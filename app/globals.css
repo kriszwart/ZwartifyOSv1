@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@import "../styles/animations.css";
+@import "highlight.js/styles/github-dark.css";
+
+:root {
+  --background: #000000;
+  --foreground: #00ff00;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Docs content container utility */
+.docs-container {
+  max-width: 65ch;
+  line-height: 1.7;
+}
+
+.docs-container h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.docs-container h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.docs-container p {
+  margin-bottom: 1rem;
+}
+
+.docs-container pre {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Custom code block styling for quantum theme */
+pre {
+  @apply bg-black/80 border border-green-400/20 rounded p-4 overflow-x-auto;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.05);
+}
+
+pre code {
+  @apply font-mono text-sm;
+  text-shadow: 0 0 2px rgba(0, 255, 0, 0.3);
+}
+
+/* Override highlight.js colors for quantum theme */
+.hljs {
+  @apply bg-transparent text-green-300;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-title,
+.hljs-section {
+  @apply text-cyan-400;
+}
+
+.hljs-string,
+.hljs-attr {
+  @apply text-green-400;
+}
+
+.hljs-number,
+.hljs-literal {
+  @apply text-pink-400;
+}
+
+.hljs-comment {
+  @apply text-green-500/50;
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type {
+  @apply text-cyan-300;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  @apply text-green-300;
+}
+
+.docs-container ol,
+.docs-container ul {
+  margin-bottom: 1rem;
+}
