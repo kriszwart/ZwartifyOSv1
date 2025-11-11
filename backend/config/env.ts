@@ -96,7 +96,8 @@ export function isRateLimitEnabled(): boolean {
 }
 
 // Validate on module load (only in Node.js environment, not in browser)
-if (typeof window === 'undefined') {
+// Skip validation during build time (Vercel sets NEXT_PHASE during build)
+if (typeof window === 'undefined' && process.env.NEXT_PHASE !== 'phase-production-build') {
   try {
     validateEnvironment()
   } catch (error) {
