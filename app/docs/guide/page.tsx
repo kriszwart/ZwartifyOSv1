@@ -2121,7 +2121,7 @@ const data = await response.json()`}
                       <strong className="text-green-400">Documentation:</strong> Review the <Link href="/docs" className="text-green-400 hover:underline">Docs</Link> page for detailed information
                     </p>
                     <p className="text-green-300">
-                      <strong className="text-green-400">GitHub:</strong> Check <a href="https://github.com/kriszwart/zwartifyos" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">issues</a> or create a new one
+                      <strong className="text-green-400">GitHub:</strong> Check <a href="https://github.com/kriszwart/ZwartifyOSv1" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">issues</a> or create a new one
                     </p>
                     <p className="text-green-300">
                       <strong className="text-green-400">Read the Code:</strong> ZwartifyOS is open source - inspect the implementation

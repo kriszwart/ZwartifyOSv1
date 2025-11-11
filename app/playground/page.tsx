@@ -15,6 +15,7 @@ interface Agent {
   enabled: boolean
   createdAt: string
   updatedAt: string
+  ragFolderId?: string
   skillIds?: string[]
   createdByAgentId?: string | null
   creationPrompt?: string | null

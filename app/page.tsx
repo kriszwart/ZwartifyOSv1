@@ -436,40 +436,23 @@ export default function Home() {
 
       <main className={`relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-16 ${screenTear ? 'screen-tear' : ''}`}>
         <div className="max-w-4xl w-full text-center space-y-8">
-          {/* Title with Enhanced Glitch Effects */}
+          {/* Title - Professional, Clean */}
           <h1
             ref={titleRef}
-            className={`text-6xl md:text-8xl font-bold mb-4 ${glitchActive ? 'rgb-split-glitch' : ''}`}
+            className="text-6xl md:text-8xl font-bold mb-4 text-green-400"
             style={{
-              animation: "glitch 3s infinite",
-              textShadow: glitchActive
-                ? "3px 3px 0 #ff00ff, -3px -3px 0 #00ffff, 0 0 20px #00ff00"
-                : "0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00",
+              textShadow: "0 0 20px rgba(0, 255, 0, 0.3)",
             }}
           >
             ZwartifyOS
           </h1>
 
-          {/* Mysterious Binary Subliminal Messages */}
-          {glitchActive && (
-            <div className="absolute top-1/4 left-0 right-0 text-xs font-mono text-green-400/30 animate-fade-in pointer-events-none">
-              01011010 01110111 01100001 01110010 01110100 01101001 01100110 01111001
-            </div>
-          )}
-
-          {/* Description with random color mutations */}
-          <p
-            className="text-xl md:text-2xl text-green-300 max-w-2xl mx-auto leading-relaxed mb-4"
-            style={{
-              animation: descriptionHasMutation ? 'color-mutate-cyan 3s ease-in-out infinite' : 'none'
-            }}
-          >
-            A full-stack agent platform where agents create agents.
-            Build intelligent applications with modular tools, skills, and futuristic interfaces.
-            Includes G-SAC (Growth Strategy Agent Creator) - create agents from a single prompt.
+          {/* Tagline */}
+          <p className="text-2xl md:text-3xl text-green-300 max-w-3xl mx-auto leading-relaxed mb-2 font-semibold">
+            Build, Deploy, and Scale AI Agents — in Hours, Not Months
           </p>
-          <p className="text-lg text-green-400/80 max-w-xl mx-auto">
-            The operating system for building intelligent products.
+          <p className="text-lg md:text-xl text-green-400/80 max-w-2xl mx-auto mb-8">
+            Open-source agent framework built on Claude API, Next.js, and TypeScript. Production-ready. MIT-licensed.
           </p>
 
           {/* Open Source Philosophy */}
@@ -491,128 +474,140 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Buttons with Quantum Entanglement Effect */}
+          {/* Buttons - Professional */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
             <Link
-              href="/create-agent"
-              className="relative px-8 py-4 bg-black border-2 border-purple-400 text-purple-400 font-semibold uppercase tracking-wider
-                       hover:bg-purple-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105
-                       flicker group"
-            >
-              ✨ Create Agent
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
-            </Link>
-
-            <Link
-              href="/roadmap"
-              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
-                       hover:bg-green-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
-                       flicker group"
-            >
-              See Roadmap
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
-            </Link>
-
-            <Link
-              href="/playground"
-              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
-                       hover:bg-green-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
-                       flicker group"
-            >
-              Playground
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
-            </Link>
-
-            <Link
-              href="/agent"
-              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
-                       hover:bg-green-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
-                       flicker group"
-            >
-              Launch Agent
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
-            </Link>
-
-            <a
-              href="https://github.com/kriszwart/zwartifyos"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
-                       hover:bg-green-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
-                       flicker group"
-            >
-              GitHub
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
-            </a>
-
-            <Link
               href="/demo"
-              className="relative px-8 py-4 bg-black border-2 border-yellow-400 text-yellow-400 font-semibold uppercase tracking-wider
-                       hover:bg-yellow-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(255,255,0,0.5)] hover:scale-105
-                       flicker group"
+              className="px-8 py-4 bg-green-400 text-black font-semibold uppercase tracking-wider
+                       hover:bg-green-300 transition-all duration-300 rounded-lg
+                       shadow-lg hover:shadow-green-400/50"
             >
-              View Demo
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+              🚀 Try Demo
             </Link>
 
             <Link
               href="/docs"
-              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
-                       hover:bg-green-400 hover:text-black transition-all duration-300
-                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
-                       flicker group"
+              className="px-8 py-4 bg-transparent border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
+                       hover:bg-green-400 hover:text-black transition-all duration-300 rounded-lg"
             >
-              Docs
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+              📖 Documentation
             </Link>
+
+            <a
+              href="https://github.com/kriszwart/ZwartifyOSv1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-transparent border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
+                       hover:bg-green-400 hover:text-black transition-all duration-300 rounded-lg"
+            >
+              ⭐ GitHub
+            </a>
           </div>
 
-          {/* Feature Showcase */}
-          <div className="mt-20 mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-center">Core Capabilities</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          {/* Quick Navigation */}
+          <div className="mt-16 mb-12">
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link
+                href="/create-agent"
+                className="px-6 py-3 bg-purple-400/20 border-2 border-purple-400 text-purple-300 hover:bg-purple-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                ✨ Create Agent
+              </Link>
+              <Link
+                href="/roadmap"
+                className="px-6 py-3 bg-cyan-400/20 border-2 border-cyan-400 text-cyan-300 hover:bg-cyan-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                🗺️ Roadmap
+              </Link>
+              <Link
+                href="/agents"
+                className="px-6 py-3 bg-green-400/20 border-2 border-green-400 text-green-300 hover:bg-green-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                🤖 Agents
+              </Link>
+              <Link
+                href="/dashboard"
+                className="px-6 py-3 bg-yellow-400/20 border-2 border-yellow-400 text-yellow-300 hover:bg-yellow-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                📊 Dashboard
+              </Link>
+              <Link
+                href="/playground"
+                className="px-6 py-3 bg-blue-400/20 border-2 border-blue-400 text-blue-300 hover:bg-blue-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                🎮 Playground
+              </Link>
+            </div>
+          </div>
+
+          {/* Architecture Overview Section */}
+          <div className="mt-20 mb-16 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-center text-green-400">Architecture Overview</h2>
+            <div className="bg-black/50 border-2 border-green-400/30 p-6 rounded-lg">
+              <p className="text-green-300 mb-4 text-center">
+                ZwartifyOS coordinates intelligence the way Unix coordinated programs.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4 mt-6">
+                <div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2">ACCV Stack</h3>
+                  <ul className="text-sm text-green-300/90 space-y-1">
+                    <li>• <strong>Agents</strong> - Intelligent userland programs</li>
+                    <li>• <strong>Cursor</strong> - Local code generation</li>
+                    <li>• <strong>Claude</strong> - Code review & API</li>
+                    <li>• <strong>Vercel</strong> - Instant deployment</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2">Core Components</h3>
+                  <ul className="text-sm text-green-300/90 space-y-1">
+                    <li>• <strong>Tools</strong> - Extensible capabilities</li>
+                    <li>• <strong>RAG</strong> - Knowledge base system</li>
+                    <li>• <strong>Memory</strong> - Conversation persistence</li>
+                    <li>• <strong>Scheduling</strong> - Automated runs</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Features Section */}
+          <div className="mt-20 mb-16 max-w-5xl mx-auto">
+            <h2 className="text-3xl font-bold mb-8 text-center text-green-400">Features</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { icon: "✨", name: "G-SAC", desc: "Agent that creates agents", link: "/create-agent", color: "purple" },
-                { icon: "🎮", name: "Playground", desc: "Try agents live", link: "/playground", color: "cyan" },
-                { icon: "🧠", name: "Skills", desc: "Modular capabilities", link: "/skills", color: "cyan" },
-                { icon: "📚", name: "RAG", desc: "Knowledge bases", link: "/rag", color: "blue" },
-                { icon: "💭", name: "Memory", desc: "Context-aware", link: "/memory", color: "green" },
-                { icon: "⏰", name: "Scheduling", desc: "Automated runs", link: "/dashboard", color: "yellow" },
-                { icon: "📊", name: "Logging", desc: "Full observability", link: "/dashboard", color: "green" },
-                { icon: "🔨", name: "Tools", desc: "Custom functions", link: "/docs?tab=tools", color: "purple" },
-                { icon: "🌐", name: "MCP", desc: "Platform integration", link: "/mcp", color: "cyan" },
-                { icon: "🐍", name: "Future Vision", desc: "The Ouroboros", link: "/roadmap/future", color: "cyan" },
+                { icon: "🤖", title: "Agent Management", desc: "Create, configure, and monitor agents", link: "/agents" },
+                { icon: "🧠", title: "RAG System", desc: "Knowledge base management for contextual agents", link: "/rag" },
+                { icon: "💾", title: "Memory & Context", desc: "Conversation persistence and context management", link: "/memory" },
+                { icon: "⏰", title: "Scheduling", desc: "Automated agent runs with cron expressions", link: "/dashboard" },
+                { icon: "✨", title: "G-SAC Creator", desc: "Agents that create agents from natural language", link: "/create-agent" },
+                { icon: "📊", title: "Token Tracking", desc: "Comprehensive usage and cost monitoring", link: "/dashboard" },
               ].map((feature, idx) => (
                 <Link
                   key={idx}
                   href={feature.link}
-                  className={`bg-black/50 border-2 p-4 rounded-lg hover:scale-105 transition-all group ${
-                    feature.color === 'purple' ? 'border-purple-400/30 hover:border-purple-400' :
-                    feature.color === 'cyan' ? 'border-cyan-400/30 hover:border-cyan-400' :
-                    feature.color === 'blue' ? 'border-blue-400/30 hover:border-blue-400' :
-                    feature.color === 'yellow' ? 'border-yellow-400/30 hover:border-yellow-400' :
-                    'border-green-400/30 hover:border-green-400'
-                  }`}
+                  className="bg-black/50 border-2 border-green-400/30 p-6 rounded-lg hover:border-green-400/50 transition-all cursor-pointer group"
                 >
-                  <div className="text-3xl mb-2">{feature.icon}</div>
-                  <h3 className={`font-bold mb-1 ${
-                    feature.color === 'purple' ? 'text-purple-400' :
-                    feature.color === 'cyan' ? 'text-cyan-400' :
-                    feature.color === 'blue' ? 'text-blue-400' :
-                    feature.color === 'yellow' ? 'text-yellow-400' :
-                    'text-green-400'
-                  }`}>
-                    {feature.name}
-                  </h3>
-                  <p className="text-sm text-green-300/70">{feature.desc}</p>
+                  <div className="text-4xl mb-3">{feature.icon}</div>
+                  <h3 className="text-lg font-bold text-green-400 mb-2 group-hover:text-green-300">{feature.title}</h3>
+                  <p className="text-sm text-green-300/80">{feature.desc}</p>
                 </Link>
               ))}
+            </div>
+          </div>
+
+          {/* Demo Section */}
+          <div className="mt-20 mb-16 max-w-3xl mx-auto">
+            <div className="bg-black/50 border-2 border-green-400/30 p-8 rounded-lg text-center">
+              <h2 className="text-2xl font-bold mb-4 text-green-400">See It In Action</h2>
+              <p className="text-green-300 mb-6">
+                Describe your agent in plain English. G-SAC builds and deploys it automatically.
+              </p>
+              <Link
+                href="/demo"
+                className="inline-block px-6 py-3 bg-green-400 text-black font-semibold rounded-lg hover:bg-green-300 transition-all"
+              >
+                View Interactive Demo →
+              </Link>
             </div>
           </div>
 
@@ -643,21 +638,35 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="absolute bottom-0 w-full py-6 text-center text-sm text-green-500 opacity-60 space-y-2">
-          <div className="transition-opacity duration-500">
-            <span className="text-green-400/70 font-mono text-xs">{calendarDate || "Born October 31st, 2025"}</span>
-          </div>
-          <div>
-            <a
-              href="https://github.com/kriszwart/zwartifyos"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-green-400 transition-colors"
-            >
-              GitHub
-            </a>
-            {" • "}
-            <span>MIT License © 2025 ZwartifyOS</span>
+        <footer className="absolute bottom-0 w-full py-6 text-center text-sm text-green-500/60">
+          <div className="space-y-2">
+            <div>
+              <a
+                href="https://github.com/kriszwart/ZwartifyOSv1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-green-400 transition-colors"
+              >
+                GitHub
+              </a>
+              {" • "}
+              <Link href="/docs" className="hover:text-green-400 transition-colors">
+                Documentation
+              </Link>
+              {" • "}
+              <Link href="/demo" className="hover:text-green-400 transition-colors">
+                Demo
+              </Link>
+              {" • "}
+              <Link href="/roadmap" className="hover:text-green-400 transition-colors">
+                Roadmap
+              </Link>
+            </div>
+            <div>
+              <span>MIT License © 2025 ZwartifyOS</span>
+              {" • "}
+              <span className="text-green-400/50">v1.0.0</span>
+            </div>
           </div>
         </footer>
       </main>

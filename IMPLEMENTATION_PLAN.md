@@ -67,7 +67,7 @@ if (mode === 'webhook') {
 ```
 
 **3. GitHub webhook setup**
-- Go to: `https://github.com/kriszwart/zwartifyos/settings/hooks`
+- Go to: `https://github.com/kriszwart/ZwartifyOSv1/settings/hooks`
 - Add webhook: `https://your-domain.vercel.app/api/webhook/github`
 - Content type: `application/json`
 - Secret: Generate random string, add to `.env` as `GITHUB_WEBHOOK_SECRET`
@@ -295,7 +295,7 @@ const tools = [
 File: `.env`
 ```bash
 GITHUB_TOKEN=ghp_your_personal_access_token
-GITHUB_REPO=kriszwart/zwartifyos
+GITHUB_REPO=kriszwart/ZwartifyOSv1
 ```
 
 **Create GitHub token:**

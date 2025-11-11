@@ -50,7 +50,7 @@ The repo is live. Documentation is complete. The system is yours.
 
 This isn't just code. It's a statement about what's possible when technology converges.
 
-GitHub: github.com/kriszwart/zwartifyos
+GitHub: github.com/kriszwart/ZwartifyOSv1
 
 #WebDevelopment #AI #OpenSource #NextJS #ClaudeAI #Vercel #DeveloperTools #Coding #TechInnovation
 
@@ -109,7 +109,7 @@ The system builds itself.
 
 🚀 **Try It**
 
-GitHub: github.com/kriszwart/zwartifyos
+GitHub: github.com/kriszwart/ZwartifyOSv1
 
 Open source. MIT licensed. Ready to use.
 
@@ -138,7 +138,7 @@ Code → Push → Claude reviews → Claude commits → Auto-sync → Review →
 Next.js 16 | Claude Agent SDK | TypeScript | Node.js sync system | Vercel deployment
 
 📦 **Open Source:**
-github.com/kriszwart/zwartifyos
+github.com/kriszwart/ZwartifyOSv1
 
 What took a team now takes you.
 
@@ -168,7 +168,7 @@ One keyboard. Many minds. Infinite worlds.
 
 This is cooperative cognition. This is the one-person coding revolution.
 
-GitHub: github.com/kriszwart/zwartifyos
+GitHub: github.com/kriszwart/ZwartifyOSv1
 
 Open source. MIT licensed. Yours to build with.
 
@@ -193,7 +193,7 @@ Code locally → Push → Claude reviews & commits → Auto-sync → Review → 
 All automated. All seamless.
 
 🚀 **Try it:**
-github.com/kriszwart/zwartifyos
+github.com/kriszwart/ZwartifyOSv1
 
 What would you build with this?
 

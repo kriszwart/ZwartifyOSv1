@@ -1,5 +1,11 @@
 # ZwartifyOS Manifesto
 
+*The poetic philosophy of ZwartifyOS*
+
+For the technical philosophy and open source beliefs, see [philosophy.md](philosophy.md).
+
+---
+
 ## One Person Coding Revolution
 
 ### Primary Sequence

@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-export default function DocsPage() {
+export const dynamic = 'force-dynamic'
+
+function DocsContent() {
   const searchParams = useSearchParams()
   const tabFromUrl = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(tabFromUrl || "intro")
@@ -72,6 +74,9 @@ export default function DocsPage() {
               </Link>
               <Link href="/demo" className="text-green-400 hover:underline">
                 View Demo →
+              </Link>
+              <Link href="/roadmap" className="text-green-400 hover:underline">
+                Roadmap →
               </Link>
             </p>
             
@@ -330,7 +335,7 @@ await callMCP({
           {/* Footer */}
           <footer className="mt-16 pt-8 border-t border-green-400/30 text-center text-sm text-green-500 opacity-60">
             <a
-              href="https://github.com/kriszwart/zwartifyos"
+              href="https://github.com/kriszwart/ZwartifyOSv1"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-green-400 transition-colors"
@@ -353,5 +358,17 @@ await callMCP({
         </main>
       </div>
     </div>
+  )
+}
+
+export default function DocsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-green-400 flex items-center justify-center">
+        <div className="text-green-400 font-mono">Loading...</div>
+      </div>
+    }>
+      <DocsContent />
+    </Suspense>
   )
 }

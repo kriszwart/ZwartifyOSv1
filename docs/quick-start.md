@@ -8,12 +8,18 @@
 
 ### Initial Setup
 
-1. **Install Dependencies**
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/kriszwart/ZwartifyOSv1.git
+   cd ZwartifyOSv1
+   ```
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Configure API Key**
+3. **Configure API Key**
    Create `.env.local` file in the root directory:
    ```env
    CLAUDE_API_KEY=sk-ant-your-api-key-here
@@ -21,13 +27,28 @@
    ANTHROPIC_API_KEY=sk-ant-your-api-key-here
    ```
 
-3. **Start Development Server**
+   **Note:** ZwartifyOS is open source. You bring your own API key. All API calls use your Anthropic API key, and you have full visibility into token usage and costs.
+
+4. **Start Development Server**
    ```bash
    npm run dev
    ```
 
-4. **Open in Browser**
+5. **Open in Browser**
    Navigate to: `http://localhost:3000`
+
+---
+
+## 🚀 Deploy to Vercel
+
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kriszwart/ZwartifyOSv1)
+
+1. Click the button above or import repository on [Vercel](https://vercel.com)
+2. Add environment variables:
+   - `CLAUDE_API_KEY` (required)
+   - `API_KEY` (optional, for API authentication)
+   - `RATE_LIMIT_ENABLED` (optional, for rate limiting)
+3. Deploy automatically on every push
 
 ---
 

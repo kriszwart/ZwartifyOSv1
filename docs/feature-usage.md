@@ -1,5 +1,33 @@
 # Feature Usage Guide
 
+## ✨ New in v1.0.0
+
+**Production-Ready Release** - ZwartifyOS v1.0.0 introduces enterprise-grade features:
+
+### Token Usage & Cost Tracking
+- **Automatic Tracking**: Every API call tracks input/output tokens
+- **Cost Calculation**: Real-time cost estimates based on Claude Sonnet 4 pricing
+- **Dashboard Analytics**: View total tokens, costs, and per-agent breakdowns
+- **Execution Details**: See token usage for each agent execution
+- **Usage API**: Programmatic access via `/api/usage/stats` and `/api/usage/agent/[id]`
+
+### Production Features
+- **API Versioning**: Structured API versioning support (v1.0.0)
+- **Authentication**: Optional API key authentication with multiple auth methods
+- **Rate Limiting**: Configurable rate limiting for API protection
+- **Health Checks**: Production-ready endpoints (`/api/health`, `/api/ready`)
+- **Environment Validation**: Startup validation prevents misconfiguration
+- **Structured Error Logging**: Comprehensive error tracking with stack traces
+
+### Interactive Demo
+- New `/demo` page showcasing G-SAC workflow
+- Works without API key (mock data)
+- Shows token usage tracking in action
+
+See [CHANGELOG.md](../CHANGELOG.md) for complete release notes.
+
+---
+
 ## 🎯 Agent Management
 
 ### Creating Agents
