@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { useEffect, useState, useRef } from "react"
 
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   const [matrixColumns, setMatrixColumns] = useState<Array<{id: number, left: number, duration: number, delay: number, chars: string}>>([])
   const [terminalVisible, setTerminalVisible] = useState(false)
