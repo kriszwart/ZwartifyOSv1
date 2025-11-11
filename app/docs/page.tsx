@@ -78,6 +78,9 @@ function DocsContent() {
               <Link href="/roadmap" className="text-green-400 hover:underline">
                 Roadmap →
               </Link>
+              <Link href="/settings" className="text-green-400 hover:underline">
+                Settings →
+              </Link>
             </p>
             
             {/* Open Source Philosophy */}

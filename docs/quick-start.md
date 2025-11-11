@@ -20,12 +20,24 @@
    ```
 
 3. **Configure API Key**
-   Create `.env.local` file in the root directory:
+   
+   **Option A: Use Settings Page (Recommended for Web UI)**
+   - Start the development server first (see step 4)
+   - Navigate to `http://localhost:3000`
+   - Go to `/settings` or click "Settings" in the navigation
+   - Enter your Anthropic API key
+   - Click "Save API Key"
+   - Your API key is stored securely in your browser (localStorage)
+   - Works immediately without restarting the server
+
+   **Option B: Use Environment File**
+   - Create `.env.local` file in the root directory:
    ```env
    CLAUDE_API_KEY=sk-ant-your-api-key-here
    # OR
    ANTHROPIC_API_KEY=sk-ant-your-api-key-here
    ```
+   - Restart the development server after creating/updating `.env.local`
 
    **Note:** ZwartifyOS is open source. You bring your own API key. All API calls use your Anthropic API key, and you have full visibility into token usage and costs.
 
@@ -36,6 +48,8 @@
 
 5. **Open in Browser**
    Navigate to: `http://localhost:3000`
+   
+   **If using Settings page:** Go to `/settings` to add your API key
 
 ---
 
@@ -322,9 +336,12 @@ curl -X POST http://localhost:3000/api/rag/folders/{folder-id}/files \
 ## 🐛 Troubleshooting
 
 ### Agent Not Responding
-1. Check API key in `.env.local`
-2. Restart dev server after changing `.env.local`
-3. Check execution logs for error details
+1. **Check API Key Configuration:**
+   - If using Settings page: Go to `/settings` and verify your API key is saved
+   - If using `.env.local`: Check the file exists and contains `CLAUDE_API_KEY=sk-ant-...`
+   - Restart dev server after changing `.env.local`
+2. Check execution logs for error details
+3. Verify your API key is valid at [Anthropic Console](https://console.anthropic.com/)
 
 ### RAG Not Working
 1. Ensure files are uploaded and processed
@@ -350,6 +367,7 @@ curl -X POST http://localhost:3000/api/rag/folders/{folder-id}/files \
 
 ## 🔗 Useful Links
 
+- **Settings**: `/settings` - Configure your API key
 - **Dashboard**: `/dashboard`
 - **Agents**: `/agents`
 - **Agent Testing**: `/agent`
