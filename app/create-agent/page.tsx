@@ -23,6 +23,8 @@ interface Agent {
   id: string
   name: string
   description?: string
+  createdAt?: string
+  createdByAgentId?: string | null
 }
 
 export default function CreateAgentPage() {
@@ -177,9 +179,11 @@ export default function CreateAgentPage() {
               if (!newAgent && agentsData.agents?.length > 0) {
                 const recentAgents = agentsData.agents
                   .filter((a: Agent) => a.createdByAgentId === gsacAgentId)
-                  .sort((a: Agent, b: Agent) => 
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                  )
+                  .sort((a: Agent, b: Agent) => {
+                    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
+                    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
+                    return bTime - aTime
+                  })
                 newAgent = recentAgents[0]
               }
               
@@ -439,7 +443,7 @@ export default function CreateAgentPage() {
                                   <p className={`text-sm font-mono ${isAgentCreation ? 'text-green-300 font-semibold' : 'text-green-300/80'}`}>
                                     {log.message}
                                   </p>
-                                  {log.data && typeof log.data === 'object' && Object.keys(log.data).length > 0 && (
+                                  {log.data && typeof log.data === 'object' && log.data !== null && Object.keys(log.data).length > 0 ? (
                                     <details className="mt-2">
                                       <summary className="text-xs text-green-400/50 font-mono cursor-pointer hover:text-green-400/70">
                                         View details
@@ -448,7 +452,7 @@ export default function CreateAgentPage() {
                                         {JSON.stringify(log.data, null, 2)}
                                       </pre>
                                     </details>
-                                  )}
+                                  ) : null}
                                 </div>
                               </div>
                             )
