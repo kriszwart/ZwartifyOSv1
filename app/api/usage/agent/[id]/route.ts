@@ -6,9 +6,10 @@ import { getUsageStats } from "../../../../../backend/utils/usageAnalytics"
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const searchParams = request.nextUrl.searchParams
     const timeRange = searchParams.get('timeRange')
 
@@ -36,7 +37,7 @@ export async function GET(
       }
     }
 
-    const stats = getUsageStats(params.id, timeRangeFilter)
+    const stats = getUsageStats(id, timeRangeFilter)
 
     return NextResponse.json({ stats })
   } catch (error) {

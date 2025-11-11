@@ -17,10 +17,11 @@ import { indexFolderChunks } from "../../../../../backend/rag/query"
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const folder = getRAGFolder(params.id)
+    const { id } = await params
+    const folder = getRAGFolder(id)
     
     if (!folder) {
       return NextResponse.json(
@@ -29,7 +30,7 @@ export async function GET(
       )
     }
 
-    const files = getRAGFiles(params.id)
+    const files = getRAGFiles(id)
     return NextResponse.json({ folder, files })
   } catch (error) {
     console.error("Error getting folder:", error)
@@ -45,10 +46,11 @@ export async function GET(
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const deleted = deleteRAGFolder(params.id)
+    const { id } = await params
+    const deleted = deleteRAGFolder(id)
     
     if (!deleted) {
       return NextResponse.json(

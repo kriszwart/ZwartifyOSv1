@@ -6,14 +6,15 @@ import { getAgentExecutions, getExecution } from "../../../../../backend/db/logg
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '50')
     const status = searchParams.get('status') as 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | null
 
-    let executions = getAgentExecutions(params.id, limit)
+    let executions = getAgentExecutions(id, limit)
 
     if (status) {
       executions = executions.filter(ex => ex.status === status)

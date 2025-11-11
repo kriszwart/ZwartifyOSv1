@@ -11,10 +11,11 @@ import {
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const skill = getSkill(params.id)
+    const { id } = await params
+    const skill = getSkill(id)
     
     if (!skill) {
       return NextResponse.json(
@@ -38,11 +39,12 @@ export async function GET(
  */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
-    const skill = updateSkill(params.id, body)
+    const skill = updateSkill(id, body)
     
     if (!skill) {
       return NextResponse.json(
@@ -66,10 +68,11 @@ export async function PUT(
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const deleted = deleteSkill(params.id)
+    const { id } = await params
+    const deleted = deleteSkill(id)
     
     if (!deleted) {
       return NextResponse.json(
