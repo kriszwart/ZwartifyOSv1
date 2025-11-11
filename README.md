@@ -105,16 +105,18 @@ This creates a continuous development loop where code evolves through AI-assiste
 
 ## 📊 Comparison
 
-| Feature                        | ZwartifyOS | LangChain | CrewAI | AutoGen |
-|--------                       -|------------|-----------|--------|---------|
-| **Agents create agents**       |     ✅     |    ❌    |   ❌    |   ❌    |
-| **Built-in Web UI**            |     ✅     |    ❌    |   ⚠️    |   ❌    |
-| **Cost + token tracking**      |     ✅     |    ❌    |   ❌    |   ❌    |
-| **Vercel-native**              |     ✅     |    ❌    |   ❌    |   ❌    |
-| **MIT License**                |     ✅     |    ✅    |   ✅    |   ✅    |
-| **G-SAC meta agent**           |     ✅     |    ❌    |   ❌    |   ❌    |
-| **RAG + Memory built-in**      |     ✅     |    ⚠️    |   ⚠️    |   ⚠️    |
-| **One-click deployment**       |     ✅     |    ❌    |   ❌    |   ❌    |
+## 📊 Comparison
+
+| Feature                  | ZwartifyOS | LangChain | CrewAI | AutoGen |
+|--------------------------|------------|-----------|--------|---------|
+| **Agents create agents** | ✅         | ❌        | ❌     | ❌      |
+| **Built-in Web UI**      | ✅         | ❌        | ⚠️     | ❌      |
+| **Cost + token tracking**| ✅         | ❌        | ❌     | ❌      |
+| **Vercel-native**        | ✅         | ❌        | ❌     | ❌      |
+| **MIT License**          | ✅         | ✅        | ✅     | ✅      |
+| **G-SAC meta agent**     | ✅         | ❌        | ❌     | ❌      |
+| **RAG + Memory built-in**| ✅         | ⚠️        | ⚠️     | ⚠️      |
+| **One-click deployment** | ✅         | ❌        | ❌     | ❌      |
 
 ---
 
