@@ -5,6 +5,7 @@ import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
+import { getApiHeaders } from "@/lib/apiKey"
 
 interface Message {
   role: "user" | "assistant"
@@ -277,7 +278,7 @@ export default function AgentPage() {
     try {
       const res = await fetch("/api/agent", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getApiHeaders(),
         body: JSON.stringify({ 
           input: userMessage.content,
           image: selectedImage || undefined,

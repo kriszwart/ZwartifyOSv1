@@ -2,7 +2,7 @@ import { agentClient } from "./agentClient"
 import { getTools } from "../tools"
 import { getAgent } from "./agentRegistry"
 
-export async function mainAgent(input: string, options?: { agentId?: string; metadata?: Record<string, unknown>; image?: string }) {
+export async function mainAgent(input: string, options?: { agentId?: string; metadata?: Record<string, unknown>; image?: string; userApiKey?: string }) {
   try {
     // Load tools
     const tools = await getTools()
@@ -39,6 +39,7 @@ export async function mainAgent(input: string, options?: { agentId?: string; met
       ragFolderId,
       useMemory,
       autoDetectSkills: true, // Auto-detect skills if none assigned
+      userApiKey: options?.userApiKey, // Pass user-provided API key if available
     })
 
     // Return response in expected format

@@ -6,6 +6,7 @@ import { useParams } from "next/navigation"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
+import { getApiHeaders } from "@/lib/apiKey"
 
 interface Agent {
   id: string
@@ -192,7 +193,7 @@ export default function AgentDetailPage() {
     try {
       const res = await fetch("/api/agent", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getApiHeaders(),
         body: JSON.stringify({ 
           input: currentInput || (currentImage?.includes('data:application/pdf') ? "Analyse this PDF document" : "Analyse this screenshot"),
           agentId: agentId,

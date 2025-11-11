@@ -11,6 +11,9 @@ export async function POST(request: NextRequest) {
     return middlewareResponse
   }
   
+  // Check for user-provided API key in header (client-side)
+  const userApiKey = request.headers.get('x-user-api-key')
+  
   let body: { input?: string; agentId?: string; metadata?: Record<string, unknown>; image?: string }
   
   try {
@@ -72,7 +75,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await mainAgent(input, { agentId, metadata, image })
+    // Pass user API key if provided, otherwise use server env
+    const result = await mainAgent(input, { agentId, metadata, image, userApiKey: userApiKey || undefined })
     
     // Add rate limit headers to response
     const response = NextResponse.json(result)

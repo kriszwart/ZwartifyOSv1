@@ -504,6 +504,36 @@ export default function Home() {
             </a>
           </div>
 
+          {/* API Key Notice */}
+          <div className="mt-12 mb-8 max-w-3xl mx-auto">
+            <div className="bg-gradient-to-r from-green-400/20 to-cyan-400/20 border-2 border-green-400/50 p-6 rounded-lg">
+              <div className="flex items-start gap-4">
+                <div className="text-3xl">🔑</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold mb-2 text-green-400">Bring Your Own API Key</h3>
+                  <p className="text-green-300 mb-4 text-sm leading-relaxed">
+                    ZwartifyOS is <strong className="text-green-400">100% open source</strong>. To use agents, you need your own Anthropic API key. 
+                    No middlemen, no hidden fees—you pay Anthropic directly and see all token usage.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href="/settings"
+                      className="px-4 py-2 bg-green-400/20 border border-green-400/50 text-green-400 font-mono text-sm hover:bg-green-400/30 transition-all rounded"
+                    >
+                      ⚙️ Add API Key
+                    </Link>
+                    <Link
+                      href="/docs/quick-start"
+                      className="px-4 py-2 bg-cyan-400/20 border border-cyan-400/50 text-cyan-400 font-mono text-sm hover:bg-cyan-400/30 transition-all rounded"
+                    >
+                      📖 Get Started Guide
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Quick Navigation */}
           <div className="mt-16 mb-12">
             <div className="flex flex-wrap gap-3 justify-center">
@@ -536,6 +566,12 @@ export default function Home() {
                 className="px-6 py-3 bg-blue-400/20 border-2 border-blue-400 text-blue-300 hover:bg-blue-400/30 transition-all rounded-lg font-semibold text-sm"
               >
                 🎮 Playground
+              </Link>
+              <Link
+                href="/settings"
+                className="px-6 py-3 bg-orange-400/20 border-2 border-orange-400 text-orange-300 hover:bg-orange-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                ⚙️ Settings
               </Link>
             </div>
           </div>
@@ -661,11 +697,19 @@ export default function Home() {
               <Link href="/roadmap" className="hover:text-green-400 transition-colors">
                 Roadmap
               </Link>
+              {" • "}
+              <Link href="/settings" className="hover:text-green-400 transition-colors">
+                Settings
+              </Link>
             </div>
             <div>
               <span>MIT License © 2025 ZwartifyOS</span>
               {" • "}
               <span className="text-green-400/50">v1.0.0</span>
+              {" • "}
+              <Link href="/settings" className="hover:text-green-400 transition-colors text-green-400/70">
+                Configure API Key
+              </Link>
             </div>
           </div>
         </footer>

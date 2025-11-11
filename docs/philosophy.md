@@ -56,6 +56,17 @@ The Growth Strategy Agent Creator (G-SAC) represents a fundamental shift:
 
 This is the future of AI agent systems—where agents don't just execute tasks, they create new capabilities.
 
+## Styling Theme
+
+ZwartifyOS uses a futuristic quantum aesthetic:
+
+- **Color Scheme**: Black base (#000000) with neon green accents (#00ff00)
+- **Effects**: Glitch animations, holographic gradients, scanline overlays
+- **Typography**: Monospace fonts for terminal/tech feel
+- **Animations**: Lightweight CSS animations
+
+See `/styles/animations.css` for custom effects.
+
 ## The Manifesto
 
 For the poetic manifesto in haiku form, see [docs/manifesto.md](manifesto.md).

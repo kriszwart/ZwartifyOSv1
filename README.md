@@ -35,6 +35,7 @@ ZwartifyOS is an open-source operating system for AI agents. One-prompt agent cr
 
 ## 🚀 Quick Start
 
+```bash
 # 1. Clone the repository
 git clone https://github.com/kriszwart/ZwartifyOSv1.git
 cd ZwartifyOSv1
@@ -46,7 +47,10 @@ npm install
 echo "CLAUDE_API_KEY=your-key-here" > .env.local
 
 # 4. Start the server
-npm run devVisit `http://localhost:3000` → Go to `/settings` → Add your Anthropic API key → Start building agents.
+npm run dev
+```
+
+Visit `http://localhost:3000` → Go to `/settings` → Add your Anthropic API key → Start building agents.
 
 **See [Quick Start Guide](docs/quick-start.md) for detailed setup.**
 
@@ -71,9 +75,15 @@ npm run devVisit `http://localhost:3000` → Go to `/settings` → Add your Anth
 
 Instead of manually configuring agents, tools, and integrations, simply describe what you want:
 
+```
 "Create an agent that qualifies sales leads and schedules demos"
 "Build a customer support agent for Slack and Discord"
-"Create a content creator agent that posts to Twitter and LinkedIn") for complete details and examples.**
+"Create a content creator agent that posts to Twitter and LinkedIn"
+```
+
+G-SAC autonomously analyzes your requirements, selects tools and skills, configures platform integration, and deploys a production-ready agent.
+
+**See [G-SAC Documentation](docs/g-sac.md) for complete details and examples.**
 
 ---
 
@@ -105,18 +115,16 @@ This creates a continuous development loop where code evolves through AI-assiste
 
 ## 📊 Comparison
 
-## 📊 Comparison
-
-| Feature                  | ZwartifyOS | LangChain | CrewAI | AutoGen |
-|--------------------------|------------|-----------|--------|---------|
-| **Agents create agents** | ✅         | ❌        | ❌     | ❌      |
-| **Built-in Web UI**      | ✅         | ❌        | ⚠️     | ❌      |
-| **Cost + token tracking**| ✅         | ❌        | ❌     | ❌      |
-| **Vercel-native**        | ✅         | ❌        | ❌     | ❌      |
-| **MIT License**          | ✅         | ✅        | ✅     | ✅      |
-| **G-SAC meta agent**     | ✅         | ❌        | ❌     | ❌      |
-| **RAG + Memory built-in**| ✅         | ⚠️        | ⚠️     | ⚠️      |
-| **One-click deployment** | ✅         | ❌        | ❌     | ❌      |
+| Feature | ZwartifyOS | LangChain | CrewAI | AutoGen |
+|---------|------------|-----------|--------|---------|
+| **Agents create agents** | ✅ | ❌ | ❌ | ❌ |
+| **Built-in Web UI** | ✅ | ❌ | ⚠️ | ❌ |
+| **Cost + token tracking** | ✅ | ❌ | ❌ | ❌ |
+| **Vercel-native** | ✅ | ❌ | ❌ | ❌ |
+| **MIT License** | ✅ | ✅ | ✅ | ✅ |
+| **G-SAC meta agent** | ✅ | ❌ | ❌ | ❌ |
+| **RAG + Memory built-in** | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| **One-click deployment** | ✅ | ❌ | ❌ | ❌ |
 
 ---
 

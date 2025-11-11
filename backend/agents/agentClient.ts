@@ -70,6 +70,7 @@ export interface AgentRunOptions {
   image?: string // Base64 encoded image for vision analysis
   skillIds?: string[] // Specific skills to use (auto-detected if not provided)
   autoDetectSkills?: boolean // Whether to auto-detect relevant skills from input
+  userApiKey?: string // User-provided API key (client-side), falls back to server env if not provided
 }
 
 export interface AgentRunResult {
@@ -86,15 +87,19 @@ export const agentClient = {
    * @returns Promise with output text and execution ID
    */
   async run(input: string, options: AgentRunOptions = {}): Promise<AgentRunResult> {
-    // Get API key from environment (using validated config)
-    const { getEnvConfig } = await import("../config/env")
-    const config = getEnvConfig()
-    const apiKey = config.CLAUDE_API_KEY
+    // Get API key: prefer user-provided key, fall back to server environment
+    let apiKey = options.userApiKey
+    
+    if (!apiKey) {
+      const { getEnvConfig } = await import("../config/env")
+      const config = getEnvConfig()
+      apiKey = config.CLAUDE_API_KEY
+    }
 
     if (!apiKey) {
       throw new Error(
-        "CLAUDE_API_KEY or ANTHROPIC_API_KEY environment variable is required. " +
-        "Please add it to your .env.local file."
+        "API key is required. Please provide your Anthropic API key in Settings, " +
+        "or set CLAUDE_API_KEY/ANTHROPIC_API_KEY environment variable."
       )
     }
 
