@@ -1,4 +1,4 @@
-# LeadnamicOS: Overall Improvement Plan
+# ZwartifyOS: Overall Improvement Plan
 
 ## 🎯 Priority Improvements
 
@@ -100,7 +100,7 @@
 - ✅ Usage analytics (requests per agent, peak times)
 - ✅ Performance metrics (response times, token usage)
 - ✅ Cost tracking (API usage, estimated costs)
-- ✅ User behavior analytics
+- ✅ User behaviour analytics
 - ✅ Exportable reports
 
 **Impact:** 🟡 **MEDIUM** - Better insights for users

@@ -29,8 +29,19 @@ interface DashboardStats {
   avgDuration: number
 }
 
+interface UsageStats {
+  totalTokens: number
+  inputTokens: number
+  outputTokens: number
+  totalCost: number
+  executionCount: number
+  averageTokensPerExecution: number
+  averageCostPerExecution: number
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [executions, setExecutions] = useState<Execution[]>([])
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
@@ -85,6 +96,17 @@ export default function DashboardPage() {
         enabledAgents: agentsData.agents?.filter((a: Agent) => a.enabled).length || 0,
         avgDuration: Math.round(avgDuration),
       })
+
+      // Load usage statistics
+      try {
+        const usageResponse = await fetch('/api/usage/stats')
+        if (usageResponse.ok) {
+          const usageData = await usageResponse.json()
+          setUsageStats(usageData.stats)
+        }
+      } catch (error) {
+        console.error('Error loading usage stats:', error)
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error)
     } finally {
@@ -211,6 +233,51 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Token Usage Stats */}
+              {usageStats && (
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold mb-4 text-green-400">Token Usage & Costs</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-black/50 border-2 border-cyan-400/50 p-6 rounded-lg">
+                      <div className="text-sm text-cyan-400/60 font-mono mb-2">Total Tokens</div>
+                      <div className="text-3xl font-bold text-cyan-400">
+                        {usageStats.totalTokens.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-cyan-400/50 font-mono mt-1">
+                        {usageStats.inputTokens.toLocaleString()} in / {usageStats.outputTokens.toLocaleString()} out
+                      </div>
+                    </div>
+                    <div className="bg-black/50 border-2 border-purple-400/50 p-6 rounded-lg">
+                      <div className="text-sm text-purple-400/60 font-mono mb-2">Estimated Cost</div>
+                      <div className="text-3xl font-bold text-purple-400">
+                        ${usageStats.totalCost.toFixed(4)}
+                      </div>
+                      <div className="text-xs text-purple-400/50 font-mono mt-1">
+                        ${usageStats.averageCostPerExecution.toFixed(4)} avg per execution
+                      </div>
+                    </div>
+                    <div className="bg-black/50 border-2 border-yellow-400/50 p-6 rounded-lg">
+                      <div className="text-sm text-yellow-400/60 font-mono mb-2">Avg Tokens/Execution</div>
+                      <div className="text-3xl font-bold text-yellow-400">
+                        {usageStats.averageTokensPerExecution.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-yellow-400/50 font-mono mt-1">
+                        {usageStats.executionCount} executions tracked
+                      </div>
+                    </div>
+                    <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg">
+                      <div className="text-sm text-green-400/60 font-mono mb-2">Cost Efficiency</div>
+                      <div className="text-3xl font-bold text-green-400">
+                        ${(usageStats.totalCost / Math.max(usageStats.executionCount, 1)).toFixed(4)}
+                      </div>
+                      <div className="text-xs text-green-400/50 font-mono mt-1">
+                        per execution
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Recent Executions */}
               <div className="mb-8">

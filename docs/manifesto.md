@@ -1,4 +1,4 @@
-# LeadnamicOS Manifesto
+# ZwartifyOS Manifesto
 
 ## One Person Coding Revolution
 

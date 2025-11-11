@@ -28,6 +28,20 @@
  * - Full file system and process access
  * 
  * See: https://docs.claude.com/en/api/agent-sdk/typescript for full SDK documentation
+ * 
+ * ---
+ * 
+ * Philosophy: Agent systems should be open source and empower users, not act as middlemen.
+ * 
+ * This codebase is open source because we believe:
+ * - Agent platforms should be transparent and auditable
+ * - Users should own their agents and data, not rent them
+ * - Innovation comes from open collaboration, not walled gardens
+ * - Middlemen who add no value beyond access control are rip-off merchants
+ * 
+ * If you're building an agent system, make it open source. Let users self-host.
+ * Don't be a gatekeeper charging for access to something they can run themselves.
+ * The value is in the code, the tools, the architecture—not in artificial scarcity.
  */
 
 import Anthropic from "@anthropic-ai/sdk"
@@ -47,6 +61,7 @@ export interface AgentRunOptions {
   tools?: Array<{ name: string; description: string; execute: (...args: unknown[]) => Promise<unknown> }>
   agentId?: string
   agentName?: string
+  agentPrompt?: string // System prompt for the agent
   logger?: ExecutionLogger
   metadata?: Record<string, unknown>
   ragFolderId?: string // RAG folder to use for context
@@ -282,6 +297,7 @@ export const agentClient = {
       const message = await anthropic.messages.create({
         model: "claude-sonnet-4-5-20250929",
         max_tokens: 2048,
+        ...(options.agentPrompt && { system: options.agentPrompt }), // Add system prompt if provided
         messages: [
           {
             role: "user",
@@ -290,6 +306,15 @@ export const agentClient = {
         ],
         ...(tools.length > 0 && { tools }),
       })
+
+      // Capture token usage from initial API call
+      if (message.usage) {
+        logger.logTokenUsage(
+          message.usage.input_tokens,
+          message.usage.output_tokens,
+          "claude-sonnet-4-5-20250929"
+        )
+      }
 
       // Handle tool use requests if any
       let finalContent = ""
@@ -308,8 +333,9 @@ export const agentClient = {
             const toolCallId = logger.logToolCall(content.name, content.input)
             
             try {
-              // Set tool context with current agent ID
-              setToolContext(options.agentId)
+              // Set tool context with current agent ID and original user prompt
+              // Use the original input before any enhancements (RAG, memory, etc.)
+              setToolContext(options.agentId, input)
               
               logger.log('info', `Executing tool: ${content.name}`, { 
                 toolUseId: content.id,
@@ -332,6 +358,7 @@ export const agentClient = {
               const followUpMessage = await anthropic.messages.create({
                 model: "claude-sonnet-4-5-20250929",
                 max_tokens: 2048,
+                ...(options.agentPrompt && { system: options.agentPrompt }), // Add system prompt if provided
                 messages: [
                   {
                     role: "user",
@@ -354,6 +381,15 @@ export const agentClient = {
                 ],
                 ...(tools.length > 0 && { tools }),
               })
+
+              // Capture token usage from follow-up API call
+              if (followUpMessage.usage) {
+                logger.logTokenUsage(
+                  followUpMessage.usage.input_tokens,
+                  followUpMessage.usage.output_tokens,
+                  "claude-sonnet-4-5-20250929"
+                )
+              }
 
               // Extract final text from follow-up response
               const followUpTexts = followUpMessage.content

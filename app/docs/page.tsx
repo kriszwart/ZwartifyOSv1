@@ -1,10 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 
 export default function DocsPage() {
-  const [activeTab, setActiveTab] = useState("intro")
+  const searchParams = useSearchParams()
+  const tabFromUrl = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "intro")
+  
+  useEffect(() => {
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl)
+    }
+  }, [tabFromUrl])
 
   const tabs = [
     { id: "intro", label: "Intro" },
@@ -32,7 +41,7 @@ export default function DocsPage() {
             ← HOME
           </Link>
           <h1 className="text-2xl font-bold font-mono" style={{ animation: "glitch-slow 4s infinite" }}>
-            LeadnamicOS Docs
+            ZwartifyOS Docs
           </h1>
           <Link
             href="/agent"
@@ -47,10 +56,10 @@ export default function DocsPage() {
           {/* Intro Section */}
           <section className="mb-8">
             <h2 className="text-4xl font-bold mb-4 text-green-400">
-              LeadnamicOS Documentation
+              ZwartifyOS Documentation
             </h2>
             <p className="text-lg text-green-300 leading-relaxed mb-6">
-              LeadnamicOS is an operating system for building intelligent products. 
+              ZwartifyOS is an operating system for building intelligent products. 
               It coordinates intelligence the way Unix coordinated programs. 
               Each tool is a capability. Each agent is a userland program. Each interaction is a process.
             </p>
@@ -61,7 +70,41 @@ export default function DocsPage() {
               <Link href="/docs/guide" className="text-green-400 hover:underline">
                 User Guide →
               </Link>
+              <Link href="/demo" className="text-green-400 hover:underline">
+                View Demo →
+              </Link>
             </p>
+            
+            {/* Open Source Philosophy */}
+            <div className="bg-black/50 border-2 border-green-400/30 p-6 rounded-lg mb-6 hover:border-green-400/50 transition-all">
+              <h3 className="text-2xl font-bold mb-3 text-green-400">🌱 Why Open Source?</h3>
+              <p className="text-green-300 mb-4 leading-relaxed">
+                ZwartifyOS is open source because we believe agent systems should empower users, not act as middlemen.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <h4 className="text-lg font-bold mb-2 text-green-400">Our Core Beliefs:</h4>
+                  <ul className="text-green-300/90 space-y-2 list-disc list-inside ml-2">
+                    <li><strong className="text-green-400">Transparency</strong> - Agent platforms should be transparent and auditable</li>
+                    <li><strong className="text-green-400">Ownership</strong> - Users should own their agents and data, not rent them</li>
+                    <li><strong className="text-green-400">Innovation</strong> - Innovation comes from open collaboration, not walled gardens</li>
+                    <li><strong className="text-green-400">Value</strong> - Middlemen who add no value beyond access control are rip-off merchants</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold mb-2 text-green-400">What This Means:</h4>
+                  <p className="text-green-300/90 mb-2">
+                    If you're building an agent system, make it open source. Let users self-host.
+                  </p>
+                  <p className="text-green-300/90 mb-2">
+                    Don't be a gatekeeper charging for access to something they can run themselves.
+                  </p>
+                  <p className="text-green-400/80 italic">
+                    The value is in the code, the tools, the architecture—not in artificial scarcity.
+                  </p>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Tabs */}
@@ -90,7 +133,7 @@ export default function DocsPage() {
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">How It Works</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS unifies the ACCV stack:
+                    ZwartifyOS unifies the ACCV stack:
                   </p>
                   <ul className="list-disc list-inside text-green-300 ml-4 space-y-2">
                     <li><strong className="text-green-400">Agents</strong> - Intelligent programs that reason and act</li>
@@ -102,7 +145,7 @@ export default function DocsPage() {
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">The OS Metaphor</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS coordinates intelligence the way Unix coordinated programs. 
+                    ZwartifyOS coordinates intelligence the way Unix coordinated programs. 
                     You are root. You spawn processes. The system orchestrates.
                   </p>
                 </section>
@@ -160,6 +203,8 @@ export async function myAgent(input: string) {
                     <li><code className="bg-black/50 px-2 py-1 rounded border border-green-400/30">markdownFormatter</code> - Formats and cleans markdown</li>
                     <li><code className="bg-black/50 px-2 py-1 rounded border border-green-400/30">screenshotDescription</code> - Analyses screenshots (demo)</li>
                     <li><code className="bg-black/50 px-2 py-1 rounded border border-green-400/30">helloTool</code> - Simple greeting tool</li>
+                    <li><code className="bg-black/50 px-2 py-1 rounded border border-green-400/30">agentCreationTool</code> - Allows agents to create other agents</li>
+                    <li><code className="bg-black/50 px-2 py-1 rounded border border-green-400/30">mcpClientTool</code> - Model Context Protocol client for platform integration</li>
                   </ul>
                 </section>
                 <section>
@@ -172,9 +217,48 @@ export async function myAgent(input: string) {
   import("./helloTool"),
   import("./markdownFormatter"),
   import("./screenshotDescription"),
+  import("./mcpClientTool"),
+  import("./agentCreationTool"),
   import("./myTool"),
 ]`}
                   </pre>
+                </section>
+                <section>
+                  <h3 className="text-2xl font-bold mb-4 text-green-400">MCP (Model Context Protocol)</h3>
+                  <p className="text-green-300 mb-4">
+                    The <code className="bg-black/50 px-2 py-1 rounded border border-green-400/30">callMCP</code> tool enables agents to interact with external platforms and services through a standardized protocol.
+                  </p>
+                  <div className="bg-black/50 border border-green-400/30 p-4 rounded mb-4">
+                    <h4 className="text-lg font-bold mb-2 text-green-400">How MCP Works</h4>
+                    <ul className="list-disc list-inside text-green-300 ml-4 space-y-2">
+                      <li><strong className="text-green-400">Platform Agnostic:</strong> Agents can work across Slack, Discord, Twitter, CRMs, and more</li>
+                      <li><strong className="text-green-400">Standardized Interface:</strong> Single tool for all platform interactions</li>
+                      <li><strong className="text-green-400">Automatic Configuration:</strong> G-SAC automatically enables MCP for agents that need platform integration</li>
+                      <li><strong className="text-green-400">Future-Proof:</strong> New platforms only require MCP server setup, not code changes</li>
+                    </ul>
+                  </div>
+                  <h4 className="text-lg font-bold mb-2 text-green-400">Example MCP Usage</h4>
+                  <pre className="bg-black/50 border border-green-400/30 p-4 rounded font-mono text-sm overflow-x-auto">
+{`// Agent can call MCP to interact with platforms
+await callMCP({
+  service: "slack",
+  method: "sendMessage",
+  params: {
+    channel: "#general",
+    text: "Hello from ZwartifyOS"
+  }
+})
+
+// Works with any platform
+await callMCP({
+  service: "discord",
+  method: "createChannel",
+  params: { name: "ai-updates" }
+})`}
+                  </pre>
+                  <p className="text-green-300 mt-4">
+                    MCP servers must be configured via environment variables or custom endpoints. The tool automatically handles authentication and error responses.
+                  </p>
                 </section>
               </div>
             )}
@@ -230,7 +314,7 @@ export async function myAgent(input: string) {
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">The ACCV Flow</h3>
                   <p className="text-green-300 mb-4">
-                    With LeadnamicOS on Vercel:
+                    With ZwartifyOS on Vercel:
                   </p>
                   <div className="bg-black/50 border border-green-400/30 p-4 rounded">
                     <p className="text-green-300">
@@ -246,7 +330,7 @@ export async function myAgent(input: string) {
           {/* Footer */}
           <footer className="mt-16 pt-8 border-t border-green-400/30 text-center text-sm text-green-500 opacity-60">
             <a
-              href="https://github.com/kriszwart/leadnamicos"
+              href="https://github.com/kriszwart/zwartifyos"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-green-400 transition-colors"

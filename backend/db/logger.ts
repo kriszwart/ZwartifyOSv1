@@ -18,6 +18,9 @@ export class ExecutionLogger {
   private agentName?: string
   private startTime: Date
   private executionLogs: AgentLog[] = []
+  private totalInputTokens: number = 0
+  private totalOutputTokens: number = 0
+  private model?: string
 
   constructor(agentId: string, agentName?: string) {
     this.executionId = randomUUID()
@@ -69,8 +72,23 @@ export class ExecutionLogger {
     execution.completedAt = completedAt
     execution.duration = duration
 
+    // Store token usage if tracked
+    if (this.totalInputTokens > 0 || this.totalOutputTokens > 0) {
+      const totalTokens = this.totalInputTokens + this.totalOutputTokens
+      // Calculate cost: Input $3/1M tokens, Output $15/1M tokens
+      const estimatedCost = (this.totalInputTokens / 1_000_000 * 3) + (this.totalOutputTokens / 1_000_000 * 15)
+      
+      execution.tokenUsage = {
+        inputTokens: this.totalInputTokens,
+        outputTokens: this.totalOutputTokens,
+        totalTokens,
+        estimatedCost,
+      }
+      execution.model = this.model
+    }
+
     executions.set(this.executionId, execution)
-    this.log('info', 'Execution completed', { output, duration })
+    this.log('info', 'Execution completed', { output, duration, tokenUsage: execution.tokenUsage })
   }
 
   /**
@@ -164,6 +182,30 @@ export class ExecutionLogger {
 
     this.executionLogs.push(logEntry)
     logs.set(this.executionId, [...this.executionLogs])
+  }
+
+  /**
+   * Log token usage from API call
+   */
+  logTokenUsage(inputTokens: number, outputTokens: number, model?: string): void {
+    this.totalInputTokens += inputTokens
+    this.totalOutputTokens += outputTokens
+    if (model) {
+      this.model = model
+    }
+    
+    const totalTokens = inputTokens + outputTokens
+    const estimatedCost = (inputTokens / 1_000_000 * 3) + (outputTokens / 1_000_000 * 15)
+    
+    this.log('info', 'Token usage', {
+      inputTokens,
+      outputTokens,
+      totalTokens,
+      estimatedCost,
+      model,
+      cumulativeInputTokens: this.totalInputTokens,
+      cumulativeOutputTokens: this.totalOutputTokens,
+    })
   }
 
   /**

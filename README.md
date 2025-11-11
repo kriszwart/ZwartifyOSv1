@@ -1,9 +1,9 @@
-# LeadnamicOS
+# ZwartifyOS
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Version](https://img.shields.io/badge/version-v0.1.0-blue)
 
-**LeadnamicOS is an operating system for building intelligent products.**
+**ZwartifyOS is an operating system for building intelligent products.**
 
 It fuses local AI coding with cloud AI code review and deploys instantly.
 
@@ -11,13 +11,36 @@ This hybrid workflow means a single human can build complex systems that once re
 
 These patterns did not exist together until now.
 
-LeadnamicOS sits at the frontier.
+ZwartifyOS sits at the frontier.
+
+---
+
+## 🌟 The Creative Agent System: Agents Creating Agents
+
+**ZwartifyOS features the Growth Strategy Agent Creator (G-SAC) - a meta-agent that creates other agents from a single natural language prompt.**
+
+### Single-Prompt Agent Creation
+
+Simply describe what you want your agent to do in plain language:
+
+- "Create an agent that qualifies sales leads and schedules demos"
+- "Build a customer support agent for Slack and Discord"
+- "Create a content creator agent that posts to Twitter and LinkedIn"
+
+The G-SAC autonomously:
+1. Analyses your business goal
+2. Selects appropriate tools and skills
+3. Configures platform integration via MCP
+4. Drafts a comprehensive agent prompt
+5. Deploys the agent instantly
+
+**See [WHAT_ZWARTIFYOS_IS.md](docs/WHAT_ZWARTIFYOS_IS.md) for the complete value proposition.**
 
 ---
 
 ## 🚀 The Revolution Statement
 
-LeadnamicOS is not just a template.
+ZwartifyOS is not just a template.
 
 It is the beginning of a new method of creation.
 
@@ -41,9 +64,24 @@ This is cooperative cognition.
 
 ---
 
-## 🎯 What is LeadnamicOS Good For?
+## 🌱 Why Open Source?
 
-**LeadnamicOS is a production-ready template for building AI agent platforms.**
+ZwartifyOS is open source because we believe:
+
+- **Agent platforms should be transparent and auditable** - You should know exactly what your agents are doing
+- **Users should own their agents and data, not rent them** - No vendor lock-in, no monthly fees for basic functionality
+- **Innovation comes from open collaboration, not walled gardens** - The best ideas come from the community
+- **Middlemen who add no value beyond access control are rip-off merchants** - If you can run it yourself, you should be able to
+
+If you're building an agent system, make it open source. Let users self-host.
+Don't be a gatekeeper charging for access to something they can run themselves.
+The value is in the code, the tools, the architecture—not in artificial scarcity.
+
+---
+
+## 🎯 What is ZwartifyOS Good For?
+
+**ZwartifyOS is a production-ready template for building AI agent platforms.**
 
 ### **Perfect For:**
 
@@ -100,7 +138,7 @@ This combination unlocks something that was effectively impossible until very re
 
 **Claude API** enables intelligent agents that can build and extend systems.
 
-LeadnamicOS unifies all of this.
+ZwartifyOS unifies all of this.
 
 **This is the closest we have ever been to a one-person full-stack AI engineering team.**
 
@@ -173,7 +211,7 @@ The system becomes extensible and self improving.
 
 ### 🤖 Single-Prompt Autonomous Agent Creation (G-SAC)
 
-**LeadnamicOS includes the Growth Strategy Agent Creator (G-SAC) - an AI agent that creates other AI agents.**
+**ZwartifyOS includes the Growth Strategy Agent Creator (G-SAC) - an AI agent that creates other AI agents.**
 
 G-SAC can autonomously create fully configured agents from a single natural language prompt. This revolutionary feature enables:
 
@@ -191,7 +229,7 @@ G-SAC can autonomously create fully configured agents from a single natural lang
 ```
 
 Visit `/create-agent` to try it yourself. G-SAC will:
-1. Analyze your requirements
+1. Analyse your requirements
 2. Translate business goals into agent specifications
 3. Select appropriate tools and skills
 4. Configure platform support (if needed)
@@ -207,8 +245,8 @@ Visit `/create-agent` to try it yourself. G-SAC will:
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/kriszwart/leadnamicos.git
-cd leadnamicos
+git clone https://github.com/kriszwart/zwartifyos.git
+cd zwartifyos
 ```
 
 2. **Copy environment variables:**
@@ -222,6 +260,8 @@ cp .env.example .env.local
 ```
 CLAUDE_API_KEY=your_anthropic_api_key_here
 ```
+
+**Note:** ZwartifyOS is open source. You bring your own API key. All API calls use your Anthropic API key, and you have full visibility into token usage and costs.
 
 **Optional (Security & Rate Limiting):**
 ```
@@ -243,6 +283,26 @@ npm install
 ```bash
 npm run dev
 ```
+
+6. **View the demo:**
+   - Visit `/demo` to see an interactive walkthrough of how G-SAC creates agents
+   - The demo works without an API key and shows token usage tracking
+
+## 📊 Token Usage & Cost Tracking
+
+ZwartifyOS includes comprehensive token usage tracking and cost monitoring:
+
+- **Automatic Tracking**: Every API call tracks input/output tokens
+- **Cost Calculation**: Real-time cost estimates based on Claude Sonnet 4 pricing
+- **Dashboard Analytics**: View total tokens, costs, and per-agent breakdowns
+- **Execution Details**: See token usage for each agent execution
+- **Usage API**: Programmatic access to usage statistics via `/api/usage/stats`
+
+**Pricing (Claude Sonnet 4):**
+- Input: $3 per 1M tokens
+- Output: $15 per 1M tokens
+
+View usage stats in the Dashboard (`/dashboard`) or check individual execution logs.
 
 ## 🔐 Security & Production Features
 
@@ -285,7 +345,7 @@ The development workflow:
 
 ### Claude Code for Web Sync
 
-LeadnamicOS includes automatic sync to pull changes made by Claude Code for Web back to your local codebase.
+ZwartifyOS includes automatic sync to pull changes made by Claude Code for Web back to your local codebase.
 
 **Quick Start:**
 
@@ -330,7 +390,7 @@ See the [Sync Workflow Guide](docs/sync-workflow.md) for detailed instructions.
    - Review and merge changes
 
 Claude Code for Web can:
-- Review your LeadnamicOS code
+- Review your ZwartifyOS code
 - Suggest improvements
 - Write patches
 - Commit directly to your repository
@@ -342,7 +402,7 @@ This creates a continuous improvement loop where your system evolves through AI-
 
 ## 🤖 Using Claude Agents
 
-LeadnamicOS uses the **standard Anthropic SDK** (`@anthropic-ai/sdk`) to power intelligent agents:
+ZwartifyOS uses the **standard Anthropic SDK** (`@anthropic-ai/sdk`) to power intelligent agents:
 
 ```typescript
 import { agentClient } from "./agentClient"
@@ -597,7 +657,7 @@ See **[IMPROVEMENTS.md](docs/IMPROVEMENTS.md)** for detailed improvement plan.
 
 ## 🎨 Styling Theme
 
-LeadnamicOS uses a futuristic quantum aesthetic:
+ZwartifyOS uses a futuristic quantum aesthetic:
 - **Color Scheme**: Black base (#000000) with neon green accents (#00ff00)
 - **Effects**: Glitch animations, holographic gradients, scanline overlays
 - **Typography**: Monospace fonts for terminal/tech feel
@@ -626,7 +686,7 @@ The ACCV stack means:
 
 ---
 
-## 💡 Why LeadnamicOS is Special
+## 💡 Why ZwartifyOS is Special
 
 It is opinionated only where required.
 
@@ -646,7 +706,7 @@ And from there you spawn anything.
 
 **The OS metaphor is intentional.**
 
-LeadnamicOS coordinates intelligence the way Unix coordinated programs.
+ZwartifyOS coordinates intelligence the way Unix coordinated programs.
 
 Each tool is a capability.
 
@@ -696,7 +756,7 @@ This is not the future workforce.
 
 ## 📄 License
 
-MIT License - Copyright (c) 2025 LeadnamicOS
+MIT License - Copyright (c) 2025 ZwartifyOS
 
 See [LICENSE](./LICENSE) file for full license text.
 
@@ -712,7 +772,7 @@ See [LICENSE](./LICENSE) file for full license text.
 
 ---
 
-**LeadnamicOS. The operating system for building intelligent products.**
+**ZwartifyOS. The operating system for building intelligent products.**
 
 **Built with Cursor. Reviewed by Claude. Deployed on Vercel.**
 

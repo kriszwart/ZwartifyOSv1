@@ -347,7 +347,7 @@ export default function AgentPage() {
             </button>
           </div>
           <h1 className="text-2xl font-bold font-mono" style={{ animation: "glitch-slow 4s infinite" }}>
-            LeadnamicOS Agent
+            ZwartifyOS Agent
           </h1>
           <div className="flex items-center gap-4">
             <Link

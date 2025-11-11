@@ -21,6 +21,10 @@ export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterEnabled, setFilterEnabled] = useState<boolean | null>(null)
+  const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null)
   const [createForm, setCreateForm] = useState({
     name: '',
     description: '',
@@ -31,6 +35,20 @@ export default function SkillsPage() {
     resourceFolderId: '',
   })
   const [ragFolders, setRagFolders] = useState<Array<{ id: string; name: string }>>([])
+
+  // Filter skills based on search query and enabled filter
+  const filteredSkills = skills.filter(skill => {
+    // Search filter
+    const matchesSearch = !searchQuery || 
+      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (skill.tags && skill.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+    
+    // Enabled filter
+    const matchesEnabled = filterEnabled === null || skill.enabled === filterEnabled
+    
+    return matchesSearch && matchesEnabled
+  })
 
   useEffect(() => {
     loadSkills()
@@ -156,13 +174,6 @@ export default function SkillsPage() {
       console.error('Error deleting skill:', error)
     }
   }
-
-  const filteredSkills = skills.filter(skill => {
-    if (filterEnabled !== null && skill.enabled !== filterEnabled) {
-      return false
-    }
-    return true
-  })
 
   return (
     <div className="min-h-screen bg-black text-green-400 relative overflow-hidden">

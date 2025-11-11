@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         image = undefined
       } else {
         // If extraction fails, add guidance note
-        input = `${input}\n\nNote: A PDF file was uploaded but text extraction returned empty. The PDF may be image-based, encrypted, or require specialized processing. Please provide guidance on how to handle this PDF.`
+        input = `${input}\n\nNote: A PDF file was uploaded but text extraction returned empty. The PDF may be image-based, encrypted, or require specialised processing. Please provide guidance on how to handle this PDF.`
       }
     } catch (pdfError) {
       const errorResult = handleApiError(

@@ -1,8 +1,8 @@
-# LeadnamicOS: Complete System Overview & Use Cases
+# ZwartifyOS: Complete System Overview & Use Cases
 
-## 🎯 What is LeadnamicOS?
+## 🎯 What is ZwartifyOS?
 
-LeadnamicOS is a **comprehensive agent development and deployment platform** built on Next.js and Claude API. It provides everything you need to build, test, deploy, and manage AI agents with enterprise-grade features like RAG, memory, scheduling, and full observability.
+ZwartifyOS is a **comprehensive agent development and deployment platform** built on Next.js and Claude API. It provides everything you need to build, test, deploy, and manage AI agents with enterprise-grade features like RAG, memory, scheduling, and full observability.
 
 Think of it as **your own Toolhouse.ai** - a complete backend-as-a-service for AI agents that you can deploy anywhere.
 
@@ -14,7 +14,7 @@ Think of it as **your own Toolhouse.ai** - a complete backend-as-a-service for A
 
 **Problem:** Handle customer inquiries 24/7 with accurate, company-specific answers
 
-**Solution with LeadnamicOS:**
+**Solution with ZwartifyOS:**
 - Create support agent with RAG folder containing FAQ, policies, product docs
 - Agent automatically searches knowledge base for accurate answers
 - Memory enables context-aware conversations
@@ -199,9 +199,9 @@ const response = await fetch('https://your-site.com/api/agent', {
 ```javascript
 // Embed in any website
 <script src="https://your-site.com/widget.js"></script>
-<div id="leadnamic-agent"></div>
+<div id="zwartify-agent"></div>
 <script>
-  LeadnamicAgent.init({
+  ZwartifyAgent.init({
     agentId: 'your-agent-id',
     apiUrl: 'https://your-site.com/api/agent'
   })
@@ -219,7 +219,7 @@ const response = await fetch('https://your-site.com/api/agent', {
 ### Option 3: Standalone Application
 
 **Deploy as Full App:**
-- Deploy entire LeadnamicOS platform
+- Deploy entire ZwartifyOS platform
 - Customise branding
 - Add authentication
 - Multi-tenant support
@@ -237,12 +237,12 @@ const response = await fetch('https://your-site.com/api/agent', {
 **Export as Command-Line Tool:**
 ```bash
 # Install globally
-npm install -g leadnamic-cli
+npm install -g zwartify-cli
 
 # Use anywhere
-leadnamic run my-agent "What is the status?"
-leadnamic schedule my-agent "0 9 * * *"
-leadnamic logs my-agent
+zwartify run my-agent "What is the status?"
+zwartify schedule my-agent "0 9 * * *"
+zwartify logs my-agent
 ```
 
 **Use Cases:**
@@ -320,10 +320,10 @@ Export agent definition:
 
 Export as npm package:
 ```bash
-npm install @yourorg/leadnamic-agents
+npm install @yourorg/zwartify-agents
 
 # Use in code
-import { customerSupportAgent } from '@yourorg/leadnamic-agents'
+import { customerSupportAgent } from '@yourorg/zwartify-agents'
 
 const result = await customerSupportAgent.run(input)
 ```
@@ -495,7 +495,7 @@ aws lambda update-function-code --zip-file fileb://agent.zip
 ## 🎓 Getting Started with Exports
 
 ### Step 1: Prepare Your Agent
-1. Create and test agent in LeadnamicOS
+1. Create and test agent in ZwartifyOS
 2. Configure RAG folders if needed
 3. Set up tools and memory
 4. Test thoroughly
