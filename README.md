@@ -70,3 +70,103 @@ npm run devVisit `http://localhost:3000` → Go to `/settings` → Add your Anth
 **G-SAC is ZwartifyOS's meta-agent that creates other agents from a single natural language prompt.**
 
 Instead of manually configuring agents, tools, and integrations, simply describe what you want:
+
+"Create an agent that qualifies sales leads and schedules demos"
+"Build a customer support agent for Slack and Discord"
+"Create a content creator agent that posts to Twitter and LinkedIn") for complete details and examples.**
+
+---
+
+## 🏗️ Architecture
+
+<details>
+<summary><strong>ACCV Stack: Agents. Cursor. Claude. Vercel.</strong></summary>
+
+ZwartifyOS coordinates intelligence the way Unix coordinated programs:
+
+- **Agents** are userland programs
+- **Tools** are capabilities
+- **Interactions** are processes
+- **You** are root
+
+**The ACCV Stack:**
+- **Cursor** - Local code generation and editing
+- **Claude Code for Web** - Code review and commits
+- **Claude API** - Powers intelligent agents (standard Anthropic SDK)
+- **GitHub** - Version control and collaboration
+- **Vercel** - Instant deployment
+
+This creates a continuous development loop where code evolves through AI-assisted workflows.
+
+**See [Architecture Documentation](docs/ARCHITECTURE.md) for deep dive.**
+</details>
+
+---
+
+## 📊 Comparison
+
+| Feature                        | ZwartifyOS | LangChain | CrewAI | AutoGen |
+|--------                       -|------------|-----------|--------|---------|
+| **Agents create agents**       |     ✅     |    ❌    |   ❌    |   ❌    |
+| **Built-in Web UI**            |     ✅     |    ❌    |   ⚠️    |   ❌    |
+| **Cost + token tracking**      |     ✅     |    ❌    |   ❌    |   ❌    |
+| **Vercel-native**              |     ✅     |    ❌    |   ❌    |   ❌    |
+| **MIT License**                |     ✅     |    ✅    |   ✅    |   ✅    |
+| **G-SAC meta agent**           |     ✅     |    ❌    |   ❌    |   ❌    |
+| **RAG + Memory built-in**      |     ✅     |    ⚠️    |   ⚠️    |   ⚠️    |
+| **One-click deployment**       |     ✅     |    ❌    |   ❌    |   ❌    |
+
+---
+
+## 🎯 Use Cases
+
+- **AI-Powered SaaS Products** - Customer support automation, knowledge base assistants, content generation platforms
+- **Rapid Prototyping** - Test agent ideas quickly, validate concepts, launch MVPs fast
+- **Internal Tools** - Employee assistants, document Q&A systems, automated reporting
+- **White-Label Solutions** - Deploy for clients, custom branding, agent marketplaces
+
+**See [Use Cases & Examples](docs/EXAMPLES.md) for detailed walkthroughs.**
+
+---
+
+## 🗺️ Roadmap
+
+**Phase 1-3: Foundation & Enhancement** ✅
+- Core agent system, G-SAC, RAG, memory, scheduling, token tracking
+
+**Phase 4: Production Readiness** ✅
+- Authentication, rate limiting, health checks, error logging
+
+**Next: Performance & UX**
+- Streaming responses, caching layer, enhanced analytics
+
+**See [Full Roadmap](app/roadmap/page.tsx) for complete timeline.**
+
+---
+
+## 📖 Documentation
+
+- **[Quick Start Guide](docs/quick-start.md)** - Get started in minutes
+- **[G-SAC Documentation](docs/g-sac.md)** - Learn about agent creation
+- **[Feature Usage Guide](docs/feature-usage.md)** - Complete feature reference
+- **[Architecture Deep Dive](docs/ARCHITECTURE.md)** - System design and ACCV stack
+- **[Examples & Use Cases](docs/EXAMPLES.md)** - Real-world examples and walkthroughs
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Philosophy](docs/philosophy.md)** - Our approach and beliefs
+- **[CHANGELOG](CHANGELOG.md)** - Version history and release notes
+
+---
+
+## 📄 License
+
+MIT License - Copyright (c) 2025 ZwartifyOS
+
+See [LICENSE](./LICENSE) file for full license text.
+
+---
+
+**ZwartifyOS. The operating system for building intelligent products.**
+
+**Built with Cursor. Reviewed by Claude. Deployed on Vercel.**
+
+**You are the conductor.**
