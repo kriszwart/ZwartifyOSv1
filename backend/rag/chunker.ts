@@ -122,9 +122,10 @@ export async function extractTextFromBuffer(
   if (mimeType === 'application/pdf' || filename?.toLowerCase().endsWith('.pdf')) {
     try {
       // Dynamic import to avoid loading PDF parser unless needed
-      const pdfParse = await import('pdf-parse')
-      const pdfData = await pdfParse.default(buffer)
-      return pdfData.text || ''
+      const { PDFParse } = await import('pdf-parse')
+      const parser = new PDFParse({ data: buffer })
+      const textResult = await parser.getText()
+      return textResult.text || ''
     } catch (error) {
       console.error('Error extracting text from PDF:', error)
       throw new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`)

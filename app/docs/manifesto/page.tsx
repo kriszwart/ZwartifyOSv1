@@ -627,9 +627,6 @@ both your power and your responsibility.`
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       clearInterval(cleanupInterval)
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
     }
   }, [])
 

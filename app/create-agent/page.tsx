@@ -23,6 +23,9 @@ interface Agent {
   id: string
   name: string
   description?: string
+  createdByAgentId?: string | null
+  createdAt?: string
+  ragFolderId?: string
 }
 
 export default function CreateAgentPage() {
@@ -176,9 +179,9 @@ export default function CreateAgentPage() {
               // If still not found, get the most recently created agent
               if (!newAgent && agentsData.agents?.length > 0) {
                 const recentAgents = agentsData.agents
-                  .filter((a: Agent) => a.createdByAgentId === gsacAgentId)
-                  .sort((a: Agent, b: Agent) => 
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                  .filter((a: Agent) => a.createdByAgentId === gsacAgentId && a.createdAt)
+                  .sort((a: Agent, b: Agent) =>
+                    new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
                   )
                 newAgent = recentAgents[0]
               }
@@ -439,7 +442,7 @@ export default function CreateAgentPage() {
                                   <p className={`text-sm font-mono ${isAgentCreation ? 'text-green-300 font-semibold' : 'text-green-300/80'}`}>
                                     {log.message}
                                   </p>
-                                  {log.data && typeof log.data === 'object' && Object.keys(log.data).length > 0 && (
+                                  {!!log.data && typeof log.data === 'object' && Object.keys(log.data).length > 0 && (
                                     <details className="mt-2">
                                       <summary className="text-xs text-green-400/50 font-mono cursor-pointer hover:text-green-400/70">
                                         View details

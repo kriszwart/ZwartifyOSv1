@@ -18,6 +18,7 @@ interface Agent {
   skillIds?: string[]
   createdByAgentId?: string | null
   creationPrompt?: string | null
+  ragFolderId?: string
 }
 
 interface Message {
