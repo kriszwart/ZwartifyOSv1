@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getAllSkillUsageStats, getTopUsedSkills, getSkillUsageStats } from "../../../../backend/skills/usageTracking"
+import { getAllSkillUsageStats, getTopUsedSkills, getSkillUsageStats } from "@/lib/analytics/skillUsageTracking"
 import { getSkill, listSkills } from "../../../../backend/skills/store"
 
 /**

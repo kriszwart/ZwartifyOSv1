@@ -1,10 +1,10 @@
 /**
  * Usage Analytics Utilities
- * 
+ *
  * Functions for calculating and aggregating token usage and costs
  */
 
-import { getAllExecutions, getAgentExecutions } from '../db/logger'
+import { getAllExecutions, getAgentExecutions } from '@/backend/db/logger'
 
 export interface UsageStats {
   totalTokens: number
@@ -33,7 +33,7 @@ export function calculateCost(inputTokens: number, outputTokens: number): number
  * Get usage statistics for all agents or a specific agent
  */
 export function getUsageStats(agentId?: string, timeRange?: TimeRange): UsageStats {
-  const executions = agentId 
+  const executions = agentId
     ? getAgentExecutions(agentId, 1000)
     : getAllExecutions(1000)
 
@@ -132,4 +132,3 @@ export function getUsageByAgent(): Record<string, UsageStats> {
 
   return agentMap
 }
-

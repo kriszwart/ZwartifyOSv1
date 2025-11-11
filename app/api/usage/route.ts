@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getUsageStats, getUsageByAgent } from "../../../backend/utils/usageAnalytics"
+import { getUsageStats, getUsageByAgent } from "@/lib/analytics/usageAnalytics"
 
 /**
  * GET /api/usage/stats - Get overall usage statistics

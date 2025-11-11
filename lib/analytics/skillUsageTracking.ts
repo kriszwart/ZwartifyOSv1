@@ -1,6 +1,6 @@
 /**
  * Skill Usage Tracking
- * 
+ *
  * Tracks which skills are used in agent executions and provides analytics
  */
 
@@ -21,10 +21,10 @@ const skillUsageMap = new Map<string, SkillUsage>()
  */
 export function trackSkillUsage(skillIds: string[], agentId: string): void {
   const now = new Date()
-  
+
   skillIds.forEach(skillId => {
     const existing = skillUsageMap.get(skillId)
-    
+
     if (existing) {
       existing.usageCount++
       existing.lastUsed = now
@@ -72,4 +72,3 @@ export function getTopUsedSkills(limit: number = 10): SkillUsage[] {
 export function resetUsageStats(): void {
   skillUsageMap.clear()
 }
-

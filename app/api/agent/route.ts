@@ -2,7 +2,7 @@ import { mainAgent } from "../../../backend/agents/mainAgent"
 import { NextRequest, NextResponse } from "next/server"
 import { extractTextFromBuffer } from "../../../backend/rag/chunker"
 import { applyMiddleware, getRateLimitHeaders } from "../../../backend/middleware"
-import { handleApiError, ErrorCategory } from "../../../backend/utils/errorLogger"
+import { handleApiError, ErrorCategory } from "@/lib/logging/errorLogger"
 
 export async function POST(request: NextRequest) {
   // Apply middleware (auth, rate limit, size check)

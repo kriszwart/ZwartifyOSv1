@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getEnvConfig, isApiKeyAuthEnabled } from "../config/env"
+import { getEnvConfig, isApiKeyAuthEnabled } from "@/backend/config/env"
 
 /**
  * API Key Authentication Middleware
- * 
+ *
  * Validates API key from request headers or query params
- * 
+ *
  * Usage:
  * - Header: Authorization: Bearer <api-key>
  * - Header: X-API-Key: <api-key>
@@ -17,15 +17,15 @@ export function authenticateApiKey(request: NextRequest): { authorized: boolean;
   if (!isApiKeyAuthEnabled()) {
     return { authorized: true }
   }
-  
+
   const config = getEnvConfig()
   const expectedApiKey = config.API_KEY
-  
+
   if (!expectedApiKey) {
     // Should not happen if isApiKeyAuthEnabled() returned true
     return { authorized: false, error: "API key authentication is misconfigured" }
   }
-  
+
   // Check Authorization header (Bearer token)
   const authHeader = request.headers.get('authorization')
   if (authHeader?.startsWith('Bearer ')) {
@@ -34,20 +34,20 @@ export function authenticateApiKey(request: NextRequest): { authorized: boolean;
       return { authorized: true }
     }
   }
-  
+
   // Check X-API-Key header
   const apiKeyHeader = request.headers.get('x-api-key')
   if (apiKeyHeader === expectedApiKey) {
     return { authorized: true }
   }
-  
+
   // Check query parameter (less secure, but convenient for testing)
   const { searchParams } = new URL(request.url)
   const apiKeyParam = searchParams.get('apiKey')
   if (apiKeyParam === expectedApiKey) {
     return { authorized: true }
   }
-  
+
   return {
     authorized: false,
     error: "Invalid or missing API key. Provide via Authorization header (Bearer token), X-API-Key header, or ?apiKey query parameter.",
@@ -62,7 +62,7 @@ export function withAuth(
 ) {
   return async (request: NextRequest) => {
     const authResult = authenticateApiKey(request)
-    
+
     if (!authResult.authorized) {
       return NextResponse.json(
         {
@@ -72,8 +72,7 @@ export function withAuth(
         { status: 401 }
       )
     }
-    
+
     return handler(request)
   }
 }
-

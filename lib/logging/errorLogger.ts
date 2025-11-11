@@ -1,6 +1,6 @@
 /**
  * Structured Error Logging
- * 
+ *
  * Provides structured error logging with categorization,
  * stack traces, and optional error tracking service integration
  */
@@ -38,10 +38,10 @@ export function createErrorLog(
 ): ErrorLog {
   const message = error instanceof Error ? error.message : String(error)
   const stack = error instanceof Error ? error.stack : undefined
-  
+
   // Determine severity based on category
   const severity = getSeverity(category)
-  
+
   return {
     timestamp: new Date().toISOString(),
     category,
@@ -82,7 +82,7 @@ export function logError(
   context?: Record<string, unknown>
 ): ErrorLog {
   const errorLog = createErrorLog(error, category, context)
-  
+
   // Console logging (structured JSON in production, readable in development)
   if (process.env.NODE_ENV === 'production') {
     console.error(JSON.stringify(errorLog))
@@ -93,12 +93,12 @@ export function logError(
       context: errorLog.context,
     })
   }
-  
+
   // TODO: Integrate with error tracking service (Sentry, Rollbar, etc.)
   // if (process.env.ERROR_TRACKING_SERVICE === 'sentry') {
   //   Sentry.captureException(error, { tags: { category }, extra: context })
   // }
-  
+
   return errorLog
 }
 
@@ -113,28 +113,28 @@ export function getUserFriendlyMessage(
   if (category === ErrorCategory.SYSTEM_ERROR) {
     return 'An internal error occurred. Please try again later.'
   }
-  
+
   if (category === ErrorCategory.API_ERROR) {
     return 'Unable to connect to the AI service. Please try again later.'
   }
-  
+
   if (category === ErrorCategory.NETWORK_ERROR) {
     return 'Network error. Please check your connection and try again.'
   }
-  
+
   if (category === ErrorCategory.AUTH_ERROR) {
     return 'Authentication failed. Please check your API key.'
   }
-  
+
   if (category === ErrorCategory.RATE_LIMIT_ERROR) {
     return 'Too many requests. Please try again later.'
   }
-  
+
   // For user errors, return the actual message
   if (category === ErrorCategory.USER_ERROR) {
     return error instanceof Error ? error.message : String(error)
   }
-  
+
   // Default message
   return 'An error occurred. Please try again.'
 }
@@ -149,7 +149,7 @@ export function handleApiError(
 ): { status: number; message: string; log: ErrorLog } {
   const errorLog = logError(error, category, context)
   const userMessage = getUserFriendlyMessage(error, category)
-  
+
   // Determine HTTP status code
   let status = 500
   switch (category) {
@@ -172,11 +172,10 @@ export function handleApiError(
     default:
       status = 500
   }
-  
+
   return {
     status,
     message: userMessage,
     log: errorLog,
   }
 }
-

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { isRateLimitEnabled, getEnvConfig } from "../config/env"
+import { isRateLimitEnabled, getEnvConfig } from "@/backend/config/env"
 
 /**
  * Simple in-memory rate limiter
- * 
+ *
  * For production, consider using Redis or a dedicated rate limiting service
  */
 
@@ -23,16 +23,16 @@ function getClientId(request: NextRequest): string {
   if (authHeader?.startsWith('Bearer ')) {
     return `api_key:${authHeader.substring(7).substring(0, 10)}` // First 10 chars for ID
   }
-  
+
   const apiKeyHeader = request.headers.get('x-api-key')
   if (apiKeyHeader) {
     return `api_key:${apiKeyHeader.substring(0, 10)}`
   }
-  
+
   // Fall back to IP address
   const forwarded = request.headers.get('x-forwarded-for')
   const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown'
-  
+
   return `ip:${ip}`
 }
 
@@ -52,16 +52,16 @@ export function checkRateLimit(request: NextRequest): {
       resetAt: Date.now() + 60000,
     }
   }
-  
+
   const config = getEnvConfig()
   const maxRequests = parseInt(config.RATE_LIMIT_MAX_REQUESTS || '100', 10)
   const windowMs = parseInt(config.RATE_LIMIT_WINDOW_MS || '60000', 10)
-  
+
   const clientId = getClientId(request)
   const now = Date.now()
-  
+
   const entry = rateLimitStore.get(clientId)
-  
+
   // If no entry or window expired, create new entry
   if (!entry || now >= entry.resetAt) {
     const newEntry: RateLimitEntry = {
@@ -69,7 +69,7 @@ export function checkRateLimit(request: NextRequest): {
       resetAt: now + windowMs,
     }
     rateLimitStore.set(clientId, newEntry)
-    
+
     // Clean up old entries periodically (simple cleanup)
     if (rateLimitStore.size > 10000) {
       for (const [key, value] of rateLimitStore.entries()) {
@@ -78,17 +78,17 @@ export function checkRateLimit(request: NextRequest): {
         }
       }
     }
-    
+
     return {
       allowed: true,
       remaining: maxRequests - 1,
       resetAt: newEntry.resetAt,
     }
   }
-  
+
   // Increment count
   entry.count++
-  
+
   if (entry.count > maxRequests) {
     return {
       allowed: false,
@@ -96,7 +96,7 @@ export function checkRateLimit(request: NextRequest): {
       resetAt: entry.resetAt,
     }
   }
-  
+
   return {
     allowed: true,
     remaining: maxRequests - entry.count,
@@ -112,10 +112,10 @@ export function withRateLimit(
 ) {
   return async (request: NextRequest) => {
     const rateLimitResult = checkRateLimit(request)
-    
+
     if (!rateLimitResult.allowed) {
       const resetDate = new Date(rateLimitResult.resetAt).toISOString()
-      
+
       return NextResponse.json(
         {
           error: "Rate limit exceeded",
@@ -133,15 +133,14 @@ export function withRateLimit(
         }
       )
     }
-    
+
     // Add rate limit headers to successful responses
     const response = await handler(request)
-    
+
     response.headers.set('X-RateLimit-Limit', process.env.RATE_LIMIT_MAX_REQUESTS || '100')
     response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString())
     response.headers.set('X-RateLimit-Reset', rateLimitResult.resetAt.toString())
-    
+
     return response
   }
 }
-

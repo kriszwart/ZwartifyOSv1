@@ -54,7 +54,7 @@ import {
   buildConversationContext 
 } from "../memory/store"
 import { buildSkillContext, detectRelevantSkills } from "../skills/store"
-import { trackSkillUsage } from "../skills/usageTracking"
+import { trackSkillUsage } from "@/lib/analytics/skillUsageTracking"
 import { setToolContext, clearToolContext } from "../tools/toolContext"
 
 export interface AgentRunOptions {

@@ -1,6 +1,6 @@
 /**
  * API Versioning Support
- * 
+ *
  * Supports versioned API routes with backward compatibility
  */
 
@@ -42,4 +42,3 @@ export function getVersionedPath(path: string, version: string = DEFAULT_API_VER
 export function redirectToVersioned(path: string, version: string = DEFAULT_API_VERSION): string {
   return getVersionedPath(path, version)
 }
-
