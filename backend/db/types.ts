@@ -19,6 +19,13 @@ export interface AgentExecution {
   duration?: number // milliseconds
   toolCalls?: ToolCall[]
   metadata?: Record<string, unknown>
+  tokenUsage?: {
+    inputTokens: number
+    outputTokens: number
+    totalTokens: number
+    estimatedCost: number // USD
+  }
+  model?: string
 }
 
 export interface ToolCall {
@@ -31,6 +38,11 @@ export interface ToolCall {
   startedAt: Date
   completedAt?: Date
   duration?: number // milliseconds
+  tokenUsage?: {
+    inputTokens: number
+    outputTokens: number
+    totalTokens: number
+  }
 }
 
 export interface AgentLog {

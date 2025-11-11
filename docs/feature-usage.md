@@ -4,7 +4,7 @@
 
 ### Creating Agents
 
-Agents are the core of LeadnamicOS. Each agent has:
+Agents are the core of ZwartifyOS. Each agent has:
 - **Name**: Unique identifier
 - **Description**: What the agent does
 - **Prompt**: Instructions for the agent

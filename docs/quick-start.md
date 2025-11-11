@@ -1,4 +1,4 @@
-# Quick Start Guide - LeadnamicOS Agent Platform
+# Quick Start Guide - ZwartifyOS Agent Platform
 
 ## 🚀 Getting Started
 
@@ -33,7 +33,7 @@
 
 ## 🎯 Example Agents (Ready to Test!)
 
-LeadnamicOS comes with **7 pre-built example agents** with specialized skills:
+ZwartifyOS comes with **7 pre-built example agents** with specialised skills:
 
 ### 📄 PDF Processor
 - **Skill:** PDF Processing
@@ -45,7 +45,7 @@ LeadnamicOS comes with **7 pre-built example agents** with specialized skills:
 ### 📊 Data Analyst
 - **Skill:** Data Analysis
 - **Best For:** Data Analysts, Business Analysts, Researchers, Product Managers
-- **Use Cases:** Sales reporting, customer behavior analysis, performance metrics, A/B testing
+- **Use Cases:** Sales reporting, customer behaviour analysis, performance metrics, A/B testing
 - **Test:** "Analyse this dataset and find trends" or "What are the key insights?"
 - **Location:** `/agents` → Click "View" on "data-analyst"
 

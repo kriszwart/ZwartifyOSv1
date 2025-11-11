@@ -9,10 +9,21 @@ export async function mainAgent(input: string, options?: { agentId?: string; met
 
     // Load agent configuration if agentId is provided
     let skillIds: string[] | undefined
+    let agentPrompt: string | undefined
+    let agentName: string = 'Main Agent'
+    let ragFolderId: string | undefined
+    let useMemory: boolean = true
+    
     if (options?.agentId) {
       const agent = getAgent(options.agentId)
-      if (agent?.skillIds && agent.skillIds.length > 0) {
-        skillIds = agent.skillIds
+      if (agent) {
+        if (agent.skillIds && agent.skillIds.length > 0) {
+          skillIds = agent.skillIds
+        }
+        agentPrompt = agent.prompt
+        agentName = agent.name
+        ragFolderId = agent.ragFolderId
+        useMemory = agent.useMemory !== false
       }
     }
 
@@ -20,10 +31,13 @@ export async function mainAgent(input: string, options?: { agentId?: string; met
     const result = await agentClient.run(input, {
       tools,
       agentId: options?.agentId || 'main',
-      agentName: 'Main Agent',
+      agentName: agentName,
+      agentPrompt: agentPrompt, // Pass the agent's prompt as system prompt
       metadata: options?.metadata,
       image: options?.image,
       skillIds,
+      ragFolderId,
+      useMemory,
       autoDetectSkills: true, // Auto-detect skills if none assigned
     })
 

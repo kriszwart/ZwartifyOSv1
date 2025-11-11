@@ -1,15 +1,27 @@
+<<<<<<< HEAD
 # LeadnamicOS: The One-Person Coding Revolution
+=======
+# ZwartifyOS: The One-Person Coding Revolution
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 ## Screen Recording Script
 
 ---
 
 ### [OPENING - 0:00]
 
+<<<<<<< HEAD
 **[Screen: LeadnamicOS homepage, slowly panning to show the interface]**
 
 "What if I told you that you just watched the future of solo development?"
 
 "This is LeadnamicOS. And it's solving a problem that didn't exist six months ago."
+=======
+**[Screen: ZwartifyOS homepage, slowly panning to show the interface]**
+
+"What if I told you that you just watched the future of solo development?"
+
+"This is ZwartifyOS. And it's solving a problem that didn't exist six months ago."
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 **[Screen: Show the quantum aesthetic interface, agents working]**
 
@@ -43,9 +55,15 @@
 
 "Together, they form the ACCV stack. Agents. Cursor. Claude. Vercel."
 
+<<<<<<< HEAD
 **[Screen: Show LeadnamicOS coordinating these layers]**
 
 "LeadnamicOS is the operating system that coordinates them all."
+=======
+**[Screen: Show ZwartifyOS coordinating these layers]**
+
+"ZwartifyOS is the operating system that coordinates them all."
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 ---
 
@@ -53,7 +71,11 @@
 
 **[Screen: Show code structure, backend/agents, backend/tools]**
 
+<<<<<<< HEAD
 "LeadnamicOS works like Unix, but for intelligence. Each tool is a capability. Each agent is a program. Each interaction is a process."
+=======
+"ZwartifyOS works like Unix, but for intelligence. Each tool is a capability. Each agent is a program. Each interaction is a process."
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 **[Screen: Show sync script running]**
 
@@ -127,7 +149,11 @@
 
 **[Screen: Show examples - WordPress, SaaS, etc.]**
 
+<<<<<<< HEAD
 "With LeadnamicOS, one person can build WordPress portfolio systems. SaaS admin dashboards. Expert persona assistants. Migration tools."
+=======
+"With ZwartifyOS, one person can build WordPress portfolio systems. SaaS admin dashboards. Expert persona assistants. Migration tools."
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 "Each agent has tools. Each tool extends capability. The system builds itself."
 
@@ -183,7 +209,11 @@
 
 "If you're ambitious, this is your toolkit. Build the impossible."
 
+<<<<<<< HEAD
 **[Screen: Show manifesto or philosophy]** "LeadnamicOS embodies a philosophy: Quiet hands on keys. Shadows weave electric thought. I build worlds alone."
+=======
+**[Screen: Show manifesto or philosophy]** "ZwartifyOS embodies a philosophy: Quiet hands on keys. Shadows weave electric thought. I build worlds alone."
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 ---
 
@@ -195,7 +225,11 @@
 
 "Clone it. Star it. Fork it. Build with it."
 
+<<<<<<< HEAD
 "GitHub: github.com/kriszwart/leadnamicos"
+=======
+"GitHub: github.com/kriszwart/zwartifyos"
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 "This isn't just code. It's a statement about what's possible when technology converges."
 
@@ -207,9 +241,15 @@
 
 ### [CLOSING - 7:30]
 
+<<<<<<< HEAD
 **[Screen: LeadnamicOS logo or final screen]**
 
 "LeadnamicOS. The operating system for building intelligent products."
+=======
+**[Screen: ZwartifyOS logo or final screen]**
+
+"ZwartifyOS. The operating system for building intelligent products."
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 
 "I build worlds alone. But the room is full of breath."
 
@@ -222,7 +262,11 @@
 **Total Runtime:** ~7:30 minutes
 
 **Key Visuals Needed:**
+<<<<<<< HEAD
 - LeadnamicOS interface (homepage, agent page, docs)
+=======
+- ZwartifyOS interface (homepage, agent page, docs)
+>>>>>>> 78cb0b6 (feat: Add token usage tracking, cost monitoring, and interactive demo page)
 - Terminal showing sync in action
 - Code structure visualization
 - ACCV stack diagram

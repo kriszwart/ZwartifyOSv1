@@ -6,11 +6,11 @@ import {
   addRAGFile,
   isFileTypeSupported,
   MAX_FILE_SIZE 
-} from "../../../../../../backend/rag/storage"
-import { chunkText } from "../../../../../../backend/rag/chunker"
-import { createEmbedding } from "../../../../../../backend/rag/embedder"
-import { extractTextFromBuffer } from "../../../../../../backend/rag/chunker"
-import { indexFolderChunks } from "../../../../../../backend/rag/query"
+} from "../../../../../backend/rag/storage"
+import { chunkText } from "../../../../../backend/rag/chunker"
+import { createEmbedding } from "../../../../../backend/rag/embedder"
+import { extractTextFromBuffer } from "../../../../../backend/rag/chunker"
+import { indexFolderChunks } from "../../../../../backend/rag/query"
 
 /**
  * GET /api/rag/folders/[id] - Get folder details

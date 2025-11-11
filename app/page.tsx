@@ -10,10 +10,14 @@ export default function Home() {
   const [terminalHistory, setTerminalHistory] = useState<string[]>([])
   const [glitchActive, setGlitchActive] = useState(false)
   const [screenTear, setScreenTear] = useState(false)
-  const [quantumParticles, setQuantumParticles] = useState<Array<{id: number, x: number, y: number, teleporting: boolean}>>([])
+  const [quantumParticles, setQuantumParticles] = useState<Array<{id: number, x: number, y: number, teleporting: boolean, jitterDuration: number}>>([])
+  const [sparkles, setSparkles] = useState<Array<{id: number, left: number, top: number, delay: number, colorClass: string, shadowColor: string}>>([])
   const [calendarDate, setCalendarDate] = useState<string>("")
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [cursorTrail, setCursorTrail] = useState<Array<{x: number, y: number, id: number, timestamp: number}>>([])
+  const [showStaticNoise, setShowStaticNoise] = useState(false)
+  const [showTerminalHint, setShowTerminalHint] = useState(false)
+  const [descriptionHasMutation, setDescriptionHasMutation] = useState(false)
   const titleRef = useRef<HTMLHeadingElement>(null)
   
   function getWeekNumber(date: Date): number {
@@ -90,9 +94,37 @@ export default function Home() {
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      teleporting: false
+      teleporting: false,
+      jitterDuration: 0.5 + Math.random() * 0.5 // Pre-calculate animation duration
     }))
     setQuantumParticles(particles)
+  }, [])
+
+  // Initialize sparkles once
+  useEffect(() => {
+    const sparkleArray = Array.from({ length: 25 }, (_, i) => {
+      const randomMutation = Math.random()
+      let colorClass = 'bg-green-400'
+      let shadowColor = '#00ff00'
+
+      if (randomMutation > 0.85) {
+        colorClass = 'bg-cyan-400'
+        shadowColor = '#00ffff'
+      } else if (randomMutation > 0.70) {
+        colorClass = 'bg-pink-500'
+        shadowColor = '#ff00ff'
+      }
+
+      return {
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 3,
+        colorClass,
+        shadowColor
+      }
+    })
+    setSparkles(sparkleArray)
   }, [])
 
   // Random quantum particle teleportation
@@ -149,6 +181,13 @@ export default function Home() {
 
     const initialDelay = setTimeout(triggerTear, 4000)
     return () => clearTimeout(initialDelay)
+  }, [])
+
+  // Initialize probabilistic UI elements once
+  useEffect(() => {
+    setShowStaticNoise(Math.random() > 0.3)
+    setShowTerminalHint(Math.random() > 0.5)
+    setDescriptionHasMutation(Math.random() > 0.7)
   }, [])
 
   // Mouse follow effects
@@ -259,7 +298,7 @@ export default function Home() {
                 boxShadow: '0 0 10px #00ff00, 0 0 20px #00ff00',
                 animation: particle.teleporting
                   ? 'quantum-teleport 1s ease-in-out'
-                  : `quantum-jitter ${0.5 + Math.random() * 0.5}s infinite`
+                  : `quantum-jitter ${particle.jitterDuration}s infinite`
               }}
             />
             {/* Entanglement lines connecting nearby particles */}
@@ -293,37 +332,22 @@ export default function Home() {
 
       {/* Enhanced Sparkles with random color mutations */}
       <div className="fixed inset-0 pointer-events-none">
-        {[...Array(25)].map((_, i) => {
-          const randomMutation = Math.random()
-          let colorClass = 'bg-green-400'
-          let shadowColor = '#00ff00'
-
-          // Probabilistic color mutations
-          if (randomMutation > 0.85) {
-            colorClass = 'bg-cyan-400'
-            shadowColor = '#00ffff'
-          } else if (randomMutation > 0.70) {
-            colorClass = 'bg-pink-500'
-            shadowColor = '#ff00ff'
-          }
-
-          return (
-            <div
-              key={i}
-              className={`sparkle ${colorClass}`}
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                boxShadow: `0 0 6px ${shadowColor}`,
-              }}
-            />
-          )
-        })}
+        {sparkles.map((sparkle) => (
+          <div
+            key={sparkle.id}
+            className={`sparkle ${sparkle.colorClass}`}
+            style={{
+              left: `${sparkle.left}%`,
+              top: `${sparkle.top}%`,
+              animationDelay: `${sparkle.delay}s`,
+              boxShadow: `0 0 6px ${sparkle.shadowColor}`,
+            }}
+          />
+        ))}
       </div>
 
       {/* Static Noise Overlay */}
-      {Math.random() > 0.3 && ( // Probabilistic rendering
+      {showStaticNoise && (
         <div className="static-noise fixed inset-0 pointer-events-none opacity-5" />
       )}
 
@@ -389,7 +413,7 @@ export default function Home() {
               </button>
             </div>
             <div className="h-64 overflow-y-auto mb-4 font-mono text-sm space-y-1">
-              <div className="text-green-500/70">&gt; Welcome to LeadnamicOS Terminal</div>
+              <div className="text-green-500/70">&gt; Welcome to ZwartifyOS Terminal</div>
               <div className="text-green-500/70">&gt; Type 'help' for available commands</div>
               {terminalHistory.map((line, i) => (
                 <div key={i} className="text-green-400">{line}</div>
@@ -423,7 +447,7 @@ export default function Home() {
                 : "0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00",
             }}
           >
-            LeadnamicOS
+            ZwartifyOS
           </h1>
 
           {/* Mysterious Binary Subliminal Messages */}
@@ -437,20 +461,71 @@ export default function Home() {
           <p
             className="text-xl md:text-2xl text-green-300 max-w-2xl mx-auto leading-relaxed mb-4"
             style={{
-              animation: Math.random() > 0.7 ? 'color-mutate-cyan 3s ease-in-out infinite' : 'none'
+              animation: descriptionHasMutation ? 'color-mutate-cyan 3s ease-in-out infinite' : 'none'
             }}
           >
-            A full-stack agent template built with Next.js and Claude API.
+            A full-stack agent platform where agents create agents.
             Build intelligent applications with modular tools, skills, and futuristic interfaces.
-            Includes 4 pre-built example agents ready to test.
-            (Future: Claude Agent SDK for dedicated servers)
+            Includes G-SAC (Growth Strategy Agent Creator) - create agents from a single prompt.
           </p>
           <p className="text-lg text-green-400/80 max-w-xl mx-auto">
             The operating system for building intelligent products.
           </p>
 
+          {/* Open Source Philosophy */}
+          <div className="mt-8 mb-4 max-w-3xl mx-auto">
+            <div className="bg-black/50 border-2 border-green-400/30 p-6 rounded-lg hover:border-green-400/50 transition-all">
+              <h3 className="text-xl font-bold mb-3 text-green-400">🌱 Why Open Source?</h3>
+              <p className="text-green-300/90 mb-3 leading-relaxed">
+                ZwartifyOS is open source because we believe agent platforms should empower users, not act as middlemen.
+              </p>
+              <ul className="text-sm text-green-300/80 space-y-1.5 list-disc list-inside ml-2">
+                <li>Agent platforms should be <strong className="text-green-400">transparent and auditable</strong></li>
+                <li>Users should <strong className="text-green-400">own their agents and data</strong>, not rent them</li>
+                <li>Innovation comes from <strong className="text-green-400">open collaboration</strong>, not walled gardens</li>
+                <li>Middlemen who add no value beyond access control are <strong className="text-green-400">rip-off merchants</strong></li>
+              </ul>
+              <p className="text-sm text-green-400/70 mt-4 italic">
+                The value is in the code, the tools, the architecture—not in artificial scarcity.
+              </p>
+            </div>
+          </div>
+
           {/* Buttons with Quantum Entanglement Effect */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+            <Link
+              href="/create-agent"
+              className="relative px-8 py-4 bg-black border-2 border-purple-400 text-purple-400 font-semibold uppercase tracking-wider
+                       hover:bg-purple-400 hover:text-black transition-all duration-300
+                       hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105
+                       flicker group"
+            >
+              ✨ Create Agent
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+            </Link>
+
+            <Link
+              href="/roadmap"
+              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
+                       hover:bg-green-400 hover:text-black transition-all duration-300
+                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
+                       flicker group"
+            >
+              See Roadmap
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+            </Link>
+
+            <Link
+              href="/playground"
+              className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
+                       hover:bg-green-400 hover:text-black transition-all duration-300
+                       hover:shadow-[0_0_20px_rgba(0,255,0,0.5)] hover:scale-105
+                       flicker group"
+            >
+              Playground
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+            </Link>
+
             <Link
               href="/agent"
               className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
@@ -463,7 +538,7 @@ export default function Home() {
             </Link>
 
             <a
-              href="https://github.com/kriszwart/leadnamicos"
+              href="https://github.com/kriszwart/zwartifyos"
               target="_blank"
               rel="noopener noreferrer"
               className="relative px-8 py-4 bg-black border-2 border-green-400 text-green-400 font-semibold uppercase tracking-wider
@@ -474,6 +549,17 @@ export default function Home() {
               GitHub
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
             </a>
+
+            <Link
+              href="/demo"
+              className="relative px-8 py-4 bg-black border-2 border-yellow-400 text-yellow-400 font-semibold uppercase tracking-wider
+                       hover:bg-yellow-400 hover:text-black transition-all duration-300
+                       hover:shadow-[0_0_20px_rgba(255,255,0,0.5)] hover:scale-105
+                       flicker group"
+            >
+              View Demo
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+            </Link>
 
             <Link
               href="/docs"
@@ -487,6 +573,49 @@ export default function Home() {
             </Link>
           </div>
 
+          {/* Feature Showcase */}
+          <div className="mt-20 mb-16">
+            <h2 className="text-3xl font-bold mb-8 text-center">Core Capabilities</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {[
+                { icon: "✨", name: "G-SAC", desc: "Agent that creates agents", link: "/create-agent", color: "purple" },
+                { icon: "🎮", name: "Playground", desc: "Try agents live", link: "/playground", color: "cyan" },
+                { icon: "🧠", name: "Skills", desc: "Modular capabilities", link: "/skills", color: "cyan" },
+                { icon: "📚", name: "RAG", desc: "Knowledge bases", link: "/rag", color: "blue" },
+                { icon: "💭", name: "Memory", desc: "Context-aware", link: "/memory", color: "green" },
+                { icon: "⏰", name: "Scheduling", desc: "Automated runs", link: "/dashboard", color: "yellow" },
+                { icon: "📊", name: "Logging", desc: "Full observability", link: "/dashboard", color: "green" },
+                { icon: "🔨", name: "Tools", desc: "Custom functions", link: "/docs?tab=tools", color: "purple" },
+                { icon: "🌐", name: "MCP", desc: "Platform integration", link: "/mcp", color: "cyan" },
+                { icon: "🐍", name: "Future Vision", desc: "The Ouroboros", link: "/roadmap/future", color: "cyan" },
+              ].map((feature, idx) => (
+                <Link
+                  key={idx}
+                  href={feature.link}
+                  className={`bg-black/50 border-2 p-4 rounded-lg hover:scale-105 transition-all group ${
+                    feature.color === 'purple' ? 'border-purple-400/30 hover:border-purple-400' :
+                    feature.color === 'cyan' ? 'border-cyan-400/30 hover:border-cyan-400' :
+                    feature.color === 'blue' ? 'border-blue-400/30 hover:border-blue-400' :
+                    feature.color === 'yellow' ? 'border-yellow-400/30 hover:border-yellow-400' :
+                    'border-green-400/30 hover:border-green-400'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">{feature.icon}</div>
+                  <h3 className={`font-bold mb-1 ${
+                    feature.color === 'purple' ? 'text-purple-400' :
+                    feature.color === 'cyan' ? 'text-cyan-400' :
+                    feature.color === 'blue' ? 'text-blue-400' :
+                    feature.color === 'yellow' ? 'text-yellow-400' :
+                    'text-green-400'
+                  }`}>
+                    {feature.name}
+                  </h3>
+                  <p className="text-sm text-green-300/70">{feature.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+
           {/* Holographic Accent with Random Variations */}
           <div className="mt-16 space-y-2">
             <div
@@ -498,7 +627,7 @@ export default function Home() {
               &gt; _ SYSTEM_READY
             </div>
             {/* Hidden Terminal Hint - appears probabilistically */}
-            {Math.random() > 0.5 && (
+            {showTerminalHint && (
               <div className="text-xs text-green-500/40 font-mono animate-fade-in">
                 [Ctrl+Shift+T to access Quantum Terminal]
               </div>
@@ -520,7 +649,7 @@ export default function Home() {
           </div>
           <div>
             <a
-              href="https://github.com/kriszwart/leadnamicos"
+              href="https://github.com/kriszwart/zwartifyos"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-green-400 transition-colors"
@@ -528,7 +657,7 @@ export default function Home() {
               GitHub
             </a>
             {" • "}
-            <span>MIT License © 2025 LeadnamicOS</span>
+            <span>MIT License © 2025 ZwartifyOS</span>
           </div>
         </footer>
       </main>

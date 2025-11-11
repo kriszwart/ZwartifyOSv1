@@ -149,7 +149,7 @@ Claude Code for Web can:
 ✅ **Follow conventions** - Understands your codebase patterns
 ✅ **Iterate** - Can make follow-up changes based on feedback
 
-## Benefits for LeadnamicOS
+## Benefits for ZwartifyOS
 
 With Claude Code for Web integrated:
 

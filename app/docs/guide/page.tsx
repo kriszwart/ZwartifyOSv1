@@ -172,10 +172,10 @@ export default function UserGuidePage() {
             {/* Intro */}
             <section className="mb-8">
               <h2 className="text-4xl font-bold mb-4 text-green-400">
-                LeadnamicOS User Guide
+                ZwartifyOS User Guide
               </h2>
               <p className="text-lg text-green-300 leading-relaxed mb-4">
-                Complete guide to building, deploying, and using AI agents with LeadnamicOS. 
+                Complete guide to building, deploying, and using AI agents with ZwartifyOS. 
                 Learn how to create agents, use RAG, schedule tasks, and export your agents for any use case.
               </p>
             </section>
@@ -209,7 +209,7 @@ export default function UserGuidePage() {
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">Example Agents</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS includes <strong className="text-green-400">4 pre-built example agents</strong> with skills ready to test:
+                    ZwartifyOS includes <strong className="text-green-400">4 pre-built example agents</strong> with skills ready to test:
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div className="bg-black/50 border border-green-400/30 p-3 rounded">
@@ -256,7 +256,7 @@ export default function UserGuidePage() {
                       <strong className="text-green-400">🧠 Use RAG</strong> - Upload documents, create knowledge bases, enhance agent context
                     </p>
                     <p className="text-green-300">
-                      <strong className="text-green-400">🎯 Use Skills</strong> - Assign specialized capabilities to agents (PDF Processing, Data Analysis, Code Review)
+                      <strong className="text-green-400">🎯 Use Skills</strong> - Assign specialised capabilities to agents (PDF Processing, Data Analysis, Code Review)
                     </p>
                     <p className="text-green-300">
                       <strong className="text-green-400">💾 Memory & Context</strong> - Agents remember conversations across sessions
@@ -274,7 +274,7 @@ export default function UserGuidePage() {
                       <strong className="text-green-400">📝 Build Custom Tools</strong> - Add your own tools to extend agent capabilities
                     </p>
                     <p className="text-green-300">
-                      <strong className="text-green-400">🎭 Create Personas</strong> - Build expert agents with specialized knowledge
+                      <strong className="text-green-400">🎭 Create Personas</strong> - Build expert agents with specialised knowledge
                     </p>
                     <p className="text-green-300">
                       <strong className="text-green-400">🔁 Integrate Workflow</strong> - Connect Cursor, Claude Code for Web, and Vercel for full ACCV stack
@@ -312,7 +312,7 @@ export default function UserGuidePage() {
                     </div>
                     <div>
                       <strong className="text-green-400">Agent Skills (/skills):</strong>
-                      <p className="ml-4 mt-1">Manage specialized capabilities for agents</p>
+                      <p className="ml-4 mt-1">Manage specialised capabilities for agents</p>
                       <ul className="ml-8 mt-2 list-disc space-y-1 text-sm">
                         <li>View available skills</li>
                         <li>Create custom skills</li>
@@ -351,7 +351,7 @@ export default function UserGuidePage() {
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">Agent Management System</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS includes a comprehensive agent management system where you can create, configure, and manage multiple agents.
+                    ZwartifyOS includes a comprehensive agent management system where you can create, configure, and manage multiple agents.
                   </p>
                 </section>
 
@@ -575,7 +575,7 @@ metadata:
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">Default Skills</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS includes several default Skills:
+                    ZwartifyOS includes several default Skills:
                   </p>
                   <div className="space-y-3">
                     <div className="bg-black/50 border border-green-400/30 p-3 rounded">
@@ -974,6 +974,9 @@ Tags: pdf, document, extraction`}
                         <li>Status (pending/running/completed/failed)</li>
                         <li>Start and completion timestamps</li>
                         <li>Execution duration (milliseconds)</li>
+                        <li>Token usage (input/output/total tokens)</li>
+                        <li>Estimated cost (USD)</li>
+                        <li>Model used</li>
                       </ul>
                     </div>
                     <div>
@@ -994,6 +997,47 @@ Tags: pdf, document, extraction`}
                         <li>Error logs: Errors with stack traces</li>
                         <li>Debug logs: Detailed debugging info</li>
                       </ul>
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-2xl font-bold mb-4 text-green-400">Token Usage & Cost Tracking</h3>
+                  <p className="text-green-300 mb-4">
+                    ZwartifyOS automatically tracks token usage for every API call and calculates costs based on Claude Sonnet 4 pricing.
+                  </p>
+                  <div className="bg-black/50 border border-green-400/30 p-4 rounded space-y-3">
+                    <div>
+                      <p className="text-green-400 font-bold mb-2">What's Tracked:</p>
+                      <ul className="text-green-300 text-sm ml-4 list-disc space-y-1">
+                        <li><strong>Input Tokens:</strong> Tokens sent to Claude API</li>
+                        <li><strong>Output Tokens:</strong> Tokens received from Claude API</li>
+                        <li><strong>Total Tokens:</strong> Sum of input and output tokens</li>
+                        <li><strong>Estimated Cost:</strong> Calculated using current pricing</li>
+                        <li><strong>Per-Execution:</strong> Token usage for each agent execution</li>
+                        <li><strong>Cumulative:</strong> Total tokens and costs across all executions</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-green-400 font-bold mb-2">Pricing (Claude Sonnet 4):</p>
+                      <ul className="text-green-300 text-sm ml-4 list-disc space-y-1">
+                        <li>Input: $3 per 1M tokens</li>
+                        <li>Output: $15 per 1M tokens</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-green-400 font-bold mb-2">Where to View:</p>
+                      <ul className="text-green-300 text-sm ml-4 list-disc space-y-1">
+                        <li><strong>Dashboard:</strong> Overall usage statistics and costs</li>
+                        <li><strong>Execution Logs:</strong> Token usage per execution</li>
+                        <li><strong>Create Agent Page:</strong> Real-time token usage during agent creation</li>
+                        <li><strong>Usage API:</strong> Programmatic access via <code className="bg-black/70 px-1 rounded">/api/usage/stats</code></li>
+                      </ul>
+                    </div>
+                    <div className="bg-cyan-400/10 border border-cyan-400/30 p-3 rounded mt-4">
+                      <p className="text-cyan-400 text-sm font-mono">
+                        <strong>Note:</strong> ZwartifyOS is open source. You bring your own API key and have full visibility into all token usage and costs. No hidden fees or middlemen.
+                      </p>
                     </div>
                   </div>
                 </section>
@@ -1151,7 +1195,7 @@ GET /api/agents/{id}/executions/{executionId}/logs`}
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">The ACCV Workflow</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS enables the full <strong className="text-green-400">ACCV</strong> (Agents, Cursor, Claude, Vercel) workflow:
+                    ZwartifyOS enables the full <strong className="text-green-400">ACCV</strong> (Agents, Cursor, Claude, Vercel) workflow:
                   </p>
                   <div className="bg-black/50 border border-green-400/30 p-4 rounded space-y-3">
                     <div className="flex items-start space-x-3">
@@ -1324,7 +1368,7 @@ npm run sync:watch
                         <li>Runs continuously until stopped</li>
                         <li>Checks every 30 seconds (configurable)</li>
                         <li>Automatically pulls when changes detected</li>
-                        <li>Colored console output shows activity</li>
+                        <li>Coloured console output shows activity</li>
                       </ul>
                     </div>
 
@@ -1472,19 +1516,19 @@ SYNC_INTERVAL=30000        # Polling interval in milliseconds (default: 30s)`}
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">Pre-Built Example Agents</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS comes with <strong className="text-green-400">4 example agents with skills</strong> ready to test immediately:
+                    ZwartifyOS comes with <strong className="text-green-400">4 example agents with skills</strong> ready to test immediately:
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 mb-6">
                     <div className="bg-black/50 border border-green-400/30 p-4 rounded">
                       <p className="text-green-400 font-bold mb-2">📄 PDF Processor</p>
-                      <p className="text-green-300 text-sm mb-2">Specialized for PDF document processing, extraction, and manipulation</p>
+                      <p className="text-green-300 text-sm mb-2">Specialised for PDF document processing, extraction, and manipulation</p>
                       <p className="text-green-400/60 text-xs mb-2">Skill: PDF Processing</p>
                       <p className="text-green-400/60 text-xs mb-2">Location: <Link href="/agents" className="text-green-400 hover:underline">/agents</Link> → "pdf-processor"</p>
                       <p className="text-green-300 text-xs font-mono bg-black/50 p-2 rounded border border-green-400/20">Try: "Extract text from this PDF"</p>
                     </div>
                     <div className="bg-black/50 border border-green-400/30 p-4 rounded">
                       <p className="text-green-400 font-bold mb-2">📊 Data Analyst</p>
-                      <p className="text-green-300 text-sm mb-2">Expert data analysis, statistics, and visualizations</p>
+                      <p className="text-green-300 text-sm mb-2">Expert data analysis, statistics, and visualisations</p>
                       <p className="text-green-400/60 text-xs mb-2">Skill: Data Analysis</p>
                       <p className="text-green-400/60 text-xs mb-2">Location: <Link href="/agents" className="text-green-400 hover:underline">/agents</Link> → "data-analyst"</p>
                       <p className="text-green-300 text-xs font-mono bg-black/50 p-2 rounded border border-green-400/20">Try: "Analyse this dataset"</p>
@@ -1510,7 +1554,7 @@ SYNC_INTERVAL=30000        # Polling interval in milliseconds (default: 30s)`}
                       <li>Go to <Link href="/agents" className="text-green-400 hover:underline font-mono">/agents</Link> - you'll see all 4 example agents</li>
                       <li>Click <strong>"View"</strong> on any agent card to see details and test interface</li>
                       <li>Or test via <Link href="/agent" className="text-green-400 hover:underline font-mono">/agent</Link> - agents auto-detect relevant skills</li>
-                      <li>Each agent has specialized prompts and skills assigned automatically</li>
+                      <li>Each agent has specialised prompts and skills assigned automatically</li>
                     </ol>
                   </div>
                 </section>
@@ -1715,7 +1759,7 @@ SYNC_INTERVAL=30000        # Polling interval in milliseconds (default: 30s)`}
                 <section>
                   <h3 className="text-2xl font-bold mb-4 text-green-400">Export & Deploy Agents</h3>
                   <p className="text-green-300 mb-4">
-                    LeadnamicOS agents can be exported and deployed in multiple ways. Your agents are already available as APIs, 
+                    ZwartifyOS agents can be exported and deployed in multiple ways. Your agents are already available as APIs, 
                     but you can also package them for various platforms and use cases.
                   </p>
                 </section>
@@ -1753,9 +1797,9 @@ Content-Type: application/json
                       <pre className="bg-black/70 border border-green-400/30 p-3 rounded font-mono text-xs">
 {`<!-- Add to your website -->
 <script src="https://your-site.com/widget.js"></script>
-<div id="leadnamic-agent"></div>
+<div id="zwartify-agent"></div>
 <script>
-  LeadnamicAgent.init({
+  ZwartifyAgent.init({
     agentId: 'your-agent-id',
     apiUrl: 'https://your-site.com/api/agent'
   })
@@ -1770,7 +1814,7 @@ Content-Type: application/json
                     <div className="bg-black/50 border border-green-400/30 p-4 rounded">
                       <h4 className="text-green-400 font-bold mb-2">3. Standalone Application</h4>
                       <p className="text-green-300 text-sm mb-3">
-                        Deploy the entire LeadnamicOS platform as a standalone application.
+                        Deploy the entire ZwartifyOS platform as a standalone application.
                       </p>
                       <pre className="bg-black/70 border border-green-400/30 p-3 rounded font-mono text-xs">
 {`# Deploy to Vercel (already configured)
@@ -1999,7 +2043,7 @@ const data = await response.json()`}
                   <ol className="list-decimal list-inside space-y-3 text-green-300 ml-4">
                     <li>
                       <strong className="text-green-400">Prepare Your Agent</strong>
-                      <p className="ml-6 mt-1 text-sm">Create and test your agent in LeadnamicOS, configure RAG folders, tools, and memory</p>
+                      <p className="ml-6 mt-1 text-sm">Create and test your agent in ZwartifyOS, configure RAG folders, tools, and memory</p>
                     </li>
                     <li>
                       <strong className="text-green-400">Choose Export Method</strong>
@@ -2077,10 +2121,10 @@ const data = await response.json()`}
                       <strong className="text-green-400">Documentation:</strong> Review the <Link href="/docs" className="text-green-400 hover:underline">Docs</Link> page for detailed information
                     </p>
                     <p className="text-green-300">
-                      <strong className="text-green-400">GitHub:</strong> Check <a href="https://github.com/kriszwart/leadnamicos" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">issues</a> or create a new one
+                      <strong className="text-green-400">GitHub:</strong> Check <a href="https://github.com/kriszwart/zwartifyos" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">issues</a> or create a new one
                     </p>
                     <p className="text-green-300">
-                      <strong className="text-green-400">Read the Code:</strong> LeadnamicOS is open source - inspect the implementation
+                      <strong className="text-green-400">Read the Code:</strong> ZwartifyOS is open source - inspect the implementation
                     </p>
                   </div>
                 </section>

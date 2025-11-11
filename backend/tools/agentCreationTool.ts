@@ -7,7 +7,7 @@
 
 import { createAgent, AgentConfig } from '../agents/agentRegistry'
 import { AgentConfigSchema } from '../agents/schema'
-import { getCurrentAgentId } from './toolContext'
+import { getCurrentAgentId, getOriginalPrompt } from './toolContext'
 import { randomUUID } from 'crypto'
 
 export interface CreateAgentInput {
@@ -67,6 +67,9 @@ The agent will automatically track that it was created by the calling agent.`,
 
       // Get the calling agent's ID from context
       const createdByAgentId = getCurrentAgentId() || null
+      
+      // Get the original user prompt from context
+      const originalPrompt = getOriginalPrompt() || null
 
       // Build agent config for registry
       const agentConfig: AgentConfig = {
@@ -85,7 +88,7 @@ The agent will automatically track that it was created by the calling agent.`,
         useMemory: config.useMemory !== false, // Default to true
         skillIds: config.skillIds || [],
         createdByAgentId,
-        creationPrompt: null, // This will be set when we have access to the original prompt
+        creationPrompt: originalPrompt,
       }
 
       // Create the agent

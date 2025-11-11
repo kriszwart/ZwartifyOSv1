@@ -33,6 +33,13 @@ export default function CreateAgentPage() {
   const [executionId, setExecutionId] = useState<string | null>(null)
   const [reasoningLogs, setReasoningLogs] = useState<ExecutionLog[]>([])
   const [createdAgent, setCreatedAgent] = useState<Agent | null>(null)
+  const [showReasoningDetails, setShowReasoningDetails] = useState(true)
+  const [tokenUsage, setTokenUsage] = useState<{
+    inputTokens: number
+    outputTokens: number
+    totalTokens: number
+    estimatedCost: number
+  } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -64,6 +71,11 @@ export default function CreateAgentPage() {
           if (response.ok) {
             const data = await response.json()
             setReasoningLogs(data.logs || [])
+            
+            // Extract token usage from execution
+            if (data.execution?.tokenUsage) {
+              setTokenUsage(data.execution.tokenUsage)
+            }
           }
         } catch (error) {
           console.error('Error loading logs:', error)
@@ -89,6 +101,7 @@ export default function CreateAgentPage() {
     setReasoningLogs([])
     setCreatedAgent(null)
     setExecutionId(null)
+    setTokenUsage(null)
 
     try {
       const res = await fetch("/api/agent", {
@@ -113,33 +126,92 @@ export default function CreateAgentPage() {
 
       setMessages((prev) => [...prev, assistantMessage])
 
+      // Handle errors from the API
+      if (data.error) {
+        const errorMessage: Message = {
+          role: "assistant",
+          content: `**Error Creating Agent:** ${data.error}\n\n**Troubleshooting:**\n- Ensure the G-SAC agent is properly configured\n- Check that all required tools are available\n- Verify your API key is valid\n- Try simplifying your request`,
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, errorMessage])
+        setIsLoading(false)
+        return
+      }
+
       // Check if agent was created by parsing the response
-      // Look for agent ID in the response
+      // Look for agent ID in the response or success indicators
       const agentIdMatch = data.text?.match(/agent.*?ID[:\s]+([a-f0-9-]+)/i)
-      if (agentIdMatch) {
-        // Try to fetch the created agent
-        setTimeout(async () => {
+      const successIndicators = [
+        /created successfully/i,
+        /agent.*created/i,
+        /successfully created/i,
+        /agent.*is now active/i
+      ]
+      const hasSuccessIndicator = successIndicators.some(pattern => pattern.test(data.text || ''))
+      
+      if (agentIdMatch || hasSuccessIndicator) {
+        // Poll for newly created agent
+        let attempts = 0
+        const maxAttempts = 10
+        const pollAgent = async () => {
           try {
             const agentsRes = await fetch('/api/agents')
             if (agentsRes.ok) {
               const agentsData = await agentsRes.json()
-              const newAgent = agentsData.agents?.find((a: Agent) => 
-                a.id === agentIdMatch[1] || data.text?.includes(a.name)
-              )
+              // Try to find by ID first, then by name matching
+              let newAgent = null
+              if (agentIdMatch) {
+                newAgent = agentsData.agents?.find((a: Agent) => a.id === agentIdMatch[1])
+              }
+              if (!newAgent) {
+                // Try to find by name mentioned in response
+                const nameMatch = data.text?.match(/agent.*?["']([^"']+)["']/i)
+                if (nameMatch) {
+                  newAgent = agentsData.agents?.find((a: Agent) => 
+                    a.name.toLowerCase().includes(nameMatch[1].toLowerCase()) ||
+                    nameMatch[1].toLowerCase().includes(a.name.toLowerCase())
+                  )
+                }
+              }
+              // If still not found, get the most recently created agent
+              if (!newAgent && agentsData.agents?.length > 0) {
+                const recentAgents = agentsData.agents
+                  .filter((a: Agent) => a.createdByAgentId === gsacAgentId)
+                  .sort((a: Agent, b: Agent) => 
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                  )
+                newAgent = recentAgents[0]
+              }
+              
               if (newAgent) {
                 setCreatedAgent(newAgent)
+                return true
               }
             }
+            return false
           } catch (error) {
             console.error('Error fetching created agent:', error)
+            return false
           }
-        }, 2000)
+        }
+        
+        // Poll with exponential backoff
+        const pollInterval = setInterval(async () => {
+          attempts++
+          const found = await pollAgent()
+          if (found || attempts >= maxAttempts) {
+            clearInterval(pollInterval)
+            if (!found && attempts >= maxAttempts) {
+              console.warn('Could not find created agent after', maxAttempts, 'attempts')
+            }
+          }
+        }, 500 * attempts) // Exponential backoff: 500ms, 1000ms, 1500ms...
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "Network error"
       const errorMessage: Message = {
         role: "assistant",
-        content: `**Error:** ${errorMsg}`,
+        content: `**Error:** ${errorMsg}\n\nPlease try again or check your connection. If the problem persists, the G-SAC agent may need to be restarted.`,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
@@ -215,7 +287,7 @@ export default function CreateAgentPage() {
                       "Create an agent that qualifies sales leads and schedules demos",
                       "Build a customer support agent for Slack and Discord",
                       "Create a content creator agent that posts to Twitter and LinkedIn",
-                      "Build an agent that analyzes competitor data and generates insights",
+                      "Build an agent that analyses competitor data and generates insights",
                     ].map((example, idx) => (
                       <div
                         key={idx}
@@ -265,46 +337,188 @@ export default function CreateAgentPage() {
                   </div>
                 ))}
                 
-                {/* Reasoning Steps */}
+                {/* Reasoning Steps - Enhanced Display */}
                 {reasoningLogs.length > 0 && (
-                  <div className="bg-black/50 border-2 border-green-400/30 p-4 rounded-lg">
-                    <h3 className="text-green-400 font-bold mb-3 font-mono text-sm uppercase">
-                      🔍 G-SAC Reasoning Steps
-                    </h3>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {reasoningLogs
-                        .filter(log => log.level === 'info' || log.level === 'debug')
-                        .map((log, idx) => (
-                          <div key={idx} className="text-xs font-mono text-green-300/70 border-l-2 border-green-400/30 pl-3">
-                            <span className="text-green-400/50">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                            <span className="ml-2">{log.message}</span>
-                          </div>
-                        ))}
+                  <div className="bg-gradient-to-r from-green-400/10 to-green-400/5 border-2 border-green-400/50 p-6 rounded-lg shadow-lg shadow-green-400/20">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="quantum-glyph text-green-400 text-2xl">⚛</div>
+                        <h3 className="text-green-400 font-bold font-mono text-lg uppercase tracking-wider">
+                          G-SAC Reasoning Process
+                        </h3>
+                        <span className="px-2 py-1 text-xs font-mono bg-green-400/20 text-green-300 border border-green-400/30 rounded">
+                          {reasoningLogs.filter(log => log.level === 'info' || log.level === 'debug').length} steps
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setShowReasoningDetails(!showReasoningDetails)}
+                        className="text-green-400/60 hover:text-green-400 text-xs font-mono uppercase tracking-wider transition-colors"
+                      >
+                        {showReasoningDetails ? 'Hide' : 'Show'} Details
+                      </button>
                     </div>
+                    
+                    {showReasoningDetails && (
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {/* Token Usage Display */}
+                        {tokenUsage && (
+                          <div className="mb-4 p-3 bg-cyan-400/10 border border-cyan-400/30 rounded">
+                            <div className="text-xs text-cyan-400/60 mb-2 font-mono font-bold">Token Usage:</div>
+                            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                              <div>
+                                <span className="text-cyan-400/60">Input:</span>
+                                <span className="text-cyan-400 ml-2">{tokenUsage.inputTokens.toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="text-cyan-400/60">Output:</span>
+                                <span className="text-cyan-400 ml-2">{tokenUsage.outputTokens.toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="text-cyan-400/60">Total:</span>
+                                <span className="text-cyan-400 ml-2">{tokenUsage.totalTokens.toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="text-purple-400/60">Cost:</span>
+                                <span className="text-purple-400 ml-2">${tokenUsage.estimatedCost.toFixed(4)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {reasoningLogs
+                          .filter(log => log.level === 'info' || log.level === 'debug')
+                          .map((log, idx) => {
+                            // Categorize logs by keywords
+                            const isGoalAnalysis = log.message.toLowerCase().includes('goal') || log.message.toLowerCase().includes('analyse')
+                            const isToolSelection = log.message.toLowerCase().includes('tool') || log.message.toLowerCase().includes('select')
+                            const isPlatformConfig = log.message.toLowerCase().includes('platform') || log.message.toLowerCase().includes('mcp')
+                            const isAgentCreation = log.message.toLowerCase().includes('create') || log.message.toLowerCase().includes('agent')
+                            const isSkill = log.message.toLowerCase().includes('skill')
+                            
+                            let stageIcon = '→'
+                            let stageColor = 'text-green-400/60'
+                            if (isGoalAnalysis) {
+                              stageIcon = '🎯'
+                              stageColor = 'text-cyan-400'
+                            } else if (isToolSelection) {
+                              stageIcon = '🔧'
+                              stageColor = 'text-yellow-400'
+                            } else if (isPlatformConfig) {
+                              stageIcon = '🌐'
+                              stageColor = 'text-purple-400'
+                            } else if (isAgentCreation) {
+                              stageIcon = '✨'
+                              stageColor = 'text-green-400'
+                            } else if (isSkill) {
+                              stageIcon = '🧠'
+                              stageColor = 'text-blue-400'
+                            }
+                            
+                            return (
+                              <div 
+                                key={idx} 
+                                className={`flex items-start gap-3 p-3 rounded-lg border-l-4 transition-all ${
+                                  isGoalAnalysis ? 'bg-cyan-400/5 border-cyan-400/50' :
+                                  isToolSelection ? 'bg-yellow-400/5 border-yellow-400/50' :
+                                  isPlatformConfig ? 'bg-purple-400/5 border-purple-400/50' :
+                                  isAgentCreation ? 'bg-green-400/10 border-green-400/70' :
+                                  isSkill ? 'bg-blue-400/5 border-blue-400/50' :
+                                  'bg-green-400/5 border-green-400/30'
+                                }`}
+                              >
+                                <span className={`text-lg ${stageColor} flex-shrink-0 mt-0.5`}>{stageIcon}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className={`text-xs font-mono ${stageColor} font-semibold`}>
+                                      Step {idx + 1}
+                                    </span>
+                                    <span className="text-xs text-green-400/40 font-mono">
+                                      {new Date(log.timestamp).toLocaleTimeString()}
+                                    </span>
+                                  </div>
+                                  <p className={`text-sm font-mono ${isAgentCreation ? 'text-green-300 font-semibold' : 'text-green-300/80'}`}>
+                                    {log.message}
+                                  </p>
+                                  {log.data && typeof log.data === 'object' && Object.keys(log.data).length > 0 && (
+                                    <details className="mt-2">
+                                      <summary className="text-xs text-green-400/50 font-mono cursor-pointer hover:text-green-400/70">
+                                        View details
+                                      </summary>
+                                      <pre className="mt-1 text-xs text-green-400/60 font-mono bg-black/30 p-2 rounded overflow-x-auto">
+                                        {JSON.stringify(log.data, null, 2)}
+                                      </pre>
+                                    </details>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Created Agent Info */}
+                {/* Created Agent Info - Enhanced Success Display */}
                 {createdAgent && (
-                  <div className="bg-green-400/10 border-2 border-green-400 p-4 rounded-lg">
-                    <h3 className="text-green-400 font-bold mb-2 font-mono text-sm uppercase">
-                      ✅ Agent Created Successfully!
-                    </h3>
-                    <div className="space-y-2">
-                      <p className="text-green-300">
-                        <strong>Name:</strong> {createdAgent.name}
-                      </p>
-                      {createdAgent.description && (
-                        <p className="text-green-300">
-                          <strong>Description:</strong> {createdAgent.description}
+                  <div className="bg-gradient-to-r from-green-400/20 to-green-400/10 border-2 border-green-400 p-6 rounded-lg shadow-lg shadow-green-400/30 animate-pulse-once">
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="text-3xl">🎉</div>
+                      <div className="flex-1">
+                        <h3 className="text-green-400 font-bold mb-2 font-mono text-lg uppercase tracking-wider">
+                          ✅ Agent Created Successfully!
+                        </h3>
+                        <p className="text-green-300/80 text-sm mb-4">
+                          Your agent has been deployed and is ready to use.
                         </p>
+                      </div>
+                    </div>
+                    <div className="space-y-3 mb-4">
+                      <div className="bg-black/50 p-3 rounded border border-green-400/30">
+                        <p className="text-green-300 text-sm mb-1">
+                          <strong className="text-green-400">Name:</strong> {createdAgent.name}
+                        </p>
+                        {createdAgent.description && (
+                          <p className="text-green-300/80 text-sm">
+                            <strong className="text-green-400">Description:</strong> {createdAgent.description}
+                          </p>
+                        )}
+                      </div>
+                      {tokenUsage && (
+                        <div className="bg-cyan-400/10 p-3 rounded border border-cyan-400/30">
+                          <p className="text-cyan-400/60 text-xs font-mono mb-2 font-bold">Creation Cost Summary:</p>
+                          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                            <div>
+                              <span className="text-cyan-400/60">Tokens Used:</span>
+                              <span className="text-cyan-400 ml-2">{tokenUsage.totalTokens.toLocaleString()}</span>
+                            </div>
+                            <div>
+                              <span className="text-purple-400/60">Total Cost:</span>
+                              <span className="text-purple-400 ml-2">${tokenUsage.estimatedCost.toFixed(4)}</span>
+                            </div>
+                          </div>
+                        </div>
                       )}
+                    </div>
+                    <div className="flex gap-3 flex-wrap">
                       <Link
-                        href={`/agents/${createdAgent.id}`}
-                        className="inline-block px-4 py-2 border-2 border-green-400 text-green-400 hover:bg-green-400/10 transition-colors font-mono text-sm mt-2"
+                        href={`/agent/${createdAgent.id}`}
+                        className="inline-flex items-center gap-2 px-6 py-3 border-2 border-green-400 text-green-400 hover:bg-green-400 hover:text-black transition-all font-mono text-sm font-bold"
                       >
-                        View Agent →
+                        <span>View Agent</span>
+                        <span>→</span>
                       </Link>
+                      <button
+                        onClick={() => {
+                          setPrompt("")
+                          setMessages([])
+                          setCreatedAgent(null)
+                          setReasoningLogs([])
+                          setExecutionId(null)
+                        }}
+                        className="px-6 py-3 border-2 border-green-400/50 text-green-400/70 hover:bg-green-400/10 hover:text-green-400 transition-all font-mono text-sm"
+                      >
+                        Create Another
+                      </button>
                     </div>
                   </div>
                 )}

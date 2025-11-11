@@ -2,7 +2,7 @@
 
 ## Overview
 
-When Claude Code for Web makes changes to your repository via GitHub (on `claude/*` branches), LeadnamicOS can automatically sync those changes back to your local codebase.
+When Claude Code for Web makes changes to your repository via GitHub (on `claude/*` branches), ZwartifyOS can automatically sync those changes back to your local codebase.
 
 ## The Problem
 
@@ -14,7 +14,7 @@ Without automation:
 
 ## The Solution
 
-LeadnamicOS sync script automatically:
+ZwartifyOS sync script automatically:
 - Detects `claude/*` branches on GitHub
 - Checks for new commits
 - Pulls changes to your local codebase
@@ -58,7 +58,7 @@ npm run sync:watch
 - When expecting Claude Code for Web changes
 - For continuous sync
 
-**Behavior:**
+**Behaviour:**
 - Runs continuously
 - Checks every 30 seconds (or configured interval)
 - Automatically pulls when changes detected
@@ -75,7 +75,7 @@ npm run sync:check
 - Before merging branches
 - When you suspect changes
 
-**Behavior:**
+**Behaviour:**
 - Single check operation
 - Reports what branches need syncing
 - Does not pull automatically
@@ -91,7 +91,7 @@ npm run sync:pull
 - After being offline
 - Manual refresh
 
-**Behavior:**
+**Behaviour:**
 - Pulls all `claude/*` branches
 - Creates local branches if missing
 - Updates existing local branches

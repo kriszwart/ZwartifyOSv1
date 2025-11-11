@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#000000" rx="2"/>
+  <!-- Terminal-style prompt -->
+  <text x="8" y="20" font-family="monospace" font-size="12" fill="#00ff00">&gt;</text>
+  <!-- Large L -->
+  <text x="16" y="22" font-family="monospace" font-size="20" font-weight="bold" fill="#00ff00" text-anchor="middle">L</text>
+  <!-- Small accent dot -->
+  <circle cx="16" cy="8" r="1.5" fill="#00ff00"/>
+</svg>

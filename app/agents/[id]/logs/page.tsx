@@ -16,6 +16,13 @@ interface Execution {
   completedAt?: string
   duration?: number
   toolCalls?: ToolCall[]
+  tokenUsage?: {
+    inputTokens: number
+    outputTokens: number
+    totalTokens: number
+    estimatedCost: number
+  }
+  model?: string
 }
 
 interface ToolCall {
@@ -195,12 +202,45 @@ export default function AgentLogsPage() {
                       <span className={`px-2 py-1 text-xs font-mono border ${getStatusColor(selectedExecution.status)}`}>
                         {selectedExecution.status.toUpperCase()}
                       </span>
-                      {selectedExecution.duration && (
-                        <span className="text-xs text-green-400/60 font-mono">
-                          {selectedExecution.duration}ms
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {selectedExecution.duration && (
+                          <span className="text-xs text-green-400/60 font-mono">
+                            {selectedExecution.duration}ms
+                          </span>
+                        )}
+                        {selectedExecution.model && (
+                          <span className="text-xs text-green-400/60 font-mono">
+                            {selectedExecution.model}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    
+                    {/* Token Usage */}
+                    {selectedExecution.tokenUsage && (
+                      <div className="mb-3 p-3 bg-cyan-400/10 border border-cyan-400/30 rounded">
+                        <div className="text-xs text-cyan-400/60 mb-2 font-mono font-bold">Token Usage:</div>
+                        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                          <div>
+                            <span className="text-cyan-400/60">Input:</span>
+                            <span className="text-cyan-400 ml-2">{selectedExecution.tokenUsage.inputTokens.toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-cyan-400/60">Output:</span>
+                            <span className="text-cyan-400 ml-2">{selectedExecution.tokenUsage.outputTokens.toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-cyan-400/60">Total:</span>
+                            <span className="text-cyan-400 ml-2">{selectedExecution.tokenUsage.totalTokens.toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-purple-400/60">Cost:</span>
+                            <span className="text-purple-400 ml-2">${selectedExecution.tokenUsage.estimatedCost.toFixed(4)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="mb-2">
                       <div className="text-xs text-green-400/60 mb-1 font-mono">Input:</div>
                       <div className="bg-black/50 border border-green-400/20 p-2 rounded text-sm text-green-300">

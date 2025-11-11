@@ -1,8 +1,8 @@
-# LeadnamicOS: The Complete Agent Development Template
+# ZwartifyOS: The Complete Agent Development Template
 
-## 🎯 What is LeadnamicOS?
+## 🎯 What is ZwartifyOS?
 
-**LeadnamicOS is a production-ready template for building AI agent platforms** - think "your own Toolhouse.ai" or "Claude Console" that you can customise, deploy, and monetise.
+**ZwartifyOS is a production-ready template for building AI agent platforms** - think "your own Toolhouse.ai" or "Claude Console" that you can customise, deploy, and monetise.
 
 It's not just a demo or proof-of-concept. It's a **complete agent operating system** with everything you need to build, deploy, and scale AI-powered applications.
 
@@ -43,7 +43,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 
 ### **Problem 1: "I want to build an AI agent but don't know where to start"**
 
-**Solution:** LeadnamicOS gives you:
+**Solution:** ZwartifyOS gives you:
 - ✅ Complete agent infrastructure (RAG, memory, scheduling, logging)
 - ✅ 7 pre-built example agents with real use cases
 - ✅ Full UI for managing agents, skills, and knowledge bases
@@ -55,7 +55,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 
 ### **Problem 2: "I need agents that can actually DO things, not just chat"**
 
-**Solution:** LeadnamicOS includes:
+**Solution:** ZwartifyOS includes:
 - ✅ **Tool System** - Extend agents with custom functions
 - ✅ **Skills System** - Domain expertise and workflows
 - ✅ **RAG System** - Knowledge bases for agents
@@ -68,7 +68,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 
 ### **Problem 3: "I need to deploy agents for production use"**
 
-**Solution:** LeadnamicOS provides:
+**Solution:** ZwartifyOS provides:
 - ✅ **API Endpoints** - Ready for integration
 - ✅ **Observability** - Full execution logging and monitoring
 - ✅ **Scheduling** - Automated agent runs
@@ -81,7 +81,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 
 ### **Problem 4: "I want to monetize or white-label agents"**
 
-**Solution:** LeadnamicOS enables:
+**Solution:** ZwartifyOS enables:
 - ✅ **Multi-Agent Platform** - Manage multiple agents
 - ✅ **Agent Export** - Package agents for distribution
 - ✅ **API Access** - Charge per API call
@@ -172,7 +172,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 ## 💰 Monetization Paths
 
 ### **Path 1: SaaS Product**
-- Deploy LeadnamicOS as-is
+- Deploy ZwartifyOS as-is
 - Add authentication/billing
 - Charge monthly subscriptions
 - **Example:** "AgentHub" - $29/month for 5 agents
@@ -279,7 +279,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 - ❌ Hard to extend
 - ❌ No examples
 
-### **LeadnamicOS:**
+### **ZwartifyOS:**
 - ✅ Complete agent platform
 - ✅ Real working features (PDF extraction, RAG, memory)
 - ✅ Production-ready (logging, scheduling, observability)
@@ -319,7 +319,7 @@ It's not just a demo or proof-of-concept. It's a **complete agent operating syst
 
 ## 💎 The Bottom Line
 
-**LeadnamicOS is the fastest way to go from idea to production AI agent platform.**
+**ZwartifyOS is the fastest way to go from idea to production AI agent platform.**
 
 You get:
 - ✅ **Production-ready code** (not a toy)
@@ -339,7 +339,7 @@ You get:
 
 ## 🎯 TL;DR
 
-**LeadnamicOS = Production-ready agent platform template**
+**ZwartifyOS = Production-ready agent platform template**
 
 **Use it to:**
 - Build AI-powered SaaS products

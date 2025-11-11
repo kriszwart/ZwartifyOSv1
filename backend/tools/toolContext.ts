@@ -2,16 +2,18 @@
  * Tool Context
  * 
  * Provides a way for tools to access the current execution context,
- * specifically the agent ID of the agent calling the tool.
+ * specifically the agent ID of the agent calling the tool and the original user prompt.
  */
 
 let currentAgentId: string | undefined
+let originalPrompt: string | undefined
 
 /**
- * Set the current agent ID for tool execution context
+ * Set the tool execution context with agent ID and original prompt
  */
-export function setToolContext(agentId?: string): void {
+export function setToolContext(agentId?: string, prompt?: string): void {
   currentAgentId = agentId
+  originalPrompt = prompt
 }
 
 /**
@@ -22,9 +24,24 @@ export function getCurrentAgentId(): string | undefined {
 }
 
 /**
+ * Get the original user prompt from tool execution context
+ */
+export function getOriginalPrompt(): string | undefined {
+  return originalPrompt
+}
+
+/**
+ * Set the original prompt in tool context
+ */
+export function setOriginalPrompt(prompt?: string): void {
+  originalPrompt = prompt
+}
+
+/**
  * Clear the tool context
  */
 export function clearToolContext(): void {
   currentAgentId = undefined
+  originalPrompt = undefined
 }
 

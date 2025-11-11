@@ -19,6 +19,8 @@ interface Agent {
   skillIds?: string[]
   ragFolderId?: string
   useMemory?: boolean
+  createdByAgentId?: string | null
+  creationPrompt?: string | null
 }
 
 interface Skill {
@@ -45,6 +47,8 @@ export default function AgentDetailPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [creatorAgent, setCreatorAgent] = useState<Agent | null>(null)
+  const [showCreationPrompt, setShowCreationPrompt] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -83,6 +87,21 @@ export default function AgentDetailPage() {
       
       if (data.agent) {
         setAgent(data.agent)
+        
+        // Load creator agent if this agent was created by another agent
+        if (data.agent.createdByAgentId) {
+          try {
+            const creatorResponse = await fetch(`/api/agents/${data.agent.createdByAgentId}`)
+            if (creatorResponse.ok) {
+              const creatorData = await creatorResponse.json()
+              if (creatorData.agent) {
+                setCreatorAgent(creatorData.agent)
+              }
+            }
+          } catch (creatorError) {
+            console.error('Error loading creator agent:', creatorError)
+          }
+        }
         
         // Load skills if agent has skillIds
         if (data.agent.skillIds && data.agent.skillIds.length > 0) {
@@ -269,7 +288,7 @@ export default function AgentDetailPage() {
         <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
           {/* Agent Info */}
           <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg mb-6">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
               <h2 className="text-2xl font-bold text-green-400">{agent.name}</h2>
               <span
                 className={`px-2 py-1 text-xs font-mono border ${
@@ -280,7 +299,45 @@ export default function AgentDetailPage() {
               >
                 {agent.enabled ? 'Enabled' : 'Disabled'}
               </span>
+              {agent.createdByAgentId && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowCreationPrompt(!showCreationPrompt)}
+                    className="px-2 py-1 text-xs font-mono border border-purple-400/50 bg-purple-400/10 text-purple-400 hover:bg-purple-400/20 transition-colors cursor-pointer flex items-center gap-1"
+                    title="Created by AI agent"
+                  >
+                    <span>🤖</span>
+                    <span>Created by {creatorAgent?.name || 'AI Agent'}</span>
+                  </button>
+                </div>
+              )}
             </div>
+            
+            {/* Creation Prompt Display */}
+            {agent.createdByAgentId && showCreationPrompt && agent.creationPrompt && (
+              <div className="mb-4 p-4 bg-purple-400/10 border-2 border-purple-400/30 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-bold text-purple-400 font-mono uppercase">Original Creation Prompt</h4>
+                  <button
+                    onClick={() => setShowCreationPrompt(false)}
+                    className="text-purple-400/60 hover:text-purple-400 text-xs font-mono"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="text-purple-300/90 text-sm font-mono italic">{agent.creationPrompt}</p>
+                {creatorAgent && (
+                  <div className="mt-2 pt-2 border-t border-purple-400/20">
+                    <Link
+                      href={`/agent/${creatorAgent.id}`}
+                      className="text-xs text-purple-400/70 hover:text-purple-400 font-mono"
+                    >
+                      View Creator Agent: {creatorAgent.name} →
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
             
             {agent.description && (
               <p className="text-green-300/80 mb-4">{agent.description}</p>

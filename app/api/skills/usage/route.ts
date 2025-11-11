@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { getAllSkillUsageStats, getTopUsedSkills, getSkillUsageStats } from "../../../backend/skills/usageTracking"
-import { getSkill, listSkills } from "../../../backend/skills/store"
+import { getAllSkillUsageStats, getTopUsedSkills, getSkillUsageStats } from "../../../../backend/skills/usageTracking"
+import { getSkill, listSkills } from "../../../../backend/skills/store"
 
 /**
  * GET /api/skills/usage - Get skill usage statistics

@@ -1,14 +1,14 @@
-# LeadnamicOS: The Complete AI Agent Platform Template
+# ZwartifyOS: The Complete AI Agent Platform Template
 
-## 🎯 What LeadnamicOS Is
+## 🎯 What ZwartifyOS Is
 
-**LeadnamicOS is a production-ready, full-stack AI agent platform template** that lets developers and businesses quickly build and deploy intelligent AI agents with enterprise-grade features.
+**ZwartifyOS is a production-ready, full-stack AI agent platform template** that lets developers and businesses quickly build and deploy intelligent AI agents with enterprise-grade features.
 
 Think of it as **"WordPress for AI Agents"** - a complete foundation that you can customise and deploy for your specific needs.
 
 ---
 
-## 🚀 Why Use LeadnamicOS as a Template?
+## 🚀 Why Use ZwartifyOS as a Template?
 
 ### 1. **Build AI Agents Fast**
 - ✅ **7 Pre-built Example Agents** ready to use (PDF Processor, Data Analyst, Code Reviewer, Content Writer, Email Assistant, Research Assistant, Customer Support)
@@ -112,7 +112,7 @@ Think of it as **"WordPress for AI Agents"** - a complete foundation that you ca
 ## 🏗️ What Makes This Template Special?
 
 ### **1. Complete Feature Set**
-Unlike simple AI chat templates, LeadnamicOS includes:
+Unlike simple AI chat templates, ZwartifyOS includes:
 - ✅ Agent management and versioning
 - ✅ Skills system (modular capabilities)
 - ✅ RAG/knowledge bases
@@ -151,9 +151,9 @@ Unlike simple AI chat templates, LeadnamicOS includes:
 
 ---
 
-## 📊 Comparison: Starting from Scratch vs. Using LeadnamicOS
+## 📊 Comparison: Starting from Scratch vs. Using ZwartifyOS
 
-| Feature | From Scratch | With LeadnamicOS |
+| Feature | From Scratch | With ZwartifyOS |
 |---------|-------------|-----------------|
 | **Development Time** | 3-6 months | 1-2 weeks |
 | **Agent Management** | Build yourself | ✅ Built-in |
@@ -224,17 +224,20 @@ Unlike simple AI chat templates, LeadnamicOS includes:
 - ✅ Extensive documentation
 
 ### **vs. Proprietary Platforms**
-- ✅ Open source
-- ✅ Fully customizable
-- ✅ No vendor lock-in
-- ✅ Own your data
-- ✅ Deploy anywhere
+- ✅ **Open source** - Transparent, auditable, community-driven
+- ✅ **Fully customizable** - No black boxes, modify anything
+- ✅ **No vendor lock-in** - Own your agents and data
+- ✅ **Own your data** - No third-party data collection
+- ✅ **Deploy anywhere** - Self-host or use any provider
+- ✅ **No middlemen** - The value is in the code, not artificial scarcity
+
+**Why this matters:** Many proprietary agent platforms act as gatekeepers, charging monthly fees for functionality you could run yourself. They add no value beyond access control—they're just middlemen taking a cut. ZwartifyOS is open source because we believe the real value is in the code, the tools, and the architecture—not in artificial scarcity. You should own your agents, not rent them.
 
 ---
 
 ## 🎓 Summary
 
-**LeadnamicOS is the fastest way to go from idea to production AI agent platform.**
+**ZwartifyOS is the fastest way to go from idea to production AI agent platform.**
 
 It's perfect for:
 - **Developers** who want to ship AI products fast

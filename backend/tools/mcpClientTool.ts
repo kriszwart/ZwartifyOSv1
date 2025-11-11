@@ -136,7 +136,7 @@ Example:
   "method": "sendMessage",
   "params": {
     "channel": "#general",
-    "text": "Hello from LeadnamicOS"
+    "text": "Hello from ZwartifyOS"
   }
 }`,
   execute: async (input: MCPCallInput | { service: string; method: string; params?: Record<string, unknown>; endpoint?: string }) => {
