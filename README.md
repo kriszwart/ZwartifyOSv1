@@ -1,8 +1,8 @@
 # ZwartifyOS
 
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-v1.0.0-blue)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![Version](https://img.shields.io/badge/version-v1.1.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
 **ZwartifyOS is a production-ready framework for building and deploying AI agents with Claude.**
