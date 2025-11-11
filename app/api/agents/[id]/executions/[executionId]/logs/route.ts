@@ -6,10 +6,11 @@ import { getExecution, getExecutionLogs } from "../../../../../../../backend/db/
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string; executionId: string } }
+  { params }: { params: Promise<{ id: string; executionId: string }> }
 ) {
   try {
-    const execution = getExecution(params.executionId)
+    const { id, executionId } = await params
+    const execution = getExecution(executionId)
     
     if (!execution) {
       return NextResponse.json(
@@ -19,14 +20,14 @@ export async function GET(
     }
 
     // Verify execution belongs to agent
-    if (execution.agentId !== params.id) {
+    if (execution.agentId !== id) {
       return NextResponse.json(
         { error: "Execution does not belong to this agent" },
         { status: 403 }
       )
     }
 
-    const logs = getExecutionLogs(params.executionId)
+    const logs = getExecutionLogs(executionId)
 
     return NextResponse.json({
       execution,

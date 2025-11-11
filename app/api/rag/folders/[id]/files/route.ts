@@ -19,10 +19,11 @@ import { randomUUID } from "crypto"
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const files = getRAGFiles(params.id)
+    const { id } = await params
+    const files = getRAGFiles(id)
     return NextResponse.json({ files })
   } catch (error) {
     console.error("Error listing files:", error)
@@ -38,10 +39,11 @@ export async function GET(
  */
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const folder = getRAGFolder(params.id)
+    const { id } = await params
+    const folder = getRAGFolder(id)
     if (!folder) {
       return NextResponse.json(
         { error: "Folder not found" },
@@ -80,7 +82,7 @@ export async function POST(
     const buffer = Buffer.from(arrayBuffer)
 
     // Add file to storage
-    const ragFile = await addRAGFile(params.id, file.name, buffer, file.type)
+    const ragFile = await addRAGFile(id, file.name, buffer, file.type)
 
     // Process file: extract text, chunk, and create embeddings
     try {
@@ -107,8 +109,8 @@ export async function POST(
         storeChunks(ragChunks)
 
         // Index chunks for the folder
-        const existingChunks = folderChunks.get(params.id) || []
-        indexFolderChunks(params.id, [...existingChunks, ...ragChunks])
+        const existingChunks = folderChunks.get(id) || []
+        indexFolderChunks(id, [...existingChunks, ...ragChunks])
 
         // Update file as processed
         updateRAGFile(ragFile.id, {
