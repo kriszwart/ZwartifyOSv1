@@ -195,7 +195,7 @@
 
 "Clone it. Star it. Fork it. Build with it."
 
-"GitHub: github.com/kriszwart/zwartifyos"
+"GitHub: github.com/kriszwart/ZwartifyOSv1"
 
 "This isn't just code. It's a statement about what's possible when technology converges."
 

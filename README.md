@@ -1,66 +1,114 @@
 # ZwartifyOS
 
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-v0.1.0-blue)
+![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-**ZwartifyOS is an operating system for building intelligent products.**
+**ZwartifyOS is a production-ready framework for building and deploying AI agents with Claude.**
 
-It fuses local AI coding with cloud AI code review and deploys instantly.
+Build, deploy, and scale AI agents in hours, not months. Open-source. MIT-licensed. Bring your own API keys.
 
-This hybrid workflow means a single human can build complex systems that once required entire teams.
-
-These patterns did not exist together until now.
-
-ZwartifyOS sits at the frontier.
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kriszwart/ZwartifyOSv1)
 
 ---
 
-## 🌟 The Creative Agent System: Agents Creating Agents
+## What is ZwartifyOS?
 
-**ZwartifyOS features the Growth Strategy Agent Creator (G-SAC) - a meta-agent that creates other agents from a single natural language prompt.**
+ZwartifyOS is an open-source agent framework built on Claude API, Next.js, and TypeScript. It provides everything you need to build, deploy, and manage AI agents:
 
-### Single-Prompt Agent Creation
+- **Agent Management** - Create, configure, and monitor agents
+- **RAG System** - Knowledge base management for contextual agents
+- **Memory & Context** - Conversation persistence and context management
+- **Scheduling** - Automated agent runs with cron expressions
+- **G-SAC** - Growth Strategy Agent Creator (agents that create agents)
+- **Token Tracking** - Comprehensive usage and cost monitoring
+- **Production-Ready** - Auth, rate limiting, health checks, error logging
 
-Simply describe what you want your agent to do in plain language:
+### Quick Start
 
-- "Create an agent that qualifies sales leads and schedules demos"
-- "Build a customer support agent for Slack and Discord"
-- "Create a content creator agent that posts to Twitter and LinkedIn"
+```bash
+# Clone the repository
+git clone https://github.com/kriszwart/ZwartifyOSv1.git
+cd ZwartifyOSv1
 
-The G-SAC autonomously:
-1. Analyses your business goal
+# Install dependencies
+npm install
+
+# Set your API key
+echo "CLAUDE_API_KEY=your-key-here" > .env.local
+
+# Start development server
+npm run dev
+```
+
+Visit `http://localhost:3000` to get started.
+
+**See [Quick Start Guide](docs/quick-start.md) for detailed setup instructions.**
+
+---
+
+## ✨ New in v1.0.0
+
+**Production-Ready Release** - ZwartifyOS v1.0.0 brings enterprise-grade features:
+
+- **Token Usage Tracking** - Automatic tracking of input/output tokens for every API call
+- **Cost Monitoring** - Real-time cost calculation and analytics dashboard
+- **API Versioning** - Structured API versioning support
+- **Authentication** - Optional API key authentication with multiple auth methods
+- **Rate Limiting** - Configurable rate limiting for API protection
+- **Health Checks** - Production-ready health check endpoints (`/api/health`, `/api/ready`)
+- **Environment Validation** - Startup validation prevents misconfiguration errors
+- **Structured Error Logging** - Comprehensive error tracking with stack traces
+- **Interactive Demo** - New `/demo` page showcasing G-SAC workflow
+
+See [CHANGELOG.md](CHANGELOG.md) for complete release notes.
+
+---
+
+## 🌟 G-SAC: Growth Strategy Agent Creator
+
+**G-SAC is ZwartifyOS's meta-agent that creates other agents from a single natural language prompt.**
+
+Instead of manually configuring agents, tools, and integrations, simply describe what you want:
+
+```
+"Create an agent that qualifies sales leads and schedules demos"
+"Build a customer support agent for Slack and Discord"
+"Create a content creator agent that posts to Twitter and LinkedIn"
+```
+
+G-SAC autonomously:
+1. Analyzes your business goal
 2. Selects appropriate tools and skills
 3. Configures platform integration via MCP
 4. Drafts a comprehensive agent prompt
 5. Deploys the agent instantly
 
-**See [WHAT_ZWARTIFYOS_IS.md](docs/WHAT_ZWARTIFYOS_IS.md) for the complete value proposition.**
+**See [G-SAC Documentation](docs/g-sac.md) for complete details and examples.**
 
 ---
 
-## 🚀 The Revolution Statement
+## 🏗️ Architecture
 
-ZwartifyOS is not just a template.
+ZwartifyOS coordinates intelligence the way Unix coordinated programs:
 
-It is the beginning of a new method of creation.
+- **Agents** are userland programs
+- **Tools** are capabilities
+- **Interactions** are processes
+- **You** are root
 
-It reframes coding from "writing instructions" to "conducting intelligence".
+### ACCV Stack
 
-The system does not simply execute what you type.
+**Agents. Cursor. Claude. Vercel.**
 
-It co-authors your intent across multiple intelligent layers.
+- **Cursor** - Local code generation and editing
+- **Claude Code for Web** - Code review and commits
+- **Claude API** - Powers intelligent agents (standard Anthropic SDK)
+- **GitHub** - Version control and collaboration
+- **Vercel** - Instant deployment
 
-- **Cursor** interprets your edits and creates code locally
-- **Claude Code for Web** reviews, improves, commits
-- **Claude API** (via standard Anthropic SDK) powers intelligent agents
-- **GitHub** tracks the living evolution
-- **Vercel** manifests the result instantly
-
-You think → They weave → Reality updates
-
-One keyboard. Many minds. Infinite worlds.
-
-This is cooperative cognition.
+This creates a continuous development loop where code evolves through AI-assisted workflows.
 
 ---
 
@@ -245,8 +293,8 @@ Visit `/create-agent` to try it yourself. G-SAC will:
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/kriszwart/zwartifyos.git
-cd zwartifyos
+git clone https://github.com/kriszwart/ZwartifyOSv1.git
+cd ZwartifyOSv1
 ```
 
 2. **Copy environment variables:**
@@ -597,9 +645,12 @@ See `expertAgent.ts` for a persona-based example.
 
 ## 📖 Documentation
 
-- **[📖 Full Documentation](/docs)** - Complete guides and references
-- **[🎭 Manifesto](/docs/manifesto)** - The philosophy in haiku
-- **[🤖 Agent Interface](/agent)** - Interactive agent testing
+- **[Quick Start Guide](docs/quick-start.md)** - Get started in minutes
+- **[G-SAC Documentation](docs/g-sac.md)** - Learn about agent creation
+- **[Feature Usage Guide](docs/feature-usage.md)** - Complete feature reference
+- **[System Overview](docs/system-overview.md)** - Architecture and design
+- **[Philosophy](docs/philosophy.md)** - Our approach and beliefs
+- **[CHANGELOG](CHANGELOG.md)** - Version history and release notes
 
 ---
 
@@ -718,39 +769,54 @@ Each interaction is a process.
 
 ---
 
-## 🌱 Summary
+## 🎯 Key Features
 
-**🤖 Agents learn**  
-**⚡ Action is instant**  
-**📦 Tools extend**  
-**🔁 Code evolves**  
-**🔧 Cursor crafts**  
-**🔍 Claude reviews**  
-**🚀 Vercel deploys**  
-**🧠 You direct**  
-**🔮 OS emerges**
+### Core Capabilities
+
+- **Agent Management** - Full CRUD operations for agents
+- **RAG System** - Upload documents, build knowledge bases
+- **Memory & Context** - Conversation persistence
+- **Scheduling** - Cron-based automated runs
+- **Skills System** - Domain expertise modules
+- **Tool Registry** - Extensible tool system
+- **Execution Logging** - Complete observability
+- **Token Tracking** - Usage and cost monitoring
+
+### Example Agents Included
+
+1. **PDF Processor** - Document analysis and extraction
+2. **Data Analyst** - Data analysis and reporting
+3. **Code Reviewer** - Code review and suggestions
+4. **Content Writer** - Content generation
+5. **Email Assistant** - Email management
+6. **Research Assistant** - Research and summarization
+7. **Customer Support** - Customer service automation
+
+See [Quick Start Guide](docs/quick-start.md#example-agents-ready-to-test) for details.
 
 ---
 
-## 📜 The One Person Revelation
+## 🚀 Deployment
 
-You can now:
-- Ideate
-- Architect
-- Build
-- Review
-- Deploy
-- Ship
+### Deploy to Vercel (Recommended)
 
-**Alone. With superhuman fluency.**
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kriszwart/ZwartifyOSv1)
 
-Not a lone wolf.
+1. Click the button above or import repository on [Vercel](https://vercel.com)
+2. Add environment variables:
+   - `CLAUDE_API_KEY` (required)
+   - `API_KEY` (optional, for API authentication)
+   - `RATE_LIMIT_ENABLED` (optional, for rate limiting)
+3. Deploy automatically on every push
 
-**A lone conductor. With an AI orchestra.**
+### Other Platforms
 
-This is not the future workforce.
+ZwartifyOS works on any platform that supports Next.js:
+- Docker containers
+- Serverless functions
+- Traditional servers
 
-**It is the future self.**
+See [Deployment Guide](docs/feature-usage.md#deployment) for details.
 
 ---
 

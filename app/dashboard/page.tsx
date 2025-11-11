@@ -8,6 +8,7 @@ interface Execution {
   agentId: string
   agentName?: string
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  input?: string
   startedAt: string
   completedAt?: string
   duration?: number

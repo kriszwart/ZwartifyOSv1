@@ -596,7 +596,7 @@ both your power and your responsibility.`
 
   // Mouse follow effects
   useEffect(() => {
-    let animationFrameId: number
+    let animationFrameId: number | undefined
     let lastMouseUpdate = 0
     
     const handleMouseMove = (e: MouseEvent) => {
