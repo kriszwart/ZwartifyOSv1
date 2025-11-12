@@ -8,8 +8,51 @@ import { handleApiError, ErrorCategory } from "../../../backend/utils/errorLogge
 export const dynamic = 'force-dynamic'
 
 /**
+ * OPTIONS /api/agent - Handle CORS preflight requests
+ *
+ * Required for browsers to make cross-origin requests
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, X-User-API-Key',
+      'Access-Control-Max-Age': '86400',
+    },
+  })
+}
+
+/**
+ * GET /api/agent - Get agent API information
+ *
+ * Returns API endpoint documentation and status
+ */
+export async function GET() {
+  return NextResponse.json({
+    message: 'Agent API endpoint',
+    methods: ['POST'],
+    description: 'Execute an agent with the given input',
+    usage: {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-API-Key': 'optional - your Anthropic API key',
+      },
+      body: {
+        input: 'required - the input text for the agent',
+        agentId: 'optional - specific agent to use',
+        metadata: 'optional - additional metadata',
+        image: 'optional - base64 encoded image',
+      },
+    },
+  })
+}
+
+/**
  * POST /api/agent - Execute an agent with the given input
- * 
+ *
  * Handles agent execution requests with support for:
  * - User-provided API keys (via X-User-API-Key header)
  * - PDF processing
