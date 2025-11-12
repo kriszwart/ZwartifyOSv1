@@ -6,7 +6,6 @@ import { handleApiError, ErrorCategory } from "../../../backend/utils/errorLogge
 
 // Route segment configuration to ensure Next.js properly recognizes the route handler
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 
 /**
  * POST /api/agent - Execute an agent with the given input
