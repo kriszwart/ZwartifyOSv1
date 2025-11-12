@@ -110,12 +110,32 @@ export default function CreateAgentPage() {
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: getApiHeaders(),
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           input: `Create an agent with the following requirements:\n\n${userMessage.content}`,
           agentId: gsacAgentId,
         }),
       })
-      const data = await res.json()
+
+      // Check if response is ok and has content
+      if (!res.ok) {
+        let errorMessage = `Request failed with status ${res.status}`
+        try {
+          const errorData = await res.json()
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch {
+          // If JSON parsing fails, use status text
+          errorMessage = res.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
+      }
+
+      // Parse JSON response
+      let data
+      try {
+        data = await res.json()
+      } catch (jsonError) {
+        throw new Error("Failed to parse server response. Please check your API key and try again.")
+      }
 
       if (data.executionId) {
         setExecutionId(data.executionId)
