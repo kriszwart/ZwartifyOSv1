@@ -4,6 +4,19 @@ import { extractTextFromBuffer } from "../../../backend/rag/chunker"
 import { applyMiddleware, getRateLimitHeaders } from "../../../backend/middleware"
 import { handleApiError, ErrorCategory } from "../../../backend/utils/errorLogger"
 
+// Route segment configuration to ensure Next.js properly recognizes the route handler
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+/**
+ * POST /api/agent - Execute an agent with the given input
+ * 
+ * Handles agent execution requests with support for:
+ * - User-provided API keys (via X-User-API-Key header)
+ * - PDF processing
+ * - Image inputs
+ * - Middleware (auth, rate limiting, size checks)
+ */
 export async function POST(request: NextRequest) {
   // Apply middleware (auth, rate limit, size check)
   const middlewareResponse = await applyMiddleware(request)
