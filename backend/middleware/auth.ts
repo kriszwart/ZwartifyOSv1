@@ -17,15 +17,22 @@ export function authenticateApiKey(request: NextRequest): { authorized: boolean;
   if (!isApiKeyAuthEnabled()) {
     return { authorized: true }
   }
-  
+
+  // If user provides their own Anthropic API key, allow the request
+  // The route handler will validate the user's API key when calling Anthropic
+  const userApiKey = request.headers.get('x-user-api-key')
+  if (userApiKey && userApiKey.trim().length > 0) {
+    return { authorized: true }
+  }
+
   const config = getEnvConfig()
   const expectedApiKey = config.API_KEY
-  
+
   if (!expectedApiKey) {
     // Should not happen if isApiKeyAuthEnabled() returned true
     return { authorized: false, error: "API key authentication is misconfigured" }
   }
-  
+
   // Check Authorization header (Bearer token)
   const authHeader = request.headers.get('authorization')
   if (authHeader?.startsWith('Bearer ')) {
@@ -34,20 +41,20 @@ export function authenticateApiKey(request: NextRequest): { authorized: boolean;
       return { authorized: true }
     }
   }
-  
+
   // Check X-API-Key header
   const apiKeyHeader = request.headers.get('x-api-key')
   if (apiKeyHeader === expectedApiKey) {
     return { authorized: true }
   }
-  
+
   // Check query parameter (less secure, but convenient for testing)
   const { searchParams } = new URL(request.url)
   const apiKeyParam = searchParams.get('apiKey')
   if (apiKeyParam === expectedApiKey) {
     return { authorized: true }
   }
-  
+
   return {
     authorized: false,
     error: "Invalid or missing API key. Provide via Authorization header (Bearer token), X-API-Key header, or ?apiKey query parameter.",
