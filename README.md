@@ -15,12 +15,7 @@ ZwartifyOS is an open-source operating system for AI agents. One-prompt agent cr
 
 ## 📸 Screenshot / Demo
 
-> **TODO:** Add a GIF or screenshot showing:
-> - G-SAC creating an agent from a prompt
-> - Dashboard with token usage
-> - Agent playground in action
->
-> **Recommended:** Record a 30-second screen capture of the `/create-agent` flow and convert to GIF.
+![ZwartifyOS Demo](./public/ZwartifyOS30secondsedit.gif)
 
 ---
 
