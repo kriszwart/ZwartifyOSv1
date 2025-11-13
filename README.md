@@ -15,8 +15,11 @@ ZwartifyOS is an open-source operating system for AI agents. One-prompt agent cr
 
 ## 📸 Screenshot / Demo
 
-<!-- Demo GIF - See public/ZwartifyOS30secondseditlowres.gif for the full demo -->
-> **📹 Demo Available:** Check out the animated demo GIF in the `public/` folder showing ZwartifyOS in action, or visit the [live site](https://agentyxcrew.com) to see it running.
+![ZwartifyOS Demo](public/ZwartifyOS30secondseditlowres.gif)
+
+**Watch the Demo:** [Live Site](https://agentyxcrew.com)
+
+> **📹 Interactive Demo:** The GIF above shows ZwartifyOS in action. The demo showcases the Matrix-inspired UI, G-SAC agent creation, and key features.
 
 **ZwartifyOS in Action** - Watch the open-source agent OS demonstrate:
 - **Matrix-inspired UI** with neon green aesthetic
@@ -25,7 +28,7 @@ ZwartifyOS is an open-source operating system for AI agents. One-prompt agent cr
 - **Production-ready features**: RAG, memory, scheduling
 - **Bring your own API key** - no middlemen, no vendor lock-in
 
-The GIF above shows the ZwartifyOS homepage and key features. See G-SAC create agents from natural language prompts in the `/create-agent` interface.
+The demo GIF shows the ZwartifyOS homepage and key features. See G-SAC create agents from natural language prompts in the `/create-agent` interface.
 
 ---
 

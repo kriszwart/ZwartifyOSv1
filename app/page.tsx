@@ -673,6 +673,24 @@ export default function Home() {
               0x5A 0x77 0x61 0x72 0x74 0x69 0x66 0x79
             </div>
           )}
+
+          {/* Demo GIF Section */}
+          <div className="mt-20 mb-16 max-w-5xl mx-auto w-full">
+            <div className="bg-black/50 border-2 border-green-400/30 p-8 rounded-lg">
+              <h2 className="text-2xl font-bold mb-4 text-green-400 text-center">See ZwartifyOS in Action</h2>
+              <p className="text-green-300/80 text-sm text-center mb-6">
+                Watch the demo showing ZwartifyOS homepage and key features
+              </p>
+              <div className="w-full rounded-lg overflow-hidden border border-green-400/20">
+                <img
+                  src="/ZwartifyOS30secondseditlowres.gif"
+                  alt="ZwartifyOS Demo"
+                  className="w-full h-auto"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
