@@ -63,6 +63,7 @@ export default function ManifestoPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [cursorTrail, setCursorTrail] = useState<Array<{x: number, y: number, id: number, timestamp: number}>>([])
   const [speechSynthesisAvailable, setSpeechSynthesisAvailable] = useState(true)
+  const [sparkles, setSparkles] = useState<Array<{ left: number; top: number; delay: number }>>([])
   const currentWordIndexRef = useRef<number>(-1) // Track current word for pause/resume
   const segmentWordIndicesRef = useRef<number[][]>([]) // Store segment word indices
   const currentSegmentWordIndexRef = useRef<number>(0) // Track position within segment
@@ -86,13 +87,11 @@ export default function ManifestoPage() {
       
       // Check if SpeechSynthesis is available
       if (!synthRef.current) {
-        console.warn("SpeechSynthesis not available in this browser")
         setSpeechSynthesisAvailable(false)
       } else {
         setSpeechSynthesisAvailable(true)
       }
     } else {
-      console.warn("SpeechSynthesis API not supported in this browser")
       setSpeechSynthesisAvailable(false)
     }
     
@@ -105,6 +104,15 @@ export default function ManifestoPage() {
     if (savedVolume) {
       setVolume(parseFloat(savedVolume))
     }
+
+    // Generate sparkle positions only on client side to avoid hydration mismatch
+    setSparkles(
+      Array.from({ length: 10 }, () => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 3,
+      }))
+    )
   }, [])
 
   // Cleanup effect
@@ -317,7 +325,6 @@ both your power and your responsibility.`
       const speakSegment = () => {
         // Prevent multiple segments from starting
         if (isSpeakingRef.current) {
-          console.warn("Segment already speaking, skipping")
           return
         }
         
@@ -710,14 +717,14 @@ both your power and your responsibility.`
 
       {/* Subtle Particles */}
       <div className="fixed inset-0 pointer-events-none">
-        {[...Array(10)].map((_, i) => (
+        {sparkles.map((sparkle, i) => (
           <div
             key={i}
             className="sparkle"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
+              left: `${sparkle.left}%`,
+              top: `${sparkle.top}%`,
+              animationDelay: `${sparkle.delay}s`,
             }}
           />
         ))}

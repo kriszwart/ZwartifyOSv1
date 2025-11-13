@@ -156,10 +156,6 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Log webhook received
-    console.log(`[GitHub Webhook] Push detected on branch: ${branchName}`)
-    console.log(`[GitHub Webhook] Commits: ${payload.commits.length}`)
-    
     // Trigger sync
     const syncResult = await syncBranch(branchName)
     

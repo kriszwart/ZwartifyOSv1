@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
 import { getApiHeaders } from "@/lib/apiKey"
+import AgentThinkingQuote from "@/app/components/AgentThinkingQuote"
 
 interface Message {
   role: "user" | "assistant"
@@ -44,6 +45,10 @@ export default function CreateAgentPage() {
     estimatedCost: number
   } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const shouldAutoScrollRef = useRef(true) // Use ref instead of state to avoid re-renders
+  const lastMessagesLengthRef = useRef(0)
+  const lastLogsLengthRef = useRef(0)
 
   useEffect(() => {
     // Load G-SAC agent ID
@@ -61,8 +66,48 @@ export default function CreateAgentPage() {
     loadGSAC()
   }, [])
 
+  // Handle scroll events to detect manual scrolling
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      // Check if user is near bottom (within 100px)
+      const threshold = 100
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold
+      
+      // Update ref immediately (no state update = no re-render)
+      shouldAutoScrollRef.current = isNearBottom
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  // Auto-scroll only when NEW content is added and user is near bottom
+  useEffect(() => {
+    const hasNewMessages = messages.length > lastMessagesLengthRef.current
+    const hasNewLogs = reasoningLogs.length > lastLogsLengthRef.current
+    
+    // Only auto-scroll if there's actually new content
+    if ((hasNewMessages || hasNewLogs) && shouldAutoScrollRef.current) {
+      // Small delay to ensure DOM is updated
+      const timeoutId = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+      }, 100)
+      
+      // Update refs
+      lastMessagesLengthRef.current = messages.length
+      lastLogsLengthRef.current = reasoningLogs.length
+      
+      return () => clearTimeout(timeoutId)
+    } else {
+      // Update refs even if we don't scroll
+      lastMessagesLengthRef.current = messages.length
+      lastLogsLengthRef.current = reasoningLogs.length
+    }
   }, [messages, reasoningLogs])
 
   useEffect(() => {
@@ -227,7 +272,7 @@ export default function CreateAgentPage() {
           if (found || attempts >= maxAttempts) {
             clearInterval(pollInterval)
             if (!found && attempts >= maxAttempts) {
-              console.warn('Could not find created agent after', maxAttempts, 'attempts')
+              // Agent not found after maximum polling attempts
             }
           }
         }, 500 * attempts) // Exponential backoff: 500ms, 1000ms, 1500ms...
@@ -297,7 +342,7 @@ export default function CreateAgentPage() {
           </div>
 
           {/* Chat Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-6 max-w-2xl">
@@ -551,13 +596,9 @@ export default function CreateAgentPage() {
                 {isLoading && (
                   <div className="flex justify-start mb-6">
                     <div className="max-w-[85%]">
-                      <div className="px-6 py-5 rounded-lg border-2 bg-green-400/5 border-green-400/30">
-                        <div className="flex items-center gap-3">
-                          <div className="quantum-glyph text-green-400 text-2xl">⚛</div>
-                          <span className="shimmer-text font-mono text-lg font-bold text-green-400">
-                            G-SAC is creating your agent...
-                          </span>
-                        </div>
+                      <div className="px-6 py-5 rounded-lg border-2 bg-green-400/5 border-green-400/30"
+                           style={{ boxShadow: "0 0 30px rgba(0, 255, 0, 0.2)" }}>
+                        <AgentThinkingQuote customMessage="G-SAC is creating your agent..." />
                       </div>
                     </div>
                   </div>

@@ -224,7 +224,6 @@ export async function buildSkillContext(skillIds: string[]): Promise<string> {
         }
       } catch (error) {
         // If RAG loading fails, continue without it
-        console.warn(`Failed to load RAG context for skill ${skill.name}:`, error)
       }
     }
     

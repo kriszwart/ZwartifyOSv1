@@ -34,11 +34,9 @@ export async function initDatabase(config: DatabaseConfig = { type: 'sqlite' }):
   if (config.type === 'sqlite') {
     // SQLite implementation (will use better-sqlite3 or similar)
     // For now, we'll use in-memory storage
-    console.log('📦 Using in-memory storage (SQLite mode)')
     // TODO: Implement SQLite with better-sqlite3
   } else if (config.type === 'postgres') {
     // PostgreSQL implementation
-    console.log('📦 Using PostgreSQL')
     // TODO: Implement PostgreSQL with pg or @vercel/postgres
   }
 }

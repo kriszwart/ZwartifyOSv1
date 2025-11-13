@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
 import { getApiHeaders } from "@/lib/apiKey"
+import AgentThinkingQuote from "@/app/components/AgentThinkingQuote"
 
 interface Agent {
   id: string
@@ -496,11 +497,11 @@ export default function PlaygroundPage() {
                   ))}
 
                   {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-green-400/5 border-green-400/30 border-2 px-4 py-3 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                          <span className="text-green-400/60 font-mono text-sm">Thinking...</span>
+                    <div className="flex justify-start mb-6">
+                      <div className="max-w-[85%]">
+                        <div className="px-6 py-5 rounded-lg border-2 bg-green-400/5 border-green-400/30"
+                             style={{ boxShadow: "0 0 30px rgba(0, 255, 0, 0.2)" }}>
+                          <AgentThinkingQuote variant="compact" />
                         </div>
                       </div>
                     </div>

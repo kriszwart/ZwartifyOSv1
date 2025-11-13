@@ -1,47 +1,41 @@
 /**
- * Tool Context
+ * Tool Context Module
  * 
- * Provides a way for tools to access the current execution context,
- * specifically the agent ID of the agent calling the tool and the original user prompt.
+ * Manages context for tool execution (agent ID, user prompt, etc.)
  */
 
 let currentAgentId: string | undefined
-let originalPrompt: string | undefined
+let currentUserPrompt: string | undefined
 
 /**
- * Set the tool execution context with agent ID and original prompt
+ * Set tool context
+ * @param agentId - Current agent ID
+ * @param userPrompt - Original user prompt
  */
-export function setToolContext(agentId?: string, prompt?: string): void {
+export function setToolContext(agentId?: string, userPrompt?: string): void {
   currentAgentId = agentId
-  originalPrompt = prompt
+  currentUserPrompt = userPrompt
 }
 
 /**
- * Get the current agent ID from tool execution context
+ * Clear tool context
+ */
+export function clearToolContext(): void {
+  currentAgentId = undefined
+  currentUserPrompt = undefined
+}
+
+/**
+ * Get current agent ID
  */
 export function getCurrentAgentId(): string | undefined {
   return currentAgentId
 }
 
 /**
- * Get the original user prompt from tool execution context
+ * Get current user prompt
  */
-export function getOriginalPrompt(): string | undefined {
-  return originalPrompt
-}
-
-/**
- * Set the original prompt in tool context
- */
-export function setOriginalPrompt(prompt?: string): void {
-  originalPrompt = prompt
-}
-
-/**
- * Clear the tool context
- */
-export function clearToolContext(): void {
-  currentAgentId = undefined
-  originalPrompt = undefined
+export function getCurrentUserPrompt(): string | undefined {
+  return currentUserPrompt
 }
 

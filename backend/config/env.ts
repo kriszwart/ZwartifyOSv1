@@ -61,10 +61,7 @@ See docs/quick-start.md for setup instructions.
     throw new Error(errorMessage)
   }
   
-  // Log successful validation (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('✅ Environment validation passed')
-  }
+  // Environment validation passed
 }
 
 /**
@@ -107,7 +104,7 @@ if (typeof window === 'undefined' && process.env.NEXT_PHASE !== 'phase-productio
       console.error(error)
       process.exit(1)
     } else {
-      console.warn('⚠️  Environment validation warning:', error instanceof Error ? error.message : error)
+      // Environment validation warning in development mode
     }
   }
 }

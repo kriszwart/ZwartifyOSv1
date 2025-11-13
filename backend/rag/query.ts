@@ -1,102 +1,100 @@
 /**
- * RAG Query
+ * RAG Query Module
  * 
- * Semantic search and retrieval from RAG folders
+ * Handles querying RAG folders for relevant context
  */
 
+import { getRAGFiles, getRAGFolder } from './storage'
 import { RAGChunk } from './storage'
-import { createEmbedding, cosineSimilarity } from './embedder'
 
-// In-memory chunk store (will be replaced with database/vector DB)
-const chunkStore = new Map<string, RAGChunk[]>()
-export const folderChunks = new Map<string, RAGChunk[]>() // folderId -> chunks
+// In-memory chunk index (folderId -> chunks[])
+export const folderChunks = new Map<string, RAGChunk[]>()
 
 /**
- * Index chunks for a folder
- */
-export function indexFolderChunks(folderId: string, chunks: RAGChunk[]): void {
-  folderChunks.set(folderId, chunks)
-}
-
-/**
- * Search RAG folder with semantic similarity
- */
-export async function searchRAGFolder(
-  folderId: string,
-  query: string,
-  limit: number = 5
-): Promise<Array<{ chunk: RAGChunk; similarity: number }>> {
-  const chunks = folderChunks.get(folderId) || []
-  
-  if (chunks.length === 0) {
-    return []
-  }
-
-  // Create query embedding
-  const queryEmbedding = await createEmbedding(query)
-
-  // Calculate similarity for each chunk
-  const results: Array<{ chunk: RAGChunk; similarity: number }> = []
-
-  for (const chunk of chunks) {
-    if (!chunk.embedding) {
-      // Create embedding if missing
-      chunk.embedding = await createEmbedding(chunk.content)
-    }
-
-    const similarity = cosineSimilarity(queryEmbedding, chunk.embedding)
-    results.push({ chunk, similarity })
-  }
-
-  // Sort by similarity and return top results
-  return results
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, limit)
-}
-
-/**
- * Get context from RAG folder for agent
+ * Get RAG context for a query
+ * @param folderId - RAG folder ID
+ * @param query - Query string to search for
+ * @param maxChunks - Maximum number of chunks to return
+ * @returns Context string or null if no chunks found
  */
 export async function getRAGContext(
   folderId: string,
   query: string,
-  maxChunks: number = 3
-): Promise<string> {
-  const results = await searchRAGFolder(folderId, query, maxChunks)
+  maxChunks: number = 5
+): Promise<string | null> {
+  const chunks = folderChunks.get(folderId) || []
   
-  if (results.length === 0) {
-    return ''
+  if (chunks.length === 0) {
+    return null
   }
 
-  return results
-    .map((result, index) => `[Chunk ${index + 1}]\n${result.chunk.content}`)
-    .join('\n\n')
+  // Simple text matching for now (can be enhanced with semantic search)
+  const queryLower = query.toLowerCase()
+  const relevantChunks = chunks
+    .filter(chunk => chunk.content.toLowerCase().includes(queryLower))
+    .slice(0, maxChunks)
+
+  if (relevantChunks.length === 0) {
+    // If no exact match, return first few chunks
+    return chunks.slice(0, maxChunks).map(c => c.content).join('\n\n')
+  }
+
+  return relevantChunks.map(c => c.content).join('\n\n')
 }
 
 /**
  * Build RAG-enhanced prompt
+ * @param enhancedInput - Already enhanced input
+ * @param originalInput - Original user input
+ * @param ragFolderId - RAG folder ID
+ * @returns Enhanced prompt with RAG context
  */
 export async function buildRAGPrompt(
-  basePrompt: string,
-  query: string,
-  ragFolderId?: string
+  enhancedInput: string,
+  originalInput: string,
+  ragFolderId: string
 ): Promise<string> {
-  if (!ragFolderId) {
-    return basePrompt
+  const folder = getRAGFolder(ragFolderId)
+  if (!folder) {
+    return enhancedInput
   }
 
-  const context = await getRAGContext(ragFolderId, query)
+  const context = await getRAGContext(ragFolderId, originalInput, 5)
   
   if (!context) {
-    return basePrompt
+    return enhancedInput
   }
 
-  return `${basePrompt}
-
-You have access to the following relevant information from the knowledge base:
+  return `## Relevant Context from ${folder.name}
 
 ${context}
 
-Use this information to provide accurate, helpful answers. If the information doesn't contain the answer, say so clearly.`
+---
+
+## User Request
+
+${enhancedInput}`
+}
+
+/**
+ * Index chunks for a folder
+ * @param folderId - RAG folder ID
+ * @param chunks - Optional chunks to store (if not provided, loads from storage)
+ */
+export async function indexFolderChunks(folderId: string, chunks?: RAGChunk[]): Promise<void> {
+  const folder = getRAGFolder(folderId)
+  if (!folder) {
+    throw new Error(`Folder not found: ${folderId}`)
+  }
+
+  if (chunks) {
+    // Store provided chunks
+    folderChunks.set(folderId, chunks)
+  } else {
+    // Initialize empty chunk array if not exists
+    if (!folderChunks.has(folderId)) {
+      folderChunks.set(folderId, [])
+    }
+  }
 }
 

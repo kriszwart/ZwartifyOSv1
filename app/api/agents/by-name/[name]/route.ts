@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getAgentByName, initializeDefaultAgents } from "../../../../../backend/agents/agentRegistry"
+import { getAgentByName, initializeDefaultAgents } from "@/backend/agents/agentRegistry"
 
 /**
  * GET /api/agents/by-name/[name] - Get agent by name

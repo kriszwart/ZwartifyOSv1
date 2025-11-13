@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# duplicate files and directories (prevent accidental commits)
+* 2.*
+* 2/
+
+# internal documentation archive
+docs/internal/

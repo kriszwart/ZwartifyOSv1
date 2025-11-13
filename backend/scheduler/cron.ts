@@ -16,22 +16,16 @@ let schedulerInterval: NodeJS.Timeout | null = null
  */
 export function startScheduler(intervalMs: number = 60000): void {
   if (schedulerInterval) {
-    console.warn('Scheduler already running')
+    // Scheduler already running
     return
   }
 
-  console.log(`🕐 Starting scheduler (checking every ${intervalMs}ms)`)
-  
   schedulerInterval = setInterval(async () => {
     const dueSchedules = getDueSchedules()
     
     if (dueSchedules.length > 0) {
-      console.log(`📅 Found ${dueSchedules.length} due schedule(s)`)
-      
       for (const schedule of dueSchedules) {
         try {
-          console.log(`🚀 Running scheduled agent: ${schedule.agentId}`)
-          
           // Run the agent with the scheduled input
           const input = schedule.metadata?.input as string || 
                        `Scheduled execution at ${new Date().toISOString()}`
@@ -47,7 +41,6 @@ export function startScheduler(intervalMs: number = 60000): void {
           
           // Mark as run
           markScheduleRun(schedule.id)
-          console.log(`✅ Scheduled execution completed for agent: ${schedule.agentId}`)
         } catch (error) {
           console.error(`❌ Error running scheduled agent ${schedule.agentId}:`, error)
           // Still mark as run to prevent retry loops
@@ -65,7 +58,6 @@ export function stopScheduler(): void {
   if (schedulerInterval) {
     clearInterval(schedulerInterval)
     schedulerInterval = null
-    console.log('🛑 Scheduler stopped')
   }
 }
 

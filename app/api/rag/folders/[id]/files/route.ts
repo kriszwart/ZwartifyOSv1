@@ -89,7 +89,7 @@ export async function POST(
       const text = await extractTextFromBuffer(buffer, file.type, file.name)
       
       if (text) {
-        const chunks = chunkText(text, { type: 'fixed-size', chunkSize: 1000, overlap: 200 })
+        const chunks = chunkText(text, 1000, 200)
         
         // Create embeddings for chunks
         const ragChunks: RAGChunk[] = []

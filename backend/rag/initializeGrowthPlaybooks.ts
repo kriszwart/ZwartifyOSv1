@@ -1,64 +1,57 @@
 /**
- * Initialize Zwartify-Growth-Playbooks RAG Folder
+ * Initialize Growth Playbooks RAG Folder
  * 
- * Creates the RAG folder for G-SAC agent knowledge base.
- * This folder contains growth strategy playbooks, sales scripts, and agent design best practices.
+ * Creates and manages the RAG folder for Growth Playbooks used by G-SAC
  */
 
-import { createRAGFolder, getRAGFolderByName } from '../rag/storage'
+import { createRAGFolder, getRAGFolderByName } from './storage'
 
-let growthPlaybooksFolderId: string | null = null
+const GROWTH_PLAYBOOKS_FOLDER_NAME = 'Growth Playbooks'
+
+let growthPlaybooksFolderId: string | undefined
 
 /**
- * Initialize the Zwartify-Growth-Playbooks folder
- * Returns the folder ID if successful, or null if folder already exists
+ * Get or create the Growth Playbooks folder ID
  */
-export function initializeGrowthPlaybooksFolder(): string | null {
-  try {
-    // Check if folder already exists
-    const existingFolder = getRAGFolderByName('Zwartify-Growth-Playbooks')
-    if (existingFolder) {
-      growthPlaybooksFolderId = existingFolder.id
-      return existingFolder.id
-    }
-
-    // Create the folder
-    const folder = createRAGFolder('Zwartify-Growth-Playbooks', {
-      description: 'Growth strategy playbooks, sales scripts, marketing frameworks, and agent design best practices',
-      purpose: 'Knowledge base for the Growth Strategy Agent Creator (G-SAC)',
-      category: 'growth-strategy',
-      version: '1.0.0',
-    })
-
-    growthPlaybooksFolderId = folder.id
-    console.log(`✅ Created RAG folder: Zwartify-Growth-Playbooks (ID: ${folder.id})`)
-    
-    return folder.id
-  } catch (error) {
-    console.error('Error initializing Growth Playbooks folder:', error)
-    return null
-  }
-}
-
-/**
- * Get the Growth Playbooks folder ID
- */
-export function getGrowthPlaybooksFolderId(): string | null {
+export function getGrowthPlaybooksFolderId(): string | undefined {
+  // Return cached ID if available
   if (growthPlaybooksFolderId) {
     return growthPlaybooksFolderId
   }
 
-  const folder = getRAGFolderByName('Zwartify-Growth-Playbooks')
-  if (folder) {
-    growthPlaybooksFolderId = folder.id
-    return folder.id
+  // Try to find existing folder
+  const existingFolder = getRAGFolderByName(GROWTH_PLAYBOOKS_FOLDER_NAME)
+  
+  if (existingFolder) {
+    growthPlaybooksFolderId = existingFolder.id
+    return growthPlaybooksFolderId
   }
 
-  return null
+  // Create new folder if it doesn't exist
+  try {
+    const folder = createRAGFolder(GROWTH_PLAYBOOKS_FOLDER_NAME, {
+      purpose: 'growth-strategy-playbooks',
+      usedBy: 'g-sac',
+      description: 'RAG folder containing growth strategy playbooks and templates for G-SAC agent creation',
+    })
+    
+    growthPlaybooksFolderId = folder.id
+    return growthPlaybooksFolderId
+  } catch (error) {
+    console.error('Error creating Growth Playbooks folder:', error)
+    return undefined
+  }
 }
 
-// Initialize on module load (server-side only)
+/**
+ * Initialize the Growth Playbooks folder on module load
+ */
 if (typeof window === 'undefined') {
-  initializeGrowthPlaybooksFolder()
+  // Server-side initialization
+  try {
+    getGrowthPlaybooksFolderId()
+  } catch (error) {
+    console.error('Error initializing Growth Playbooks folder:', error)
+  }
 }
 
