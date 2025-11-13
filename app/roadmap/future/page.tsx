@@ -222,6 +222,16 @@ export default function FutureRoadmapPage() {
 
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-4 py-8">
+          {/* Future Feature Banner */}
+          <div className="bg-yellow-400/10 border-2 border-yellow-400 p-6 rounded-lg mb-8 text-center">
+            <div className="text-4xl mb-3">⚠️</div>
+            <h3 className="text-2xl font-bold text-yellow-400 mb-2">FUTURE VISION - NOT YET IMPLEMENTED</h3>
+            <p className="text-yellow-300/90 max-w-3xl mx-auto">
+              The Ouroboros pattern described on this page is a <strong>future roadmap feature</strong> planned for 2026.
+              It is <strong>not currently working</strong>. These capabilities depend on Claude SDK's autonomous operation features which are not yet available.
+            </p>
+          </div>
+
           {/* Hero Section */}
           <div className="text-center mb-12">
             <div className="text-6xl mb-4">🐍</div>
@@ -252,9 +262,10 @@ export default function FutureRoadmapPage() {
 
           {/* Current State */}
           <div className="bg-gradient-to-r from-green-400/10 to-cyan-400/10 border-2 border-green-400/50 p-6 rounded-lg mb-12">
-            <h3 className="text-2xl font-bold mb-3 text-green-400">Current State</h3>
+            <h3 className="text-2xl font-bold mb-3 text-green-400">Current State (What Works Today)</h3>
             <p className="text-green-300/80 mb-4">
               Today, agents can create other agents through G-SAC. But they require human prompts and operate in discrete sessions.
+              <strong className="text-yellow-400"> The Ouroboros self-improvement loop is NOT yet implemented.</strong>
             </p>
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div className="bg-black/50 border border-green-400/30 p-4 rounded">
@@ -412,10 +423,14 @@ export default function FutureRoadmapPage() {
 
           {/* Call to Action */}
           <div className="bg-gradient-to-r from-green-400/10 via-purple-400/10 to-cyan-400/10 border-2 border-green-400/50 p-8 rounded-lg text-center">
-            <h2 className="text-3xl font-bold mb-4">Building the Future</h2>
-            <p className="text-lg text-green-300/80 mb-6 max-w-2xl mx-auto">
-              The foundation is being laid today. When Claude SDK enables autonomous operation, 
+            <h2 className="text-3xl font-bold mb-4">Building the Foundation Today</h2>
+            <p className="text-lg text-green-300/80 mb-4 max-w-2xl mx-auto">
+              The foundation is being laid today. When Claude SDK enables autonomous operation,
               the Ouroboros pattern will emerge naturally from the recursive agent creation system.
+            </p>
+            <p className="text-sm text-yellow-400/80 mb-6 max-w-2xl mx-auto font-bold">
+              Note: The features on this page are future vision (2026). Today, you can create agents with G-SAC,
+              but they don't yet self-improve or operate autonomously.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link

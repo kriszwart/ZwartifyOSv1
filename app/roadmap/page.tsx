@@ -323,12 +323,18 @@ export default function RoadmapPage() {
               </Link>
             </div>
             <div className="mt-8 pt-8 border-t border-green-400/30">
+              <p className="text-sm text-green-400/70 mb-4">
+                Interested in our long-term vision for autonomous, self-improving agents?
+              </p>
               <Link
                 href="/roadmap/future"
                 className="inline-block px-8 py-4 border-2 border-cyan-400 bg-cyan-400/20 text-cyan-300 hover:bg-cyan-400/30 transition-colors font-mono font-bold"
               >
-                🐍 See Future Vision: The Ouroboros →
+                🐍 See Future Vision: The Ouroboros (2026+) →
               </Link>
+              <p className="text-xs text-yellow-400/60 mt-2">
+                Note: Future roadmap features, not yet implemented
+              </p>
             </div>
           </div>
         </main>

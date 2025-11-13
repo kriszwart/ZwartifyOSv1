@@ -56,6 +56,22 @@ Visit `http://localhost:3000` → Go to `/settings` → Add your Anthropic API k
 
 ---
 
+## 🌱 Why Open Source?
+
+**ZwartifyOS is 100% open source because agent platforms should empower users, not act as middlemen.**
+
+- ✅ **Transparent & Auditable** - See exactly what your agents are doing
+- ✅ **You Own Your Data** - Your agents, your data, your infrastructure
+- ✅ **Bring Your Own Keys** - Pay Anthropic directly, no markups or hidden fees
+- ✅ **No Rent-Seeking** - We don't charge for access to APIs you already pay for
+- ✅ **Community-Driven** - Innovation through collaboration, not walled gardens
+
+**The value is in the code, the architecture, and the tools—not in artificial scarcity.**
+
+[![GitHub Stars](https://img.shields.io/github/stars/kriszwart/ZwartifyOSv1?style=social)](https://github.com/kriszwart/ZwartifyOSv1)
+
+---
+
 ## 🎯 Core Features
 
 - **Agent Management** - Create, configure, and monitor agents via web UI
@@ -115,16 +131,20 @@ This creates a continuous development loop where code evolves through AI-assiste
 
 ## 📊 Comparison
 
-| Feature | ZwartifyOS | LangChain | CrewAI | AutoGen |
-|---------|------------|-----------|--------|---------|
-| **Agents create agents** | ✅ | ❌ | ❌ | ❌ |
-| **Built-in Web UI** | ✅ | ❌ | ⚠️ | ❌ |
-| **Cost + token tracking** | ✅ | ❌ | ❌ | ❌ |
-| **Vercel-native** | ✅ | ❌ | ❌ | ❌ |
-| **MIT License** | ✅ | ✅ | ✅ | ✅ |
-| **G-SAC meta agent** | ✅ | ❌ | ❌ | ❌ |
-| **RAG + Memory built-in** | ✅ | ⚠️ | ⚠️ | ⚠️ |
-| **One-click deployment** | ✅ | ❌ | ❌ | ❌ |
+| Feature | ZwartifyOS | Toolhouse.ai | LangChain | CrewAI | AutoGen |
+|---------|------------|--------------|-----------|--------|---------|
+| **Agents create agents** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Built-in Web UI** | ✅ | ✅ | ❌ | ⚠️ | ❌ |
+| **Cost + token tracking** | ✅ | ⚠️ | ❌ | ❌ | ❌ |
+| **Vercel-native** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **MIT License (Open Source)** | ✅ | ❌ | ✅ | ✅ | ✅ |
+| **Bring your own API keys** | ✅ | ❌ | ✅ | ✅ | ✅ |
+| **G-SAC meta agent** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **RAG + Memory built-in** | ✅ | ❌ | ⚠️ | ⚠️ | ⚠️ |
+| **One-click deployment** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **No middleman fees** | ✅ | ❌ | ✅ | ✅ | ✅ |
+
+**Why This Matters:** ZwartifyOS is 100% open source with no middlemen. You bring your own API keys and pay providers directly. Toolhouse.ai and similar platforms charge fees on top of LLM costs, creating unnecessary rent-seeking.
 
 ---
 
