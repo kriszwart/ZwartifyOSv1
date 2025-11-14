@@ -15,7 +15,7 @@ ZwartifyOS is an open-source operating system for AI agents. One-prompt agent cr
 
 ## 📸 Screenshot / Demo
 
-![ZwartifyOS Demo](public/ZwartifyOS30secondseditlowres.gif)
+![ZwartifyOS Demo](public/ZwartifyOS30lores.gif)
 
 **Watch the Demo:** [Live Site](https://agentyxcrew.com)
 

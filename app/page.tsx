@@ -683,7 +683,7 @@ export default function Home() {
               </p>
               <div className="w-full rounded-lg overflow-hidden border border-green-400/20">
                 <img
-                  src="/ZwartifyOS30secondseditlowres.gif"
+                  src="/ZwartifyOS30lores.gif"
                   alt="ZwartifyOS Demo"
                   className="w-full h-auto"
                   loading="lazy"
