@@ -1,8 +1,11 @@
 /**
  * MCP Client Tool
- * 
+ *
  * Allows agents to interact with external platforms via Model Context Protocol (MCP)
  */
+
+import { mcpClient } from '../mcp/mcpClient'
+import { mcpRegistry } from '../mcp/mcpRegistry'
 
 export const mcpClientTool = {
   name: "callMCP",
@@ -13,12 +16,43 @@ export const mcpClientTool = {
     arguments?: Record<string, unknown>
   }) => {
     try {
-      // Stub implementation - in production, this would connect to MCP servers
-      // For now, return a placeholder response
+      // Call the MCP server
+      const result = await mcpClient.call(
+        params.server,
+        params.method,
+        params.arguments
+      )
+
+      // If the call was successful, return the data
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+          server: params.server,
+          method: params.method,
+          latency: result.metadata?.latency,
+        }
+      }
+
+      // If the call failed, check if server needs to be configured
+      const availableServers = mcpRegistry.getAllServers()
+      const serverExists = mcpRegistry.getServer(params.server)
+
+      if (!serverExists) {
+        return {
+          success: false,
+          error: result.error,
+          suggestion: `Server '${params.server}' is not configured. Set up environment variables:
+MCP_${params.server.toUpperCase()}_ENDPOINT=<your-endpoint>
+MCP_${params.server.toUpperCase()}_API_KEY=<your-api-key>`,
+          availableServers: availableServers.map(s => s.name),
+        }
+      }
+
       return {
         success: false,
-        error: "MCP client not yet implemented. This tool will allow agents to interact with external platforms via Model Context Protocol.",
-        note: "To implement MCP support, configure MCP servers and connect to them via HTTP/SSE.",
+        error: result.error,
+        server: params.server,
       }
     } catch (error) {
       return {

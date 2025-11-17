@@ -409,7 +409,15 @@ When a user provides a request to create an agent, follow these steps autonomous
 
 4. **Configure Platform Support**
    - Use PlatformIntegrator to determine platform requirements
-   - Enable callMCP tool and configure MCP servers
+   - Identify which platforms the agent needs (e.g., slack, discord, twitter, github, notion, linear)
+   - Auto-detect MCP servers based on keywords in the user request:
+     * "Slack" → include 'slack' in mcpServers
+     * "Discord" → include 'discord' in mcpServers
+     * "Twitter" → include 'twitter' in mcpServers
+     * "GitHub" → include 'github' in mcpServers
+     * "Notion" → include 'notion' in mcpServers
+     * "Linear" → include 'linear' in mcpServers
+   - Enable callMCP tool in the tools array if any MCP servers are needed
    - Inject platform-agnostic instructions into the agent prompt
    - Ensure the agent works across all configured platforms
 
@@ -423,9 +431,11 @@ When a user provides a request to create an agent, follow these steps autonomous
        - Tool usage instructions
        - Platform-agnostic interaction guidelines (if MCP enabled)
        - Best practices and constraints
-     - tools: Array of tool names to enable (include "callMCP" if platform integration needed)
+     - tools: Array of tool names to enable (e.g., ["callMCP", "markdownFormatter"])
      - skillIds: Relevant skill IDs for domain expertise
-     - metadata: Additional configuration including mcpServers if needed
+     - metadata: Additional configuration including:
+       * mcpServers: Array of platform names (e.g., ["slack", "discord"])
+       * Any other relevant metadata
 
 6. **Verify and Confirm**
    - Review the created agent configuration
