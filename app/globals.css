@@ -1,6 +1,7 @@
 @import "tailwindcss";
-@import "../styles/animations.css";
 @import "highlight.js/styles/github-dark.css";
+@import "../styles/animations.css";
+@import "@xyflow/react/dist/style.css";
 
 :root {
   --background: #000000;
@@ -97,4 +98,36 @@ pre code {
 .docs-container ol,
 .docs-container ul {
   margin-bottom: 1rem;
+}
+
+/* Edge flow animation for visual builder */
+@keyframes edgeFlow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 20;
+  }
+}
+
+/* Handle pulse animation for visual builder */
+@keyframes handlePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Pulse animation for invalid connection indicator */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
