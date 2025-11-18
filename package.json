@@ -15,6 +15,7 @@
     "@anthropic-ai/claude-agent-sdk": "^0.1.30",
     "@anthropic-ai/sdk": "^0.68.0",
     "@vercel/analytics": "^1.5.0",
+    "@xyflow/react": "^12.3.4",
     "next": "16.0.1",
     "pdf-parse": "^2.4.5",
     "react": "19.2.0",
