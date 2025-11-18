@@ -4,8 +4,6 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Node } from '@xyflow/react'
-
-export const dynamic = 'force-dynamic'
 import NodeCanvas from './components/NodeCanvas'
 import NodePalette from './components/NodePalette'
 import NodePanel from './components/NodePanel'
@@ -16,6 +14,8 @@ import { agentToVisualNodes } from './utils/agentToVisualNodes'
 import { workflowTemplates } from './utils/workflowTemplates'
 import { exportWorkflowAsCode, exportWorkflowAsJSON } from './utils/workflowExporter'
 import type { CustomNode, CustomNodeData, ToolNodeData, SkillNodeData, RAGNodeData, MCPNodeData, OutputNodeData } from './types'
+
+export const dynamic = 'force-dynamic'
 
 function CreateAgentVisualPageContent() {
   const router = useRouter()
