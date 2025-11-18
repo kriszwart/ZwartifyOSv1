@@ -13,7 +13,6 @@ import {
   ReactFlowProvider,
   useReactFlow,
 } from '@xyflow/react'
-import '@xyflow/react/dist/style.css'
 import AgentConfigNode from './nodes/AgentConfigNode'
 import ToolNode from './nodes/ToolNode'
 import SkillNode from './nodes/SkillNode'
