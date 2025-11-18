@@ -540,6 +540,12 @@ export default function Home() {
           <div className="mt-16 mb-12">
             <div className="flex flex-wrap gap-3 justify-center">
               <Link
+                href="/create-agent-visual"
+                className="px-6 py-3 bg-cyan-400/20 border-2 border-cyan-400 text-cyan-300 hover:bg-cyan-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                🎨 Visual Builder
+              </Link>
+              <Link
                 href="/create-agent"
                 className="px-6 py-3 bg-purple-400/20 border-2 border-purple-400 text-purple-300 hover:bg-purple-400/30 transition-all rounded-lg font-semibold text-sm"
               >
@@ -613,6 +619,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-8 text-center text-green-400">Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
+                { icon: "🎨", title: "Visual Builder", desc: "Build agents visually with drag-and-drop nodes", link: "/create-agent-visual" },
                 { icon: "🤖", title: "Agent Management", desc: "Create, configure, and monitor agents", link: "/agents" },
                 { icon: "🧠", title: "RAG System", desc: "Knowledge base management for contextual agents", link: "/rag" },
                 { icon: "💾", title: "Memory & Context", desc: "Conversation persistence and context management", link: "/memory" },
@@ -674,12 +681,33 @@ export default function Home() {
             </div>
           )}
 
-          {/* Demo GIF Section */}
+          {/* Demo Video Section */}
           <div className="mt-20 mb-16 max-w-5xl mx-auto w-full">
             <div className="bg-black/50 border-2 border-green-400/30 p-8 rounded-lg">
               <h2 className="text-2xl font-bold mb-4 text-green-400 text-center">See ZwartifyOS in Action</h2>
               <p className="text-green-300/80 text-sm text-center mb-6">
                 Watch the demo showing ZwartifyOS homepage and key features
+              </p>
+              <div className="w-full rounded-lg overflow-hidden border border-green-400/20">
+                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full"
+                    src="https://www.youtube.com/embed/XE0iBKLWhkE"
+                    title="ZwartifyOS Demo"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Demo GIF Section */}
+          <div className="mt-20 mb-16 max-w-5xl mx-auto w-full">
+            <div className="bg-black/50 border-2 border-green-400/30 p-8 rounded-lg">
+              <h2 className="text-2xl font-bold mb-4 text-green-400 text-center">Quick Preview</h2>
+              <p className="text-green-300/80 text-sm text-center mb-6">
+                Animated preview of ZwartifyOS interface
               </p>
               <div className="w-full rounded-lg overflow-hidden border border-green-400/20">
                 <img
