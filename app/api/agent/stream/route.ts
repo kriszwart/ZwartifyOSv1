@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { extractTextFromBuffer } from "../../../../backend/rag/chunker"
 import { applyMiddleware } from "../../../../backend/middleware"
 import { handleApiError, ErrorCategory } from "../../../../backend/utils/errorLogger"
-import { agentClient } from "../../../../backend/agents/agentClient"
+import { agentClient, StreamingChunk } from "../../../../backend/agents/agentClient"
 import { getAgent } from "../../../../backend/agents/agentRegistry"
 import { getTools } from "../../../../backend/tools"
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     async start(controller) {
-      const sendEvent = (data: Record<string, unknown>) => {
+      const sendEvent = (data: Record<string, unknown> | StreamingChunk) => {
         const json = JSON.stringify(data)
         controller.enqueue(encoder.encode(`data: ${json}\n\n`))
       }
