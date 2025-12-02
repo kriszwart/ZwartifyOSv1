@@ -80,7 +80,7 @@ async function handleWebhook(
     }
 
     // Get agent configuration
-    const agent = getAgent(trigger.agentId)
+    const agent = await getAgent(trigger.agentId)
     if (!agent) {
       markEventProcessed(event.id, 'failed', { error: 'Agent not found' })
       return NextResponse.json(
@@ -109,7 +109,7 @@ async function handleWebhook(
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -178,6 +178,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
   const { triggerId } = await context.params
   return handleWebhook(request, triggerId, 'PUT')
 }
+
 
 
 

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -90,10 +90,11 @@ export async function DELETE(request: NextRequest) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
+
 
 
 

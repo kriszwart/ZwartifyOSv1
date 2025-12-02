@@ -29,6 +29,7 @@ export interface AgentConfig {
   exportFormats?: string[]
   category?: string
   tags?: string[]
+  installCount?: number
 }
 
 /**

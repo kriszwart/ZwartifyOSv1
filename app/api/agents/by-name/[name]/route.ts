@@ -12,7 +12,7 @@ export async function GET(
     const { name } = await params
     initializeDefaultAgents()
     
-    const agent = getAgentByName(name)
+    const agent = await getAgentByName(name)
     
     if (!agent) {
       return NextResponse.json(

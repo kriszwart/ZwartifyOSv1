@@ -49,7 +49,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const schedule = createSchedule(agentId, cronExpression, enabled !== false, metadata)
+    const schedule = createSchedule(agentId, cronExpression, {
+      enabled: enabled !== false,
+      metadata,
+    })
     return NextResponse.json({ schedule }, { status: 201 })
   } catch (error) {
     console.error("Error creating schedule:", error)

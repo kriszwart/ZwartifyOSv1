@@ -62,7 +62,7 @@ const CustomConnectionLine: ConnectionLineComponent = ({ fromX, fromY, toX, toY,
     })
 
     // Calculate distance to each valid target's left handle position
-    validTargets.forEach(targetNode => {
+    for (const targetNode of validTargets) {
       // Approximate handle position (left side of node)
       const handleX = targetNode.position.x
       const handleY = targetNode.position.y + (targetNode.height || 60) / 2
@@ -75,9 +75,9 @@ const CustomConnectionLine: ConnectionLineComponent = ({ fromX, fromY, toX, toY,
         closestDistance = distance
         closestTarget = { x: handleX, y: handleY, node: targetNode }
       }
-    })
+    }
 
-    if (closestTarget) {
+    if (closestTarget !== null) {
       return {
         snappedX: closestTarget.x,
         snappedY: closestTarget.y,

@@ -227,7 +227,7 @@ export default function NodeCanvas({
           const validTargets = nodes
             .filter(targetNode => {
               if (targetNode.id === nodeId) return false
-              const testConnection: Connection = { source: nodeId, target: targetNode.id }
+              const testConnection: Connection = { source: nodeId, target: targetNode.id, sourceHandle: null, targetHandle: null }
               return isValidConnection(testConnection, nodes)
             })
             .map(n => n.id)

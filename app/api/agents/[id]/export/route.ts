@@ -86,7 +86,10 @@ export async function GET(
       })
     } else {
       // For other formats, return the content directly
-      return new NextResponse(exportResult.content, {
+      const content = typeof exportResult.content === 'string' 
+        ? exportResult.content 
+        : Buffer.from(exportResult.content)
+      return new NextResponse(content, {
         headers: {
           'Content-Type': exportResult.mimeType,
           'Content-Disposition': `attachment; filename="${exportResult.filename}"`,
@@ -101,6 +104,7 @@ export async function GET(
     )
   }
 }
+
 
 
 

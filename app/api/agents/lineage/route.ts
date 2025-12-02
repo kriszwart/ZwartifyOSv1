@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server'
 import { listAgents } from '@/backend/agents/agentRegistry'
+import { AgentDefinition } from '@/backend/db/types'
 
 export interface LineageNode {
   id: string
@@ -31,9 +32,9 @@ export interface LineageResponse {
 /**
  * Build the agent lineage tree from flat agent list
  */
-function buildLineageTree(agents: ReturnType<typeof listAgents>): LineageNode[] {
+function buildLineageTree(agents: AgentDefinition[]): LineageNode[] {
   // Create a map for quick lookups
-  const agentMap = new Map<string, ReturnType<typeof listAgents>[0]>()
+  const agentMap = new Map<string, AgentDefinition>()
   for (const agent of agents) {
     agentMap.set(agent.id, agent)
   }
@@ -84,8 +85,8 @@ function buildLineageTree(agents: ReturnType<typeof listAgents>): LineageNode[] 
     level: levelMap.get(agent.id) || 0,
     parent: agent.createdByAgentId || undefined,
     children: childrenMap.get(agent.id) || [],
-    createdAt: agent.createdAt.toISOString(),
-    createdByAgentId: agent.createdByAgentId,
+    createdAt: agent.createdAt instanceof Date ? agent.createdAt.toISOString() : new Date(agent.createdAt).toISOString(),
+    createdByAgentId: agent.createdByAgentId ?? null,
     isRoot: !agent.createdByAgentId,
   }))
 
@@ -100,7 +101,7 @@ function buildLineageTree(agents: ReturnType<typeof listAgents>): LineageNode[] 
 
 export async function GET() {
   try {
-    const agents = listAgents()
+    const agents = await listAgents()
     const nodes = buildLineageTree(agents)
     
     // Calculate stats
@@ -130,6 +131,7 @@ export async function GET() {
     )
   }
 }
+
 
 
 

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     const { id } = await context.params
     
     // Get agent info
-    const agent = getAgent(id)
+    const agent = await getAgent(id)
     const agentName = agent?.name
 
     // Get metrics
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -148,10 +148,11 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
+
 
 
 

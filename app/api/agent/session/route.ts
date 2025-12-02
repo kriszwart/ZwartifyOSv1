@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       metadata: body.metadata,
     }
 
-    const session = createSession(options)
+    const session = await createSession(options)
 
     return NextResponse.json({
       success: true,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     const agentId = searchParams.get('agentId')
     const limit = searchParams.get('limit')
 
-    const sessions = listSessions({
+    const sessions = await listSessions({
       status: status || undefined,
       agentId: agentId || undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
@@ -121,10 +121,11 @@ export async function GET(request: NextRequest) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
+
 
 
 
