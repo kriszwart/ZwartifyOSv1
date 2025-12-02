@@ -1,4 +1,5 @@
 // Tool type definition
+// Updated: Force cache invalidation
 type Tool = {
   name: string
   description: string
@@ -7,12 +8,19 @@ type Tool = {
 
 // Dynamically import all tools
 // Add new tools here as they are created
+// 
+// Tool organization follows Anthropic's Advanced Tool Use patterns:
+// - toolSearchTool: First tool loaded - enables dynamic discovery (saves 85% tokens)
+// - Other tools: Discoverable on-demand via searchTools
+// See: https://www.anthropic.com/engineering/advanced-tool-use
 const toolModules = [
+  import("./toolSearchTool"),    // Always loaded first - enables tool discovery
   import("./helloTool"),
   import("./markdownFormatter"),
   import("./screenshotDescription"),
-  import("./agentCreationTool"),
+  import("./agentCreationTool"), // Has input_examples for better accuracy
   import("./mcpClientTool"),
+  import("./selfImproveTool"),   // Self-improvement for autonomous agents
   // Add more tool imports here as needed
 ]
 

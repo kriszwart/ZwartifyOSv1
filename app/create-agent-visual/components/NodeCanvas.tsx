@@ -43,6 +43,9 @@ interface NodeCanvasProps {
   onEdgesChange: (changes: any) => void
   onConnect: (connection: Connection) => void
   onNodeClick?: (event: React.MouseEvent, node: CustomNode) => void
+  onSelectionChange?: (selectedNodeIds: string[]) => void
+  validationErrors?: Array<{ nodeId?: string; edgeId?: string; message: string }>
+  highlightedNodeId?: string | null
 }
 
 // Connection validation rules
@@ -70,10 +73,11 @@ const isValidConnection = (connection: Connection, nodes: CustomNode[]): boolean
   return false
 }
 
-function NodeCanvasInner({ nodes }: { nodes: CustomNode[] }) {
-  const { fitView } = useReactFlow()
+function NodeCanvasInner({ nodes, highlightedNodeId }: { nodes: CustomNode[]; highlightedNodeId?: string | null }) {
+  const { fitView, getNode } = useReactFlow()
   const prevNodesLength = useRef(0)
   const hasFittedRef = useRef(false)
+  const prevHighlightedRef = useRef<string | null | undefined>(null)
 
   // Auto-fit view when nodes are loaded (only once per load)
   useEffect(() => {
@@ -105,6 +109,23 @@ function NodeCanvasInner({ nodes }: { nodes: CustomNode[] }) {
     }
   }, [nodes.length])
 
+  // Scroll to highlighted node
+  useEffect(() => {
+    if (highlightedNodeId && highlightedNodeId !== prevHighlightedRef.current) {
+      const node = getNode(highlightedNodeId)
+      if (node) {
+        fitView({ 
+          nodes: [node],
+          padding: 0.3,
+          duration: 500,
+          minZoom: 0.5,
+          maxZoom: 1.5
+        })
+      }
+      prevHighlightedRef.current = highlightedNodeId
+    }
+  }, [highlightedNodeId, getNode, fitView])
+
   return (
     <>
       <Background color="#00ff00" gap={16} size={1} />
@@ -135,9 +156,14 @@ export default function NodeCanvas({
   onEdgesChange,
   onConnect,
   onNodeClick,
+  onSelectionChange,
+  validationErrors = [],
+  highlightedNodeId,
 }: NodeCanvasProps) {
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null)
   const [connectionFeedback, setConnectionFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [hoveredTarget, setHoveredTarget] = useState<string | null>(null)
+  const [suggestedTargets, setSuggestedTargets] = useState<string[]>([])
 
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: any) => {
@@ -145,6 +171,12 @@ export default function NodeCanvas({
     },
     [onNodeClick]
   )
+
+  // Track selection changes
+  const handleSelectionChange = useCallback((params: { nodes: any[]; edges: any[] }) => {
+    const selectedIds = params.nodes.map(n => n.id)
+    onSelectionChange?.(selectedIds)
+  }, [onSelectionChange])
 
   const getConnectionErrorMessage = useCallback((connection: Connection): string => {
     const sourceNode = nodes.find((n) => n.id === connection.source)
@@ -189,13 +221,38 @@ export default function NodeCanvas({
     (event: MouseEvent | TouchEvent, { nodeId }: { nodeId: string | null }) => {
       if (nodeId) {
         setConnectingFrom(nodeId)
+        // Find valid connection targets
+        const sourceNode = nodes.find(n => n.id === nodeId)
+        if (sourceNode) {
+          const validTargets = nodes
+            .filter(targetNode => {
+              if (targetNode.id === nodeId) return false
+              const testConnection: Connection = { source: nodeId, target: targetNode.id }
+              return isValidConnection(testConnection, nodes)
+            })
+            .map(n => n.id)
+          setSuggestedTargets(validTargets)
+        }
       }
     },
-    []
+    [nodes]
   )
 
   const handleConnectEnd = useCallback(() => {
     setConnectingFrom(null)
+    setSuggestedTargets([])
+    setHoveredTarget(null)
+  }, [])
+
+  // Handle node mouse enter/leave for connection suggestions
+  const handleNodeMouseEnter = useCallback((nodeId: string) => {
+    if (connectingFrom) {
+      setHoveredTarget(nodeId)
+    }
+  }, [connectingFrom])
+
+  const handleNodeMouseLeave = useCallback(() => {
+    setHoveredTarget(null)
   }, [])
 
   const handleEdgeClick = useCallback(
@@ -265,8 +322,50 @@ export default function NodeCanvas({
 
       <ReactFlowProvider>
         <ReactFlow
-          nodes={nodes as any}
-          edges={edges}
+          nodes={nodes.map(node => {
+            const nodeErrors = validationErrors.filter(e => e.nodeId === node.id)
+            const isHighlighted = highlightedNodeId === node.id
+            const isSuggestedTarget = connectingFrom && suggestedTargets.includes(node.id)
+            const isHoveredTarget = hoveredTarget === node.id
+            const isValidTarget = isSuggestedTarget && isHoveredTarget
+            const isInvalidTarget = connectingFrom && hoveredTarget === node.id && !isSuggestedTarget
+            
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                hasError: nodeErrors.length > 0,
+                errorMessage: nodeErrors[0]?.message,
+                isHighlighted,
+                isSuggestedTarget,
+                isValidTarget,
+                isInvalidTarget,
+              },
+              selected: isHighlighted || node.selected,
+              style: {
+                ...node.style,
+                ...(isSuggestedTarget && !isHoveredTarget ? {
+                  opacity: 0.7,
+                } : {}),
+                ...(isValidTarget ? {
+                  filter: 'drop-shadow(0 0 8px rgba(0, 255, 0, 0.8))',
+                } : {}),
+                ...(isInvalidTarget ? {
+                  filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.8))',
+                } : {}),
+              },
+            }
+          }) as any}
+          edges={edges.map(edge => {
+            const edgeErrors = validationErrors.filter(e => e.edgeId === edge.id)
+            return {
+              ...edge,
+              style: {
+                ...edge.style,
+                stroke: edgeErrors.length > 0 ? '#ef4444' : edge.style?.stroke || '#00ff00',
+              },
+            }
+          })}
           onNodesChange={onNodesChange}
           onEdgesChange={handleEdgesChange}
           onEdgeClick={handleEdgeClick}
@@ -274,10 +373,15 @@ export default function NodeCanvas({
           onConnectStart={handleConnectStart}
           onConnectEnd={handleConnectEnd}
           onNodeClick={handleNodeClick}
+          onSelectionChange={handleSelectionChange}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           connectionMode={ConnectionMode.Loose}
+          snapToGrid={false}
+          snapGrid={[20, 20]}
+          connectionRadius={50}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
           connectionLineComponent={ConnectionLine}
           isValidConnection={(connection: Connection | any) => {
             // React Flow may pass Connection or Edge, ensure we have source and target
@@ -292,7 +396,7 @@ export default function NodeCanvas({
           deleteKeyCode={['Backspace', 'Delete']}
           multiSelectionKeyCode={['Meta', 'Control']}
         >
-          <NodeCanvasInner nodes={nodes} />
+          <NodeCanvasInner nodes={nodes} highlightedNodeId={highlightedNodeId} />
         </ReactFlow>
       </ReactFlowProvider>
     </div>

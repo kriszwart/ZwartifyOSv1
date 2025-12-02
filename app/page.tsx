@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState, useRef } from "react"
+import ChangelogBadge from "./components/ChangelogBadge"
 
 export const dynamic = 'force-dynamic'
 
@@ -453,9 +454,12 @@ export default function Home() {
           <p className="text-2xl md:text-3xl text-green-300 max-w-3xl mx-auto leading-relaxed mb-2 font-semibold">
             Build, Deploy, and Scale AI Agents — in Hours, Not Months
           </p>
-          <p className="text-lg md:text-xl text-green-400/80 max-w-2xl mx-auto mb-8">
-            Open-source agent framework built on Claude API, Next.js, and TypeScript. Production-ready. MIT-licensed.
-          </p>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <p className="text-lg md:text-xl text-green-400/80 max-w-2xl mx-auto">
+              Open-source agent framework built on Claude API, Next.js, and TypeScript. Production-ready. MIT-licensed.
+            </p>
+            <ChangelogBadge />
+          </div>
 
           {/* Open Source Philosophy */}
           <div className="mt-8 mb-4 max-w-3xl mx-auto">
@@ -556,6 +560,12 @@ export default function Home() {
                 className="px-6 py-3 bg-cyan-400/20 border-2 border-cyan-400 text-cyan-300 hover:bg-cyan-400/30 transition-all rounded-lg font-semibold text-sm"
               >
                 🗺️ Roadmap
+              </Link>
+              <Link
+                href="/changelog"
+                className="px-6 py-3 bg-purple-400/20 border-2 border-purple-400 text-purple-300 hover:bg-purple-400/30 transition-all rounded-lg font-semibold text-sm"
+              >
+                📋 Changelog
               </Link>
               <Link
                 href="/agents"

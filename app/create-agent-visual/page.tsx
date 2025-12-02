@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Node } from '@xyflow/react'
@@ -8,11 +8,13 @@ import NodeCanvas from './components/NodeCanvas'
 import NodePalette from './components/NodePalette'
 import NodePanel from './components/NodePanel'
 import AgentPreview from './components/AgentPreview'
+import BuilderDemo from './components/BuilderDemo'
 import { useNodeBuilder } from './hooks/useNodeBuilder'
 import { useAgentConfig } from './hooks/useAgentConfig'
 import { agentToVisualNodes } from './utils/agentToVisualNodes'
 import { workflowTemplates } from './utils/workflowTemplates'
 import { exportWorkflowAsCode, exportWorkflowAsJSON } from './utils/workflowExporter'
+import { validateWorkflow, getValidationSummary } from './utils/workflowValidator'
 import type { CustomNode, CustomNodeData, ToolNodeData, SkillNodeData, RAGNodeData, MCPNodeData, OutputNodeData } from './types'
 
 export const dynamic = 'force-dynamic'
@@ -29,7 +31,9 @@ function CreateAgentVisualPageContent() {
     edges,
     selectedNodeId,
     selectedNode,
+    selectedNodeIds,
     setSelectedNodeId,
+    setSelectedNodeIds,
     onNodesChange,
     onEdgesChange,
     onConnect,
@@ -38,11 +42,25 @@ function CreateAgentVisualPageContent() {
     deleteNode,
     loadNodes,
     clearCanvas,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    autoLayout,
+    copyNodes,
+    pasteNodes,
+    duplicateNodes,
+    selectAll,
+    deselectAll,
   } = useNodeBuilder()
 
   const agentConfig = useAgentConfig(nodes)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingAgent, setIsLoadingAgent] = useState(false)
+  
+  // Workflow validation
+  const validationResult = useMemo(() => validateWorkflow(nodes, edges), [nodes, edges])
+  const validationSummary = useMemo(() => getValidationSummary(validationResult), [validationResult])
   const [showLoadAgentModal, setShowLoadAgentModal] = useState(false)
   const [showTemplatesModal, setShowTemplatesModal] = useState(false)
   const [showExportModal, setShowExportModal] = useState(false)
@@ -53,6 +71,17 @@ function CreateAgentVisualPageContent() {
   const [availableTools, setAvailableTools] = useState<Array<{ name: string; description: string }>>([])
   const [availableSkills, setAvailableSkills] = useState<Array<{ id: string; name: string; description: string }>>([])
   const [availableRAGFolders, setAvailableRAGFolders] = useState<Array<{ id: string; name: string }>>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; type: string; label: string }>>([])
+  const [searchIndex, setSearchIndex] = useState(0)
+  const [showSearch, setShowSearch] = useState(false)
+  const [showDemo, setShowDemo] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('visual-builder-welcome-dismissed')
+    }
+    return false
+  })
 
   // Load available tools, skills, RAG folders, and agents
   useEffect(() => {
@@ -233,6 +262,15 @@ function CreateAgentVisualPageContent() {
     setSelectedNodeId(node.id)
   }, [setSelectedNodeId])
 
+  const handleSelectionChange = useCallback((selectedIds: string[]) => {
+    setSelectedNodeIds(new Set(selectedIds))
+    if (selectedIds.length === 1) {
+      setSelectedNodeId(selectedIds[0])
+    } else if (selectedIds.length === 0) {
+      setSelectedNodeId(null)
+    }
+  }, [setSelectedNodeId])
+
   const handleSave = async () => {
     if (!agentConfig) {
       alert('Please configure agent before saving.')
@@ -268,9 +306,15 @@ function CreateAgentVisualPageContent() {
           version: agentConfig.version || '1.0.0',
           ragFolderId: agentConfig.ragFolderId || '',
           skillIds: agentConfig.skillIds || [],
+          isPublic: agentConfig.isPublic || false,
+          isExportable: agentConfig.isExportable !== false,
+          exportFormats: agentConfig.exportFormats || [],
+          category: agentConfig.category || '',
+          tags: agentConfig.tags || [],
           metadata: {
             mcpServers: agentConfig.mcpServers || [],
             toolNames: agentConfig.toolNames || [],
+            useDeferredLoading: agentConfig.useDeferredLoading || false,
           },
         }),
       })
@@ -289,6 +333,149 @@ function CreateAgentVisualPageContent() {
     }
   }
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Undo/Redo
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        if (canUndo) undo()
+      } else if ((e.metaKey || e.ctrlKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        if (canRedo) redo()
+      }
+      // Save (Cmd/Ctrl+S)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        handleSave()
+      }
+      // Copy (Cmd/Ctrl+C)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+        e.preventDefault()
+        copyNodes()
+      }
+      // Paste (Cmd/Ctrl+V)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'v') {
+        e.preventDefault()
+        pasteNodes()
+      }
+      // Duplicate (Cmd/Ctrl+D)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
+        e.preventDefault()
+        duplicateNodes()
+      }
+      // Select all (Cmd/Ctrl+A)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+        e.preventDefault()
+        selectAll()
+      }
+      // Search (Cmd/Ctrl+F)
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+        e.preventDefault()
+        setShowSearch(true)
+        const searchInput = document.getElementById('node-search-input') as HTMLInputElement
+        if (searchInput) {
+          setTimeout(() => searchInput.focus(), 100)
+        }
+      }
+      // Escape to deselect or close search
+      else if (e.key === 'Escape') {
+        e.preventDefault()
+        if (showSearch) {
+          setShowSearch(false)
+          setSearchQuery('')
+          setSearchResults([])
+        } else {
+          deselectAll()
+        }
+      }
+      // Delete/Backspace
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        e.preventDefault()
+        if (confirm(`Delete ${selectedNode?.type} node?`)) {
+          deleteNode(selectedNodeId)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canUndo, canRedo, undo, redo, selectedNodeId, selectedNode, deleteNode, handleSave, copyNodes, pasteNodes, duplicateNodes, selectAll, deselectAll, showSearch])
+  
+  // Node search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      setSearchIndex(0)
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+    const results = nodes
+      .map(node => {
+        let label = ''
+        const nodeData = node.data
+        if (node.type === 'agentConfig') {
+          label = (nodeData as any).name || 'Agent Config'
+        } else if (node.type === 'tool') {
+          label = (nodeData as any).toolName || 'Tool'
+        } else if (node.type === 'skill') {
+          label = (nodeData as any).skillName || 'Skill'
+        } else if (node.type === 'rag') {
+          label = (nodeData as any).ragFolderName || 'RAG'
+        } else if (node.type === 'mcp') {
+          label = (nodeData as any).serverName || 'MCP Server'
+        } else if (node.type === 'output') {
+          label = (nodeData as any).agentConfig?.name || 'Output'
+        }
+
+        return {
+          id: node.id,
+          type: node.type || '',
+          label,
+        }
+      })
+      .filter(result => 
+        result.label.toLowerCase().includes(query) ||
+        result.type.toLowerCase().includes(query)
+      )
+
+    setSearchResults(results)
+    setSearchIndex(0)
+  }, [searchQuery, nodes])
+
+  // Navigate to search result
+  const navigateToSearchResult = useCallback((index: number) => {
+    if (searchResults.length === 0) return
+    const result = searchResults[index]
+    setSelectedNodeId(result.id)
+    // Scroll to node (will be handled by ReactFlow fitView)
+  }, [searchResults])
+
+  // Handle search navigation
+  useEffect(() => {
+    if (searchResults.length === 0) return
+
+    const handleSearchNav = (e: KeyboardEvent) => {
+      if (!showSearch) return
+      
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault()
+        const newIndex = searchIndex > 0 ? searchIndex - 1 : searchResults.length - 1
+        setSearchIndex(newIndex)
+        navigateToSearchResult(newIndex)
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        const newIndex = searchIndex < searchResults.length - 1 ? searchIndex + 1 : 0
+        setSearchIndex(newIndex)
+        navigateToSearchResult(newIndex)
+      }
+    }
+
+    window.addEventListener('keydown', handleSearchNav)
+    return () => window.removeEventListener('keydown', handleSearchNav)
+  }, [showSearch, searchResults, searchIndex, navigateToSearchResult])
+
   return (
     <div className="h-screen bg-black text-green-400 relative overflow-hidden">
       {/* Grid Pattern Background */}
@@ -298,6 +485,34 @@ function CreateAgentVisualPageContent() {
       <div className="scanline fixed inset-0 pointer-events-none" />
 
       <div className="relative z-10 h-screen flex flex-col">
+        {/* Welcome Banner */}
+        {showWelcome && (
+          <div className="bg-green-400/10 border-b border-green-400/30 p-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <div className="text-green-400 font-mono font-bold text-sm mb-1">
+                  Welcome to Visual Agent Builder!
+                </div>
+                <div className="text-green-400/70 font-mono text-xs">
+                  Click <span className="text-green-400 font-bold">Demo</span> to explore features and try interactive examples
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setShowWelcome(false)
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('visual-builder-welcome-dismissed', 'true')
+                }
+              }}
+              className="text-green-400/60 hover:text-green-400 transition-colors font-mono text-sm"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        
         {/* Header */}
         <header className="border-b border-green-400/30 p-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -315,10 +530,138 @@ function CreateAgentVisualPageContent() {
               Agents
             </Link>
           </div>
-          <h1 className="text-xl font-bold font-mono truncate max-w-md" style={{ animation: "glitch-slow 4s infinite" }}>
-            {isEditMode ? `Editing: ${agentName}` : 'Visual Agent Builder'}
-          </h1>
+          <div className="flex flex-col items-center gap-1">
+            <h1 className="text-xl font-bold font-mono truncate max-w-md" style={{ animation: "glitch-slow 4s infinite" }}>
+              {isEditMode ? `Editing: ${agentName}` : 'Visual Agent Builder'}
+            </h1>
+            {nodes.length > 0 && (
+              <div className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                validationResult.isValid && validationResult.warnings.length === 0
+                  ? 'text-green-400 bg-green-400/10 border border-green-400/30'
+                  : validationResult.errors.length > 0
+                  ? 'text-red-400 bg-red-400/10 border border-red-400/30'
+                  : 'text-yellow-400 bg-yellow-400/10 border border-yellow-400/30'
+              }`}>
+                {validationSummary}
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Undo/Redo */}
+            <div className="flex items-center gap-1 border-r border-green-400/30 pr-2 mr-2">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                className="px-2 py-1.5 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all font-mono text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Undo (Cmd/Ctrl+Z)"
+              >
+                ↶
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                className="px-2 py-1.5 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all font-mono text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Redo (Cmd/Ctrl+Shift+Z)"
+              >
+                ↷
+              </button>
+            </div>
+            
+            {/* Bulk Operations */}
+            {selectedNodeIds.size > 1 && (
+              <div className="flex items-center gap-1 border-r border-green-400/30 pr-2 mr-2">
+                <span className="text-green-400/60 text-[10px] font-mono">
+                  {selectedNodeIds.size} selected
+                </span>
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete ${selectedNodeIds.size} nodes?`)) {
+                      selectedNodeIds.forEach(id => deleteNode(id))
+                      setSelectedNodeIds(new Set())
+                      setSelectedNodeId(null)
+                    }
+                  }}
+                  className="px-2 py-1 border border-red-400/50 text-red-400 hover:bg-red-400/10 transition-all font-mono text-xs"
+                  title="Delete selected"
+                >
+                  🗑
+                </button>
+                <button
+                  onClick={() => {
+                    const selectedNodes = nodes.filter(n => selectedNodeIds.has(n.id))
+                    selectedNodes.forEach(node => {
+                      updateNodeData(node.id, { enabled: !(node.data as any).enabled })
+                    })
+                  }}
+                  className="px-2 py-1 border border-yellow-400/50 text-yellow-400 hover:bg-yellow-400/10 transition-all font-mono text-xs"
+                  title="Toggle enabled"
+                >
+                  ⚡
+                </button>
+              </div>
+            )}
+            
+            {/* Demo */}
+            <button
+              onClick={() => setShowDemo(true)}
+              className="px-3 py-1.5 border-2 border-purple-400 text-purple-400 hover:bg-purple-400/10 transition-all font-mono text-xs"
+              title="View demo and examples"
+            >
+              🎯 Demo
+            </button>
+            
+            {/* Auto-Layout */}
+            <button
+              onClick={autoLayout}
+              className="px-3 py-1.5 border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 transition-all font-mono text-xs"
+              title="Auto-arrange nodes"
+            >
+              ⚡ Arrange
+            </button>
+            
+            {/* Search */}
+            {showSearch && (
+              <div className="relative">
+                <input
+                  id="node-search-input"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search nodes... (Cmd/Ctrl+F)"
+                  className="px-3 py-1.5 border-2 border-green-400/50 bg-black/90 text-green-400 placeholder-green-400/40 font-mono text-xs focus:outline-none focus:border-green-400 w-48"
+                  autoFocus
+                />
+                {searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 mt-1 bg-black/95 border border-green-400/30 rounded p-2 z-50 min-w-[200px]">
+                    <div className="text-green-400/60 text-[10px] font-mono mb-1">
+                      {searchIndex + 1} / {searchResults.length}
+                    </div>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {searchResults.map((result, idx) => (
+                        <div
+                          key={result.id}
+                          className={`px-2 py-1 text-[10px] font-mono cursor-pointer transition-all ${
+                            idx === searchIndex
+                              ? 'bg-green-400/20 text-green-400 border border-green-400/50'
+                              : 'text-green-400/80 hover:bg-green-400/10'
+                          }`}
+                          onClick={() => {
+                            setSearchIndex(idx)
+                            navigateToSearchResult(idx)
+                          }}
+                        >
+                          <span className="text-green-400/60">{result.type}:</span> {result.label}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-green-400/40 text-[8px] font-mono mt-1 pt-1 border-t border-green-400/20">
+                      Enter: Next | Shift+Enter: Previous | Esc: Close
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
             <button
               onClick={() => setShowTemplatesModal(true)}
               className="px-3 py-1.5 border-2 border-blue-400 text-blue-400 hover:bg-blue-400/10 transition-all font-mono text-xs"
@@ -401,6 +744,9 @@ function CreateAgentVisualPageContent() {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onNodeClick={handleNodeClick}
+              onSelectionChange={handleSelectionChange}
+              validationErrors={[...validationResult.errors, ...validationResult.warnings]}
+              highlightedNodeId={searchResults.length > 0 ? searchResults[searchIndex]?.id : null}
             />
           </div>
 
@@ -494,6 +840,16 @@ function CreateAgentVisualPageContent() {
       )}
 
       {/* Export Modal */}
+      {showDemo && (
+        <BuilderDemo
+          onLoadExample={(exampleNodes, exampleEdges) => {
+            loadNodes(exampleNodes, exampleEdges)
+            setShowDemo(false)
+          }}
+          onClose={() => setShowDemo(false)}
+        />
+      )}
+      
       {showExportModal && (
         <div 
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import ReactMarkdown from "react-markdown"
@@ -8,6 +8,9 @@ import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
 import { getApiHeaders } from "@/lib/apiKey"
 import AgentThinkingQuote from "@/app/components/AgentThinkingQuote"
+import { downloadMarkdown, downloadPDF } from "@/app/utils/downloadUtils"
+import { enhancedMarkdownComponents } from "@/app/utils/markdownComponents"
+import AgentExportTab from "@/app/components/AgentExportTab"
 
 interface Agent {
   id: string
@@ -49,8 +52,12 @@ export default function AgentDetailPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [imageUrl, setImageUrl] = useState<string>("")
   const [creatorAgent, setCreatorAgent] = useState<Agent | null>(null)
   const [showCreationPrompt, setShowCreationPrompt] = useState(false)
+  const [downloadingPDF, setDownloadingPDF] = useState<string | null>(null)
+  const [useStreaming, setUseStreaming] = useState(true) // Enable streaming by default
+  const [activeTab, setActiveTab] = useState<'chat' | 'export'>('chat')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -155,16 +162,25 @@ export default function AgentDetailPage() {
         // For PDFs, we'll send the base64 data separately
         setSelectedImage(reader.result as string) // Store as base64
       }
+      setImageUrl("") // Clear URL when file is selected
     }
     reader.readAsDataURL(file)
   }
 
+  const handleImageUrlChange = async (url: string) => {
+    setImageUrl(url)
+    setSelectedImage(null) // Clear file when URL is entered
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
   const handleSend = async () => {
-    if (!input.trim() && !selectedImage) return
+    if (!input.trim() && !selectedImage && !imageUrl.trim()) return
 
     const userMessage: Message = {
       role: "user",
-      content: input || (selectedImage?.includes('data:application/pdf') ? "Analyse this PDF document" : "Analyse this screenshot"),
+      content: input || (selectedImage?.includes('data:application/pdf') ? "Analyse this PDF document" : selectedImage ? "Analyse this screenshot" : imageUrl ? "Analyse this image from URL" : ""),
       timestamp: new Date(),
       imageUrl: selectedImage || undefined,
     }
@@ -172,8 +188,10 @@ export default function AgentDetailPage() {
     setMessages((prev) => [...prev, userMessage])
     const currentInput = input
     const currentImage = selectedImage
+    const currentImageUrl = imageUrl
     setInput("")
     setSelectedImage(null)
+    setImageUrl("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -190,41 +208,135 @@ export default function AgentDetailPage() {
       setMessages((prev) => [...prev, errorMessage])
     }, 60000) // 60 second timeout
 
+    // Create placeholder assistant message for streaming
+    const assistantMessage: Message = {
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, assistantMessage])
+
     try {
-      const res = await fetch("/api/agent", {
-        method: "POST",
-        headers: getApiHeaders(),
-        body: JSON.stringify({ 
-          input: currentInput || (currentImage?.includes('data:application/pdf') ? "Analyse this PDF document" : "Analyse this screenshot"),
-          agentId: agentId,
-          image: currentImage || undefined,
-        }),
-      })
+      if (useStreaming) {
+        // Use streaming endpoint
+        const res = await fetch("/api/agent/stream", {
+          method: "POST",
+          headers: getApiHeaders(),
+          body: JSON.stringify({ 
+            input: currentInput || (currentImage?.includes('data:application/pdf') ? "Analyse this PDF document" : currentImage ? "Analyse this screenshot" : currentImageUrl ? "Analyse this image from URL" : ""),
+            agentId: agentId,
+            image: currentImage || undefined,
+            imageUrl: currentImageUrl || undefined,
+          }),
+        })
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+
+        const reader = res.body?.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+
+        if (!reader) {
+          throw new Error("Stream reader not available")
+        }
+
+        while (true) {
+          const { done, value } = await reader.read()
+          
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split("\n\n")
+          buffer = lines.pop() || ""
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                
+                if (data.type === "text" && data.content) {
+                  setMessages((prev) => {
+                    const updated = [...prev]
+                    const lastMsg = updated[updated.length - 1]
+                    if (lastMsg && lastMsg.role === "assistant") {
+                      lastMsg.content += data.content
+                    }
+                    return updated
+                  })
+                } else if (data.type === "tool_start") {
+                  setMessages((prev) => {
+                    const updated = [...prev]
+                    const lastMsg = updated[updated.length - 1]
+                    if (lastMsg && lastMsg.role === "assistant") {
+                      lastMsg.content += `\n\n🔧 *Executing tool: ${data.toolName}...*\n\n`
+                    }
+                    return updated
+                  })
+                } else if (data.type === "tool_complete") {
+                  setMessages((prev) => {
+                    const updated = [...prev]
+                    const lastMsg = updated[updated.length - 1]
+                    if (lastMsg && lastMsg.role === "assistant") {
+                      lastMsg.content = lastMsg.content.replace(
+                        new RegExp(`🔧 \\*Executing tool: ${data.toolName}\\.\\.\\.\\*`),
+                        `✅ *Tool ${data.toolName} completed*\n\n`
+                      )
+                    }
+                    return updated
+                  })
+                } else if (data.type === "error") {
+                  throw new Error(data.error || "Unknown error")
+                } else if (data.type === "done") {
+                  clearTimeout(timeoutId)
+                }
+              } catch (parseError) {
+                console.error("Error parsing SSE data:", parseError)
+              }
+            }
+          }
+        }
+      } else {
+        // Use non-streaming endpoint
+        const res = await fetch("/api/agent", {
+          method: "POST",
+          headers: getApiHeaders(),
+          body: JSON.stringify({ 
+            input: currentInput || (currentImage?.includes('data:application/pdf') ? "Analyse this PDF document" : currentImage ? "Analyse this screenshot" : currentImageUrl ? "Analyse this image from URL" : ""),
+            agentId: agentId,
+            image: currentImage || undefined,
+            imageUrl: currentImageUrl || undefined,
+          }),
+        })
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+
+        const data = await res.json()
+        clearTimeout(timeoutId)
+
+        setMessages((prev) => {
+          const updated = [...prev]
+          const lastMsg = updated[updated.length - 1]
+          if (lastMsg && lastMsg.role === "assistant") {
+            lastMsg.content = data.text || data.error || "No response"
+          }
+          return updated
+        })
       }
-
-      const data = await res.json()
-
-      clearTimeout(timeoutId)
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.text || data.error || "No response",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
       clearTimeout(timeoutId)
       const errorMsg = error instanceof Error ? error.message : "Network error"
-      const errorMessage: Message = {
-        role: "assistant",
-        content: `**Error:** ${errorMsg}`,
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages((prev) => {
+        const updated = [...prev]
+        const lastMsg = updated[updated.length - 1]
+        if (lastMsg && lastMsg.role === "assistant") {
+          lastMsg.content = `**Error:** ${errorMsg}`
+        }
+        return updated
+      })
     } finally {
       setIsLoading(false)
     }
@@ -277,12 +389,23 @@ export default function AgentDetailPage() {
             </button>
           </div>
           <h1 className="text-2xl font-bold font-mono">{agent.name}</h1>
-          <Link
-            href="/agent"
-            className="text-green-400 hover:text-green-300 transition-colors font-mono text-sm"
-          >
-            Test All →
-          </Link>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useStreaming}
+                onChange={(e) => setUseStreaming(e.target.checked)}
+                className="w-4 h-4 border-green-400/50 bg-black text-green-400 focus:ring-green-400"
+              />
+              <span className="text-green-400/70 font-mono text-xs">Streaming</span>
+            </label>
+            <Link
+              href="/agent"
+              className="text-green-400 hover:text-green-300 transition-colors font-mono text-sm"
+            >
+              Test All →
+            </Link>
+          </div>
         </header>
 
         {/* Content */}
@@ -426,58 +549,59 @@ export default function AgentDetailPage() {
                           )}
                         </div>
                       ) : (
-                        <div className="prose prose-invert prose-sm max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeHighlight]}
-                            components={{
-                              code({ node, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(className || "")
-                                const isInline = !match
-                                if (isInline) {
-                                  return (
-                                    <code className="px-1.5 py-0.5 bg-green-400/10 border border-green-400/20 rounded text-green-300 text-xs font-mono" {...props}>
-                                      {children}
-                                    </code>
-                                  )
+                        <div className="relative group">
+                          {/* Download Buttons */}
+                          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button
+                              onClick={() => {
+                                downloadMarkdown(message.content, agent.name, message.timestamp)
+                              }}
+                              className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1"
+                              title="Download as Markdown"
+                            >
+                              📄 MD
+                            </button>
+                            <button
+                              onClick={async () => {
+                                const elementId = `message-${index}`
+                                setDownloadingPDF(elementId)
+                                try {
+                                  // Use the existing rendered markdown element
+                                  const existingElement = document.getElementById(elementId)
+                                  if (!existingElement) {
+                                    throw new Error('Message element not found. Please ensure the message is visible.')
+                                  }
+                                  
+                                  await downloadPDF(elementId, agent.name, message.timestamp, message.content)
+                                } catch (error) {
+                                  console.error('Error downloading PDF:', error)
+                                  const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+                                  alert(`Failed to generate PDF: ${errorMessage}`)
+                                } finally {
+                                  setDownloadingPDF(null)
                                 }
-                                return (
-                                  <pre className="bg-black/70 border border-green-400/30 p-3 rounded overflow-x-auto">
-                                    <code className={className} {...props}>
-                                      {String(children).replace(/\n$/, "")}
-                                    </code>
-                                  </pre>
-                                )
-                              },
-                              p({ children }) {
-                                return <p className="text-green-300 font-sans mb-3 leading-relaxed">{children}</p>
-                              },
-                              ul({ children }) {
-                                return <ul className="list-disc list-inside space-y-1 text-green-300 mb-3">{children}</ul>
-                              },
-                              ol({ children }) {
-                                return <ol className="list-decimal list-inside space-y-1 text-green-300 mb-3">{children}</ol>
-                              },
-                              h1({ children }) {
-                                return <h1 className="text-xl font-bold text-green-400 mb-3 mt-4">{children}</h1>
-                              },
-                              h2({ children }) {
-                                return <h2 className="text-lg font-bold text-green-400 mb-2 mt-3">{children}</h2>
-                              },
-                              h3({ children }) {
-                                return <h3 className="text-base font-bold text-green-400 mb-2 mt-2">{children}</h3>
-                              },
-                              blockquote({ children }) {
-                                return (
-                                  <blockquote className="border-l-4 border-green-400/50 pl-4 italic text-green-300/80 my-3">
-                                    {children}
-                                  </blockquote>
-                                )
-                              },
-                            }}
+                              }}
+                              disabled={downloadingPDF === `message-${index}`}
+                              className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Download as PDF"
+                            >
+                              {downloadingPDF === `message-${index}` ? '⏳' : '📋'} PDF
+                            </button>
+                          </div>
+                          
+                          {/* Markdown Content */}
+                          <div 
+                            id={`message-${index}`}
+                            className="prose prose-invert prose-sm max-w-none"
                           >
-                            {message.content}
-                          </ReactMarkdown>
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              rehypePlugins={[rehypeHighlight]}
+                              components={enhancedMarkdownComponents}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -529,6 +653,17 @@ export default function AgentDetailPage() {
 
             {/* Input - Always at bottom */}
             <div className="space-y-4">
+              {/* Image URL Input */}
+              <div>
+                <input
+                  type="text"
+                  value={imageUrl}
+                  onChange={(e) => handleImageUrlChange(e.target.value)}
+                  placeholder="Or enter image URL (e.g., https://example.com/image.png)"
+                  className="w-full px-4 py-2 bg-black/50 border border-cyan-400/30 rounded text-green-400 placeholder-green-400/40 font-mono text-sm focus:outline-none focus:border-cyan-400/60"
+                />
+              </div>
+              
               <textarea
                 ref={inputRef}
                 value={input}
@@ -563,7 +698,7 @@ export default function AgentDetailPage() {
                 </div>
                 <button
                   onClick={handleSend}
-                  disabled={isLoading || (!input.trim() && !selectedImage) || !agent.enabled}
+                  disabled={isLoading || (!input.trim() && !selectedImage && !imageUrl.trim()) || !agent.enabled}
                   className="px-6 py-2 bg-black border-2 border-green-400 text-green-400 font-mono uppercase text-sm hover:bg-green-400 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
                 >
                   {isLoading ? "Sending..." : "Send →"}
@@ -571,6 +706,13 @@ export default function AgentDetailPage() {
               </div>
             </div>
           </div>
+          )}
+
+          {activeTab === 'export' && agent && (
+            <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg">
+              <AgentExportTab agent={agent} />
+            </div>
+          )}
         </main>
       </div>
     </div>

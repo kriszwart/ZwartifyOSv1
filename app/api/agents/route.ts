@@ -16,12 +16,12 @@ import {
 export async function GET(request: Request) {
   try {
     // Ensure agents are initialized (in case they weren't on module load)
-    initializeDefaultAgents()
+    await initializeDefaultAgents()
     
     const { searchParams } = new URL(request.url)
     const enabledOnly = searchParams.get('enabled') === 'true'
     
-    const agents = listAgents(enabledOnly)
+    const agents = await listAgents(enabledOnly)
     return NextResponse.json({ agents })
   } catch (error) {
     console.error("Error listing agents:", error)
@@ -38,7 +38,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, description, prompt, version, enabled, metadata, ragFolderId, useMemory, skillIds, createdByAgentId, creationPrompt } = body
+    const { 
+      name, description, prompt, version, enabled, metadata, ragFolderId, useMemory, skillIds, 
+      createdByAgentId, creationPrompt,
+      isPublic, isExportable, exportFormats, category, tags
+    } = body
 
     if (!name || !prompt) {
       return NextResponse.json(
@@ -59,9 +63,14 @@ export async function POST(request: Request) {
       skillIds,
       createdByAgentId: createdByAgentId ?? null,
       creationPrompt: creationPrompt ?? null,
+      isPublic: isPublic || false,
+      isExportable: isExportable !== false,
+      exportFormats: exportFormats || [],
+      category: category || undefined,
+      tags: tags || [],
     }
 
-    const agent = createAgent(config)
+    const agent = await createAgent(config)
     return NextResponse.json({ agent }, { status: 201 })
   } catch (error) {
     console.error("Error creating agent:", error)

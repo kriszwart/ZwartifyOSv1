@@ -9,9 +9,15 @@ interface EnvConfig {
   CLAUDE_API_KEY: string
   NODE_ENV: 'development' | 'production' | 'test'
   API_KEY?: string // Optional API key for authentication
+  ELEVENLABS_API_KEY?: string // Optional ElevenLabs API key for voice narration
   RATE_LIMIT_ENABLED?: string
   RATE_LIMIT_MAX_REQUESTS?: string
   RATE_LIMIT_WINDOW_MS?: string
+  // Backend adapter configuration
+  BACKEND_TYPE?: string // 'inMemory' (default) or 'remote'
+  BACKEND_API_URL?: string // Required for 'remote' backend type
+  BACKEND_API_KEY?: string // Optional API key for remote backend authentication
+  BACKEND_TIMEOUT?: string // Request timeout in milliseconds (default: 30000)
 }
 
 const requiredEnvVars = ['CLAUDE_API_KEY'] as const
@@ -72,9 +78,15 @@ export function getEnvConfig(): EnvConfig {
     CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY || '',
     NODE_ENV: (process.env.NODE_ENV as EnvConfig['NODE_ENV']) || 'development',
     API_KEY: process.env.API_KEY,
+    ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED || 'false',
     RATE_LIMIT_MAX_REQUESTS: process.env.RATE_LIMIT_MAX_REQUESTS || '100',
     RATE_LIMIT_WINDOW_MS: process.env.RATE_LIMIT_WINDOW_MS || '60000', // 1 minute
+    // Backend adapter configuration
+    BACKEND_TYPE: process.env.BACKEND_TYPE || 'inMemory',
+    BACKEND_API_URL: process.env.BACKEND_API_URL,
+    BACKEND_API_KEY: process.env.BACKEND_API_KEY,
+    BACKEND_TIMEOUT: process.env.BACKEND_TIMEOUT,
   }
 }
 

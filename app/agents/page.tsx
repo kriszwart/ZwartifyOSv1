@@ -32,6 +32,9 @@ export default function AgentsPage() {
     ragFolderId: '',
     useMemory: true,
     skillIds: [] as string[],
+    isPublic: false,
+    isExportable: true,
+    category: '',
   })
   const [ragFolders, setRagFolders] = useState<Array<{ id: string; name: string }>>([])
   const [skills, setSkills] = useState<Array<{ id: string; name: string; description: string }>>([])
@@ -85,7 +88,7 @@ export default function AgentsPage() {
 
       if (response.ok) {
         setShowCreateForm(false)
-        setCreateForm({ name: '', description: '', prompt: '', enabled: true, ragFolderId: '', useMemory: true, skillIds: [] })
+        setCreateForm({ name: '', description: '', prompt: '', enabled: true, ragFolderId: '', useMemory: true, skillIds: [], isPublic: false, isExportable: true, category: '' })
         loadAgents()
       }
     } catch (error) {
@@ -187,6 +190,12 @@ export default function AgentsPage() {
                 </select>
               </div>
               <Link
+                href="/create-agent-visual"
+                className="px-4 py-2 border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-mono text-sm"
+              >
+                🎨 Visual Builder
+              </Link>
+              <Link
                 href="/create-agent"
                 className="px-4 py-2 border-2 border-purple-400 text-purple-400 hover:bg-purple-400/10 transition-colors font-mono text-sm"
               >
@@ -285,6 +294,47 @@ export default function AgentsPage() {
                   <label htmlFor="useMemory" className="text-sm font-mono text-green-300">
                     Use Conversation Memory
                   </label>
+                </div>
+                <div className="border-t border-green-400/30 pt-4 mt-4">
+                  <h4 className="text-sm font-bold font-mono mb-3 text-green-400">Export Settings</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="isPublic"
+                        checked={(createForm as any).isPublic || false}
+                        onChange={(e) => setCreateForm({ ...createForm, isPublic: e.target.checked } as any)}
+                        className="w-4 h-4 border-green-400/30 bg-black text-green-400 focus:ring-green-400"
+                      />
+                      <label htmlFor="isPublic" className="text-sm font-mono text-green-300">
+                        Make Public (show in marketplace)
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="isExportable"
+                        checked={(createForm as any).isExportable !== false}
+                        onChange={(e) => setCreateForm({ ...createForm, isExportable: e.target.checked } as any)}
+                        className="w-4 h-4 border-green-400/30 bg-black text-green-400 focus:ring-green-400"
+                      />
+                      <label htmlFor="isExportable" className="text-sm font-mono text-green-300">
+                        Allow Export
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-mono mb-2 text-green-300">
+                        Category (for marketplace)
+                      </label>
+                      <input
+                        type="text"
+                        value={(createForm as any).category || ''}
+                        onChange={(e) => setCreateForm({ ...createForm, category: e.target.value } as any)}
+                        placeholder="e.g., Support, Sales, Content"
+                        className="w-full px-3 py-2 bg-black border border-green-400/30 text-green-400 font-mono focus:outline-none focus:border-green-400"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-mono mb-2 text-green-300">
@@ -427,6 +477,18 @@ export default function AgentsPage() {
                         className="px-3 py-1 text-xs font-mono border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-colors text-center"
                       >
                         View
+                      </Link>
+                      <Link
+                        href={`/create-agent-visual?agentId=${agent.id}`}
+                        className="px-3 py-1 text-xs font-mono border border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10 transition-colors text-center"
+                      >
+                        🎨 Visual
+                      </Link>
+                      <Link
+                        href={`/agent/${agent.id}?tab=export`}
+                        className="px-3 py-1 text-xs font-mono border border-blue-400/50 text-blue-400 hover:bg-blue-400/10 transition-colors text-center"
+                      >
+                        📦 Export
                       </Link>
                       <button
                         onClick={() => handleToggleEnabled(agent.id, agent.enabled)}

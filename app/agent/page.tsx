@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
 import { getApiHeaders } from "@/lib/apiKey"
 import AgentThinkingQuote from "@/app/components/AgentThinkingQuote"
+import { downloadMarkdown, downloadPDF } from "@/app/utils/downloadUtils"
+import { enhancedMarkdownComponents } from "@/app/utils/markdownComponents"
 
 interface Message {
   role: "user" | "assistant"
@@ -49,7 +51,7 @@ function CodeBlock({ children, className }: { children: string; className?: stri
   )
 }
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({ message, index, downloadingPDF, setDownloadingPDF }: { message: Message; index: number; downloadingPDF: string | null; setDownloadingPDF: (id: string | null) => void }) {
   const isUser = message.role === "user"
 
   return (
@@ -99,58 +101,59 @@ function MessageBubble({ message }: { message: Message }) {
               )}
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
-                components={{
-                  code({ node, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || "")
-                    const isInline = !match
-
-                    if (isInline) {
-                      return (
-                        <code className="px-1.5 py-0.5 bg-green-400/10 border border-green-400/20 rounded text-green-300 text-xs font-mono" {...props}>
-                          {children}
-                        </code>
-                      )
+            <div className="relative group">
+              {/* Download Buttons */}
+              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <button
+                  onClick={() => {
+                    downloadMarkdown(message.content, "Agent", message.timestamp)
+                  }}
+                  className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1"
+                  title="Download as Markdown"
+                >
+                  📄 MD
+                </button>
+                <button
+                  onClick={async () => {
+                    const elementId = `message-${index}`
+                    setDownloadingPDF(elementId)
+                    try {
+                      // Use the existing rendered markdown element
+                      const existingElement = document.getElementById(elementId)
+                      if (!existingElement) {
+                        throw new Error('Message element not found. Please ensure the message is visible.')
+                      }
+                      
+                      await downloadPDF(elementId, "Agent", message.timestamp, message.content)
+                    } catch (error) {
+                      console.error('Error downloading PDF:', error)
+                      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+                      alert(`Failed to generate PDF: ${errorMessage}`)
+                    } finally {
+                      setDownloadingPDF(null)
                     }
-
-                    return (
-                      <CodeBlock className={className}>
-                        {String(children).replace(/\n$/, "")}
-                      </CodeBlock>
-                    )
-                  },
-                  p({ children }) {
-                    return <p className="text-green-300 font-sans mb-3 leading-relaxed">{children}</p>
-                  },
-                  ul({ children }) {
-                    return <ul className="list-disc list-inside space-y-1 text-green-300 mb-3">{children}</ul>
-                  },
-                  ol({ children }) {
-                    return <ol className="list-decimal list-inside space-y-1 text-green-300 mb-3">{children}</ol>
-                  },
-                  h1({ children }) {
-                    return <h1 className="text-xl font-bold text-green-400 mb-3 mt-4">{children}</h1>
-                  },
-                  h2({ children }) {
-                    return <h2 className="text-lg font-bold text-green-400 mb-2 mt-3">{children}</h2>
-                  },
-                  h3({ children }) {
-                    return <h3 className="text-base font-bold text-green-400 mb-2 mt-2">{children}</h3>
-                  },
-                  blockquote({ children }) {
-                    return (
-                      <blockquote className="border-l-4 border-green-400/50 pl-4 italic text-green-300/80 my-3">
-                        {children}
-                      </blockquote>
-                    )
-                  },
-                }}
+                  }}
+                  disabled={downloadingPDF === `message-${index}`}
+                  className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Download as PDF"
+                >
+                  {downloadingPDF === `message-${index}` ? '⏳' : '📋'} PDF
+                </button>
+              </div>
+              
+              {/* Markdown Content */}
+              <div 
+                id={`message-${index}`}
+                className="prose prose-invert prose-sm max-w-none"
               >
-                {message.content}
-              </ReactMarkdown>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                  components={enhancedMarkdownComponents}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              </div>
             </div>
           )}
         </div>
@@ -164,6 +167,8 @@ export default function AgentPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [downloadingPDF, setDownloadingPDF] = useState<string | null>(null)
+  const [useStreaming, setUseStreaming] = useState(true) // Enable streaming by default
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -217,6 +222,8 @@ export default function AgentPage() {
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const currentInput = input
+    const currentImage = selectedImage
     setInput("")
     setSelectedImage(null)
     if (fileInputRef.current) {
@@ -224,32 +231,128 @@ export default function AgentPage() {
     }
     setIsLoading(true)
 
+    // Create placeholder assistant message for streaming
+    const assistantMessageId = `msg-${Date.now()}`
+    const assistantMessage: Message = {
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, assistantMessage])
+
     try {
-      const res = await fetch("/api/agent", {
-        method: "POST",
-        headers: getApiHeaders(),
-        body: JSON.stringify({ 
-          input: userMessage.content,
-          image: selectedImage || undefined,
-        }),
-      })
-      const data = await res.json()
+      if (useStreaming) {
+        // Use streaming endpoint
+        const res = await fetch("/api/agent/stream", {
+          method: "POST",
+          headers: getApiHeaders(),
+          body: JSON.stringify({ 
+            input: currentInput || userMessage.content,
+            image: currentImage || undefined,
+          }),
+        })
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.text || data.error || "No response",
-        timestamp: new Date(),
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+
+        const reader = res.body?.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+
+        if (!reader) {
+          throw new Error("Stream reader not available")
+        }
+
+        while (true) {
+          const { done, value } = await reader.read()
+          
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split("\n\n")
+          buffer = lines.pop() || ""
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                
+                if (data.type === "text" && data.content) {
+                  // Append text chunk
+                  setMessages((prev) => {
+                    const updated = [...prev]
+                    const lastMsg = updated[updated.length - 1]
+                    if (lastMsg && lastMsg.role === "assistant") {
+                      lastMsg.content += data.content
+                    }
+                    return updated
+                  })
+                } else if (data.type === "tool_start") {
+                  // Show tool execution indicator
+                  setMessages((prev) => {
+                    const updated = [...prev]
+                    const lastMsg = updated[updated.length - 1]
+                    if (lastMsg && lastMsg.role === "assistant") {
+                      lastMsg.content += `\n\n🔧 *Executing tool: ${data.toolName}...*\n\n`
+                    }
+                    return updated
+                  })
+                } else if (data.type === "tool_complete") {
+                  // Tool completed
+                  setMessages((prev) => {
+                    const updated = [...prev]
+                    const lastMsg = updated[updated.length - 1]
+                    if (lastMsg && lastMsg.role === "assistant") {
+                      lastMsg.content = lastMsg.content.replace(
+                        new RegExp(`🔧 \\*Executing tool: ${data.toolName}\\.\\.\\.\\*`),
+                        `✅ *Tool ${data.toolName} completed*\n\n`
+                      )
+                    }
+                    return updated
+                  })
+                } else if (data.type === "error") {
+                  throw new Error(data.error || "Unknown error")
+                } else if (data.type === "done") {
+                  // Streaming complete
+                }
+              } catch (parseError) {
+                console.error("Error parsing SSE data:", parseError)
+              }
+            }
+          }
+        }
+      } else {
+        // Use non-streaming endpoint
+        const res = await fetch("/api/agent", {
+          method: "POST",
+          headers: getApiHeaders(),
+          body: JSON.stringify({ 
+            input: currentInput || userMessage.content,
+            image: currentImage || undefined,
+          }),
+        })
+        const data = await res.json()
+
+        setMessages((prev) => {
+          const updated = [...prev]
+          const lastMsg = updated[updated.length - 1]
+          if (lastMsg && lastMsg.role === "assistant") {
+            lastMsg.content = data.text || data.error || "No response"
+          }
+          return updated
+        })
       }
-
-      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "Network error"
-      const errorMessage: Message = {
-        role: "assistant",
-        content: `**Error:** ${errorMsg}`,
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages((prev) => {
+        const updated = [...prev]
+        const lastMsg = updated[updated.length - 1]
+        if (lastMsg && lastMsg.role === "assistant") {
+          lastMsg.content = `**Error:** ${errorMsg}`
+        }
+        return updated
+      })
     } finally {
       setIsLoading(false)
     }
@@ -300,6 +403,15 @@ export default function AgentPage() {
             ZwartifyOS Agent
           </h1>
           <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useStreaming}
+                onChange={(e) => setUseStreaming(e.target.checked)}
+                className="w-4 h-4 border-green-400/50 bg-black text-green-400 focus:ring-green-400"
+              />
+              <span className="text-green-400/70 font-mono text-xs">Streaming</span>
+            </label>
             <Link
               href="/agents"
               className="text-green-400 hover:text-green-300 transition-colors font-mono text-sm"
@@ -364,7 +476,7 @@ export default function AgentPage() {
             ) : (
               <div className="space-y-4">
                 {messages.map((message, idx) => (
-                  <MessageBubble key={idx} message={message} />
+                  <MessageBubble key={idx} message={message} index={idx} downloadingPDF={downloadingPDF} setDownloadingPDF={setDownloadingPDF} />
                 ))}
                 {isLoading && (
                   <div className="flex justify-start mb-6">

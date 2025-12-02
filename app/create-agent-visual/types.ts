@@ -9,6 +9,12 @@ export interface AgentConfigNodeData extends Record<string, unknown> {
   enabled: boolean
   useMemory: boolean
   version: string
+  // Export and marketplace settings
+  isPublic?: boolean
+  isExportable?: boolean
+  exportFormats?: string[]
+  category?: string
+  tags?: string[]
 }
 
 export interface ToolNodeData extends Record<string, unknown> {
@@ -43,11 +49,13 @@ export interface OutputNodeData extends Record<string, unknown> {
     prompt: string
     enabled: boolean
     useMemory: boolean
+    useDeferredLoading?: boolean // Anthropic's defer_loading pattern for 85% token savings
     version: string
     toolNames: string[]
     skillIds: string[]
     ragFolderId?: string
     mcpServers: string[]
+    createdByAgentId?: string | null // Parent agent for lineage tracking
   }
 }
 

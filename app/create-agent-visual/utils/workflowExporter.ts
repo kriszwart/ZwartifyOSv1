@@ -20,9 +20,15 @@ export const agentConfig = {
   version: ${JSON.stringify(agentConfig.version)},
   ragFolderId: ${agentConfig.ragFolderId ? JSON.stringify(agentConfig.ragFolderId) : 'undefined'},
   skillIds: ${JSON.stringify(agentConfig.skillIds || [])},
+  isPublic: ${agentConfig.isPublic || false},
+  isExportable: ${agentConfig.isExportable !== false},
+  exportFormats: ${JSON.stringify(agentConfig.exportFormats || [])},
+  category: ${agentConfig.category ? JSON.stringify(agentConfig.category) : 'undefined'},
+  tags: ${JSON.stringify(agentConfig.tags || [])},
   metadata: {
     toolNames: ${JSON.stringify(agentConfig.toolNames || [])},
     mcpServers: ${JSON.stringify(agentConfig.mcpServers || [])},
+    useDeferredLoading: ${agentConfig.useDeferredLoading || false},
   },
 }
 
@@ -55,9 +61,15 @@ export function exportWorkflowAsJSON(agentConfig: AgentConfig | null): string {
     version: agentConfig.version,
     ragFolderId: agentConfig.ragFolderId,
     skillIds: agentConfig.skillIds,
+    isPublic: agentConfig.isPublic || false,
+    isExportable: agentConfig.isExportable !== false,
+    exportFormats: agentConfig.exportFormats || [],
+    category: agentConfig.category,
+    tags: agentConfig.tags || [],
     metadata: {
       toolNames: agentConfig.toolNames,
       mcpServers: agentConfig.mcpServers,
+      useDeferredLoading: agentConfig.useDeferredLoading || false,
     },
   }, null, 2)
 }

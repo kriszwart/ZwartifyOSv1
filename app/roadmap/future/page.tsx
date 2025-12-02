@@ -8,34 +8,58 @@ export default function FutureRoadmapPage() {
 
   const visions = [
     {
-      id: 1,
-      title: "Claude SDK Integration",
-      icon: "🔌",
-      description: "Enabling true autonomous operation",
-      color: "cyan",
+      id: 0,
+      title: "Advanced Tool Use (IMPLEMENTED ✓)",
+      icon: "🔧",
+      description: "Dynamic tool discovery, deferred loading, and improved accuracy",
+      color: "green",
       details: [
-        "Persistent Connections: Agents maintain long-running sessions",
-        "Streaming Responses: Real-time updates and feedback loops",
-        "Tool Execution: Agents can execute tools autonomously",
-        "State Management: Agents remember and learn from interactions",
-        "Event-Driven: Agents respond to triggers and scheduled events"
+        "Tool Search Tool: Dynamic discovery saves 85% context tokens",
+        "Tool Use Examples: 5 examples improve createAgent accuracy to 90%",
+        "Deferred Loading: useDeferredLoading option loads only searchTools initially",
+        "Tool Browser UI: Visual tool discovery with search and categories",
+        "Ouroboros Visualization: Interactive agent lineage with real data",
+        "Agent Lineage API: GET /api/agents/lineage for tree data",
+        "Pattern Source: Anthropic's Advanced Tool Use + Arcade MCP",
+        "Status: Fully implemented in v1.2.0"
       ],
-      timeline: "Q4 2025"
+      timeline: "NOW"
+    },
+    {
+      id: 1,
+      title: "Claude SDK Integration (IMPLEMENTED ✓)",
+      icon: "🔌",
+      description: "Autonomous agent operation within Next.js/Vercel constraints",
+      color: "green",
+      details: [
+        "Agent Sessions: Persistent sessions with goals, context, and history",
+        "Multi-Turn Tool Loops: maxToolIterations and autonomousMode options",
+        "Background Jobs: Async job queue with status tracking and retry logic",
+        "Enhanced Scheduler: Proper cron parsing with job history",
+        "Event-Driven Triggers: Webhooks, schedules, and agent completion triggers",
+        "Agent State Persistence: Goals, learnings, and state snapshots",
+        "New APIs: /api/agent/session, /api/agent/async, /api/jobs, /api/triggers, /api/webhook",
+        "Status: Fully implemented in v1.3.0"
+      ],
+      timeline: "NOW"
     },
     {
       id: 2,
-      title: "Self-Improvement Loops",
+      title: "Self-Improvement Loops (IMPLEMENTED ✓)",
       icon: "🔄",
       description: "Agents analyse and optimise their own performance",
-      color: "purple",
+      color: "green",
       details: [
-        "Performance Monitoring: Agents track their success rates",
-        "Error Analysis: Learning from failures and edge cases",
-        "Prompt Refinement: Agents update their own system prompts",
-        "Tool Selection: Identifying and requesting better tools",
-        "Skill Enhancement: Evolving their own capabilities"
+        "Performance Metrics: Success rates, timing, token usage, trends",
+        "Error Analysis: Pattern detection, categorization, root cause suggestions",
+        "Tool Optimizer: Usage tracking, effectiveness scores, recommendations",
+        "Skill Gap Analysis: Missing capability detection, skill recommendations",
+        "Prompt Refinement: Weakness detection, A/B testing, version history",
+        "Self-Improve Tool: Agent-callable tool for self-analysis",
+        "Improvements Dashboard: Visual UI at /agents/[id]/improvements",
+        "Status: Fully implemented in v1.4.0"
       ],
-      timeline: "Q1 2026"
+      timeline: "NOW"
     },
     {
       id: 3,
@@ -265,6 +289,13 @@ export default function FutureRoadmapPage() {
                   <li>RAG knowledge bases enhance context</li>
                   <li>Execution logging tracks activity</li>
                   <li>Platform integration via MCP</li>
+                  <li>Visual Builder for node-based agent design</li>
+                  <li className="text-green-400">NEW: Tool Search for dynamic discovery</li>
+                  <li className="text-green-400">NEW: Tool Use Examples (90% accuracy)</li>
+                  <li className="text-green-400">NEW: Deferred Tool Loading (85% token savings)</li>
+                  <li className="text-green-400">NEW: Tool Browser UI component</li>
+                  <li className="text-green-400">NEW: Agent Lineage API with real data</li>
+                  <li className="text-green-400">NEW: Enhanced Ouroboros Visualization</li>
                 </ul>
               </div>
               <div className="bg-black/50 border border-yellow-400/30 p-4 rounded">

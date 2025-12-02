@@ -13,6 +13,13 @@ export interface AgentConfig {
   skillIds: string[]
   ragFolderId?: string
   mcpServers: string[]
+  // Export and marketplace settings
+  isPublic?: boolean
+  isExportable?: boolean
+  exportFormats?: string[]
+  category?: string
+  tags?: string[]
+  useDeferredLoading?: boolean
 }
 
 export function useAgentConfig(nodes: Node<CustomNodeData>[]): AgentConfig | null {
@@ -50,6 +57,13 @@ export function useAgentConfig(nodes: Node<CustomNodeData>[]): AgentConfig | nul
         .filter(node => node.data?.enabled !== false)
         .map(node => node.data?.serverUrl)
         .filter((url): url is string => !!url),
+      // Export settings
+      isPublic: configData.isPublic || false,
+      isExportable: configData.isExportable !== false,
+      exportFormats: configData.exportFormats,
+      category: configData.category,
+      tags: configData.tags,
+      useDeferredLoading: (configData as any).useDeferredLoading || false,
     }
   }, [nodes])
 }

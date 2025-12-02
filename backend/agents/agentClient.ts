@@ -56,6 +56,23 @@ import {
 import { buildSkillContext, detectRelevantSkills } from "../skills/store"
 import { trackSkillUsage } from "../skills/usageTracking"
 import { setToolContext, clearToolContext } from "../tools/toolContext"
+import {
+  getSession,
+  recordToolExecution,
+  addSessionMessage,
+  canContinue,
+  updateGoal,
+  getCurrentGoal,
+  buildSessionContext,
+} from "../sessions/sessionManager"
+
+export interface ToolExecution {
+  toolName: string
+  input: unknown
+  output: unknown
+  timestamp: Date
+  durationMs: number
+}
 
 export interface AgentRunOptions {
   tools?: Array<{ name: string; description: string; execute: (...args: unknown[]) => Promise<unknown> }>
@@ -71,11 +88,40 @@ export interface AgentRunOptions {
   skillIds?: string[] // Specific skills to use (auto-detected if not provided)
   autoDetectSkills?: boolean // Whether to auto-detect relevant skills from input
   userApiKey?: string // User-provided API key (client-side), falls back to server env if not provided
+  useDeferredLoading?: boolean // Enable Anthropic's defer_loading pattern - only load searchTools initially
+  // Multi-turn tool loop options (Claude SDK Integration)
+  maxToolIterations?: number // Max number of tool calls in autonomous mode (default: 5)
+  autonomousMode?: boolean // Enable self-directed multi-turn execution
+  sessionId?: string // Session ID for state persistence across turns
+}
+
+export interface DeferredLoadingStats {
+  initialToolCount: number
+  totalToolCount: number
+  tokensSaved: number // Estimated tokens saved by not loading all tools
 }
 
 export interface AgentRunResult {
   output_text: string
   executionId?: string
+}
+
+export interface AutonomousRunResult extends AgentRunResult {
+  toolChain: ToolExecution[]
+  iterationCount: number
+  goalCompleted: boolean
+  sessionId?: string
+  stoppedReason: 'completed' | 'max_iterations' | 'no_more_tools' | 'error' | 'session_expired'
+}
+
+export interface StreamingChunk {
+  type: 'text' | 'tool_start' | 'tool_complete' | 'done' | 'error'
+  content?: string
+  toolName?: string
+  toolInput?: unknown
+  toolResult?: unknown
+  executionId?: string
+  error?: string
 }
 
 // Create and configure agent client
@@ -226,10 +272,36 @@ export const agentClient = {
     })
 
     // Convert tools to Anthropic API format if provided
-    const tools: Anthropic.Tool[] = []
+    // If useDeferredLoading is enabled, only load searchTools initially
+    // This follows Anthropic's Tool Search Tool pattern for 85% token savings
+    let tools: Anthropic.Tool[] = []
+    let deferredStats: DeferredLoadingStats | null = null
+    
     if (options.tools && options.tools.length > 0) {
-      tools.push(
-        ...options.tools.map((toolDef) => ({
+      const allToolDefs = options.tools
+      
+      if (options.useDeferredLoading) {
+        // Only load searchTools initially - other tools discovered on-demand
+        const initialTools = allToolDefs.filter(t => t.name === 'searchTools')
+        
+        // Calculate estimated token savings
+        // Average tool definition is ~500-1000 tokens
+        const estimatedTokensPerTool = 750
+        const tokensSaved = (allToolDefs.length - initialTools.length) * estimatedTokensPerTool
+        
+        deferredStats = {
+          initialToolCount: initialTools.length,
+          totalToolCount: allToolDefs.length,
+          tokensSaved,
+        }
+        
+        logger.log('info', 'Deferred tool loading enabled', {
+          initialTools: initialTools.map(t => t.name),
+          deferredTools: allToolDefs.filter(t => t.name !== 'searchTools').map(t => t.name),
+          estimatedTokensSaved: tokensSaved,
+        })
+        
+        tools = initialTools.map((toolDef) => ({
           name: toolDef.name,
           description: toolDef.description,
           input_schema: {
@@ -238,7 +310,18 @@ export const agentClient = {
             required: [] as string[],
           },
         }))
-      )
+      } else {
+        // Load all tools upfront (traditional approach)
+        tools = allToolDefs.map((toolDef) => ({
+          name: toolDef.name,
+          description: toolDef.description,
+          input_schema: {
+            type: "object" as const,
+            properties: {},
+            required: [] as string[],
+          },
+        }))
+      }
     }
 
     try {
@@ -246,6 +329,8 @@ export const agentClient = {
         model: 'claude-sonnet-4-5-20250929',
         toolCount: tools.length,
         hasImage: !!options.image,
+        useDeferredLoading: options.useDeferredLoading || false,
+        ...(deferredStats && { deferredStats }),
       })
       
       // Build message content - support text and images
@@ -471,6 +556,660 @@ export const agentClient = {
         }
       }
 
+      throw error
+    }
+  },
+
+  /**
+   * Run agent with streaming support
+   * Returns an async generator that yields streaming chunks
+   * @param input - User input/prompt
+   * @param options - Options including tools, agent info, and logger
+   * @yields StreamingChunk objects as responses are generated
+   */
+  async *runStreaming(
+    input: string,
+    options: AgentRunOptions = {}
+  ): AsyncGenerator<StreamingChunk, void, unknown> {
+    // Get API key: prefer user-provided key, fall back to server environment
+    let apiKey = options.userApiKey
+    
+    if (!apiKey) {
+      const { getEnvConfig } = await import("../config/env")
+      const config = getEnvConfig()
+      apiKey = config.CLAUDE_API_KEY
+    }
+
+    if (!apiKey) {
+      yield {
+        type: 'error',
+        error: 'API key not found. Please provide CLAUDE_API_KEY in environment or via userApiKey option.',
+      }
+      return
+    }
+
+    // Create logger if not provided
+    const logger = options.logger || new ExecutionLogger(
+      options.agentId || 'default',
+      options.agentName || 'unknown'
+    )
+
+    // Start execution logging
+    logger.startExecution(input, {
+      ...options.metadata,
+      toolCount: options.tools?.length || 0,
+    })
+
+    try {
+      logger.log('info', 'Starting streaming agent query', {
+        model: 'claude-sonnet-4-5-20250929',
+        hasTools: !!(options.tools && options.tools.length > 0),
+      })
+
+      // Get or create conversation for memory
+      let conversationId = options.conversationId
+      if (options.useMemory !== false && options.agentId) {
+        if (!conversationId) {
+          const latestConv = getLatestConversation(options.agentId)
+          if (latestConv) {
+            conversationId = latestConv.id
+          } else {
+            const newConv = createConversation(options.agentId)
+            conversationId = newConv.id
+          }
+        }
+
+        // Add user message to conversation
+        addMessage(conversationId, 'user', input, options.metadata)
+      }
+
+      // Build enhanced input with RAG and memory context (same as run method)
+      let enhancedInput = input
+
+      // Add memory context if enabled
+      if (options.useMemory !== false && conversationId && options.agentId) {
+        const memoryContext = buildConversationContext(options.agentId, 10)
+        if (memoryContext) {
+          logger.log('info', 'Adding conversation memory context', { conversationId })
+          enhancedInput = `Previous conversation context:\n\n${memoryContext}\n\nCurrent request: ${input}`
+        }
+      }
+
+      // Enhance prompt with Skills context
+      let skillIds = options.skillIds || []
+      
+      // Auto-detect relevant skills if enabled and no skills specified
+      if (options.autoDetectSkills !== false && skillIds.length === 0) {
+        const detectedSkills = detectRelevantSkills(input, 3)
+        skillIds = detectedSkills.map(skill => skill.id)
+        if (detectedSkills.length > 0) {
+          logger.log('info', 'Auto-detected relevant skills', {
+            skillNames: detectedSkills.map(s => s.name),
+          })
+        }
+      }
+      
+      // Build skill context and inject into prompt
+      if (skillIds.length > 0) {
+        // Track skill usage
+        trackSkillUsage(skillIds, options.agentId || 'unknown')
+        
+        const skillContext = await buildSkillContext(skillIds)
+        if (skillContext) {
+          logger.log('info', 'Adding Skills context to prompt', { skillCount: skillIds.length })
+          enhancedInput = `${skillContext}\n\n---\n\nUser Request: ${enhancedInput}`
+        }
+      }
+
+      // Enhance prompt with RAG context if RAG folder is specified
+      if (options.ragFolderId) {
+        logger.log('info', 'Enhancing prompt with RAG context', { ragFolderId: options.ragFolderId })
+        enhancedInput = await buildRAGPrompt(enhancedInput, input, options.ragFolderId)
+      }
+
+      const anthropic = new Anthropic({
+        apiKey: apiKey,
+      })
+
+      // Convert tools to Anthropic API format if provided
+      const tools: Anthropic.Tool[] = []
+      if (options.tools && options.tools.length > 0) {
+        tools.push(
+          ...options.tools.map((toolDef) => ({
+            name: toolDef.name,
+            description: toolDef.description,
+            input_schema: {
+              type: "object" as const,
+              properties: {},
+              required: [] as string[],
+            },
+          }))
+        )
+      }
+
+      // Build message content - support text and images
+      const messageContent: Array<
+        | { type: "text"; text: string }
+        | { type: "image"; source: { type: "base64"; media_type: "image/jpeg" | "image/png" | "image/gif" | "image/webp"; data: string } }
+      > = [
+        {
+          type: "text",
+          text: input,
+        },
+      ]
+      
+      // Add image if provided (base64 encoded)
+      if (options.image && !options.image.includes('data:application/pdf')) {
+        const base64Data = options.image.includes(',') 
+          ? options.image.split(',')[1] 
+          : options.image
+        
+        const imageTypeMatch = options.image.match(/data:image\/(\w+)/)?.[1] || 'png'
+        const mediaTypeMap: Record<string, "image/jpeg" | "image/png" | "image/gif" | "image/webp"> = {
+          'jpeg': 'image/jpeg',
+          'jpg': 'image/jpeg',
+          'png': 'image/png',
+          'gif': 'image/gif',
+          'webp': 'image/webp',
+        }
+        const mediaType = mediaTypeMap[imageTypeMatch.toLowerCase()] || 'image/png'
+        
+        messageContent.push({
+          type: "image" as const,
+          source: {
+            type: "base64" as const,
+            media_type: mediaType,
+            data: base64Data,
+          },
+        })
+      }
+
+      // Create streaming request
+      const stream = anthropic.messages.stream({
+        model: "claude-sonnet-4-5-20250929",
+        max_tokens: 2048,
+        ...(options.agentPrompt && { system: options.agentPrompt }),
+        messages: [
+          {
+            role: "user",
+            content: messageContent as any,
+          },
+        ],
+        ...(tools.length > 0 && { tools }),
+      })
+
+      let accumulatedText = ""
+      let toolCallsCount = 0
+      const pendingToolCalls = new Map<string, { name: string; input: unknown; id: string }>()
+
+      // Process streaming events using the stream's event iterator
+      for await (const event of stream) {
+        // Handle text deltas
+        if (event.type === 'content_block_delta' && 'delta' in event && event.delta.type === 'text_delta') {
+          const chunk = event.delta.text
+          accumulatedText += chunk
+          yield {
+            type: 'text',
+            content: chunk,
+          }
+        }
+        // Handle tool use start
+        else if (event.type === 'content_block_start' && 'content_block' in event && event.content_block.type === 'tool_use') {
+          const toolUse = event.content_block
+          pendingToolCalls.set(toolUse.id, {
+            name: toolUse.name,
+            input: toolUse.input,
+            id: toolUse.id,
+          })
+        }
+        // Handle message stop - process any pending tool calls
+        else if (event.type === 'message_stop') {
+          // Get the final message to extract tool calls
+          const finalMessage = await stream.finalMessage()
+          
+          if (finalMessage.usage) {
+            logger.logTokenUsage(
+              finalMessage.usage.input_tokens,
+              finalMessage.usage.output_tokens,
+              "claude-sonnet-4-5-20250929"
+            )
+          }
+
+          // Process any tool calls from the message
+          const messageToolCalls = finalMessage.content.filter(
+            (item: any): item is Anthropic.ToolUseBlock => item.type === 'tool_use'
+          )
+
+          if (messageToolCalls.length > 0) {
+            // Process tool calls sequentially
+            const conversationMessages: Anthropic.MessageParam[] = [
+              {
+                role: "user",
+                content: messageContent as any,
+              },
+              {
+                role: "assistant",
+                content: messageToolCalls.map(tc => ({
+                  type: "tool_use" as const,
+                  id: tc.id,
+                  name: tc.name,
+                  input: tc.input,
+                })),
+              },
+            ]
+
+            for (const toolCall of messageToolCalls) {
+              toolCallsCount++
+              const toolName = toolCall.name
+              const toolInput = toolCall.input
+              
+              yield {
+                type: 'tool_start',
+                toolName,
+                toolInput,
+              }
+
+              logger.logToolCall(toolName, toolInput)
+              logger.log('info', `Executing tool: ${toolName}`, { 
+                arguments: toolInput 
+              })
+
+              // Execute tool
+              const toolDef = options.tools?.find((t) => t.name === toolName)
+              if (toolDef) {
+                try {
+                  setToolContext(options.agentId, input)
+                  const toolResult = await toolDef.execute(...(Array.isArray(toolInput) ? toolInput : [toolInput]))
+                  clearToolContext()
+                  
+                  const resultText = typeof toolResult === "string" ? toolResult : JSON.stringify(toolResult)
+                  
+                  yield {
+                    type: 'tool_complete',
+                    toolName,
+                    toolResult,
+                  }
+
+                  logger.completeToolCall(toolName, toolResult)
+
+                  // Add tool result to conversation
+                  conversationMessages.push({
+                    role: "user",
+                    content: [
+                      {
+                        type: "tool_result",
+                        tool_use_id: toolCall.id,
+                        content: resultText,
+                      },
+                    ],
+                  })
+                } catch (toolError) {
+                  clearToolContext()
+                  logger.completeToolCall(
+                    toolName, 
+                    undefined, 
+                    toolError instanceof Error ? toolError : new Error(String(toolError))
+                  )
+                  
+                  yield {
+                    type: 'error',
+                    error: `Error executing tool ${toolName}: ${toolError instanceof Error ? toolError.message : String(toolError)}`,
+                  }
+                }
+              }
+            }
+
+            // Make follow-up streaming request with tool results
+            if (conversationMessages.length > 2) {
+              const followUpStream = anthropic.messages.stream({
+                model: "claude-sonnet-4-5-20250929",
+                max_tokens: 2048,
+                ...(options.agentPrompt && { system: options.agentPrompt }),
+                messages: conversationMessages,
+                ...(tools.length > 0 && { tools }),
+              })
+
+              // Stream follow-up response
+              for await (const followUpEvent of followUpStream) {
+                if (followUpEvent.type === 'content_block_delta' && 'delta' in followUpEvent && followUpEvent.delta.type === 'text_delta') {
+                  const chunk = followUpEvent.delta.text
+                  accumulatedText += chunk
+                  yield {
+                    type: 'text',
+                    content: chunk,
+                  }
+                }
+              }
+
+              // Get final message for token usage
+              const followUpFinal = await followUpStream.finalMessage()
+              if (followUpFinal.usage) {
+                logger.logTokenUsage(
+                  followUpFinal.usage.input_tokens,
+                  followUpFinal.usage.output_tokens,
+                  "claude-sonnet-4-5-20250929"
+                )
+              }
+            }
+          }
+        }
+      }
+
+      logger.log('info', 'Streaming agent query completed successfully', {
+        outputLength: accumulatedText.length,
+        toolCallsCount,
+      })
+
+      // Add assistant response to conversation memory
+      if (options.useMemory !== false && conversationId && accumulatedText) {
+        addMessage(conversationId, 'assistant', accumulatedText)
+      }
+
+      // Complete execution successfully
+      logger.completeExecution(accumulatedText)
+
+      // Send completion event
+      yield {
+        type: 'done',
+        executionId: logger.getExecutionId(),
+      }
+    } catch (error) {
+      logger.log('error', 'Streaming error occurred', {
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      })
+
+      logger.failExecution(error instanceof Error ? error : String(error))
+
+      yield {
+        type: 'error',
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  },
+
+  /**
+   * Run agent in autonomous mode with multi-turn tool loops
+   * 
+   * The agent will continue executing tools until:
+   * - It decides no more tools are needed
+   * - Max iterations reached
+   * - Session expires
+   * - An error occurs
+   * 
+   * @param input - User input/prompt or goal
+   * @param options - Options including tools, agent info, and autonomous settings
+   * @returns Promise with final output, tool chain, and execution metrics
+   */
+  async runAutonomous(
+    input: string,
+    options: AgentRunOptions = {}
+  ): Promise<AutonomousRunResult> {
+    const maxIterations = options.maxToolIterations ?? 5
+    const sessionId = options.sessionId
+    
+    // Get API key
+    let apiKey = options.userApiKey
+    if (!apiKey) {
+      const { getEnvConfig } = await import("../config/env")
+      const config = getEnvConfig()
+      apiKey = config.CLAUDE_API_KEY
+    }
+
+    if (!apiKey) {
+      throw new Error("API key is required for autonomous mode")
+    }
+
+    // Create logger
+    const logger = options.logger || new ExecutionLogger(
+      options.agentId || 'default',
+      options.agentName
+    )
+
+    logger.startExecution(input, {
+      ...options.metadata,
+      autonomousMode: true,
+      maxIterations,
+      sessionId,
+    })
+
+    const toolChain: ToolExecution[] = []
+    let iterationCount = 0
+    let stoppedReason: AutonomousRunResult['stoppedReason'] = 'completed'
+    let finalOutput = ''
+
+    try {
+      // Check session if provided
+      if (sessionId) {
+        if (!canContinue(sessionId)) {
+          logger.log('warn', 'Session cannot continue', { sessionId })
+          stoppedReason = 'session_expired'
+          return {
+            output_text: 'Session has expired or reached max iterations',
+            toolChain,
+            iterationCount,
+            goalCompleted: false,
+            sessionId,
+            stoppedReason,
+          }
+        }
+
+        // Add session context to input
+        const sessionContext = buildSessionContext(sessionId)
+        if (sessionContext) {
+          input = `${sessionContext}\n\n---\n\nNew Request: ${input}`
+        }
+      }
+
+      // Build enhanced system prompt for autonomous mode
+      const autonomousPrompt = options.agentPrompt 
+        ? `${options.agentPrompt}\n\n---\n\nYou are operating in autonomous mode. You can use tools multiple times to accomplish your goal. After each tool result, decide if you need to use more tools or if the task is complete. When the task is complete, provide your final response without calling any more tools.`
+        : `You are an autonomous agent. You can use tools multiple times to accomplish your goal. After each tool result, decide if you need to use more tools or if the task is complete. When the task is complete, provide your final response without calling any more tools.`
+
+      const anthropic = new Anthropic({ apiKey })
+
+      // Convert tools to Anthropic format
+      const tools: Anthropic.Tool[] = options.tools?.map(t => ({
+        name: t.name,
+        description: t.description,
+        input_schema: {
+          type: "object" as const,
+          properties: {},
+          required: [] as string[],
+        },
+      })) || []
+
+      // Build initial conversation
+      let messages: Anthropic.MessageParam[] = [
+        { role: "user", content: input },
+      ]
+
+      // Main autonomous loop
+      while (iterationCount < maxIterations) {
+        logger.log('info', `Autonomous iteration ${iterationCount + 1}/${maxIterations}`)
+
+        // Check session can continue
+        if (sessionId && !canContinue(sessionId)) {
+          logger.log('warn', 'Session limit reached during iteration')
+          stoppedReason = 'session_expired'
+          break
+        }
+
+        // Make API call
+        const response = await anthropic.messages.create({
+          model: "claude-sonnet-4-5-20250929",
+          max_tokens: 2048,
+          system: autonomousPrompt,
+          messages,
+          ...(tools.length > 0 && { tools }),
+        })
+
+        // Log token usage
+        if (response.usage) {
+          logger.logTokenUsage(
+            response.usage.input_tokens,
+            response.usage.output_tokens,
+            "claude-sonnet-4-5-20250929"
+          )
+        }
+
+        // Check for tool use
+        const toolUseBlocks = response.content.filter(
+          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
+        )
+
+        const textBlocks = response.content.filter(
+          (block): block is Anthropic.TextBlock => block.type === 'text'
+        )
+
+        // If no tool use, we're done
+        if (toolUseBlocks.length === 0) {
+          finalOutput = textBlocks.map(b => b.text).join('\n')
+          stoppedReason = 'no_more_tools'
+          logger.log('info', 'Autonomous loop complete - no more tools requested')
+          break
+        }
+
+        // Execute each tool
+        const toolResults: Anthropic.ToolResultBlockParam[] = []
+
+        for (const toolUse of toolUseBlocks) {
+          iterationCount++
+          const toolDef = options.tools?.find(t => t.name === toolUse.name)
+
+          if (!toolDef) {
+            logger.log('warn', `Tool not found: ${toolUse.name}`)
+            toolResults.push({
+              type: 'tool_result',
+              tool_use_id: toolUse.id,
+              content: `Error: Tool ${toolUse.name} not found`,
+              is_error: true,
+            })
+            continue
+          }
+
+          const startTime = Date.now()
+          logger.logToolCall(toolUse.name, toolUse.input)
+
+          try {
+            setToolContext(options.agentId, input)
+            const result = await toolDef.execute(
+              ...(Array.isArray(toolUse.input) ? toolUse.input : [toolUse.input])
+            )
+            clearToolContext()
+
+            const durationMs = Date.now() - startTime
+            const resultText = typeof result === 'string' ? result : JSON.stringify(result)
+
+            // Track tool execution
+            const execution: ToolExecution = {
+              toolName: toolUse.name,
+              input: toolUse.input,
+              output: result,
+              timestamp: new Date(),
+              durationMs,
+            }
+            toolChain.push(execution)
+
+            // Record in session if provided
+            if (sessionId) {
+              recordToolExecution(sessionId, toolUse.name, toolUse.input, result)
+            }
+
+            logger.completeToolCall(toolUse.name, result)
+            logger.log('info', `Tool ${toolUse.name} completed in ${durationMs}ms`)
+
+            toolResults.push({
+              type: 'tool_result',
+              tool_use_id: toolUse.id,
+              content: resultText,
+            })
+          } catch (toolError) {
+            clearToolContext()
+            const errorMsg = toolError instanceof Error ? toolError.message : String(toolError)
+            
+            logger.completeToolCall(
+              toolUse.name,
+              undefined,
+              toolError instanceof Error ? toolError : new Error(errorMsg)
+            )
+
+            toolResults.push({
+              type: 'tool_result',
+              tool_use_id: toolUse.id,
+              content: `Error: ${errorMsg}`,
+              is_error: true,
+            })
+          }
+        }
+
+        // Update messages for next iteration
+        messages = [
+          ...messages,
+          { role: "assistant", content: response.content },
+          { role: "user", content: toolResults },
+        ]
+
+        // Check if we've hit max iterations
+        if (iterationCount >= maxIterations) {
+          stoppedReason = 'max_iterations'
+          logger.log('warn', 'Autonomous loop stopped - max iterations reached')
+          
+          // Get final response without tools
+          const finalResponse = await anthropic.messages.create({
+            model: "claude-sonnet-4-5-20250929",
+            max_tokens: 2048,
+            system: `${autonomousPrompt}\n\nIMPORTANT: You have reached the maximum number of tool iterations. Provide your final response now based on what you've accomplished so far.`,
+            messages,
+          })
+
+          if (finalResponse.usage) {
+            logger.logTokenUsage(
+              finalResponse.usage.input_tokens,
+              finalResponse.usage.output_tokens,
+              "claude-sonnet-4-5-20250929"
+            )
+          }
+
+          finalOutput = finalResponse.content
+            .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+            .map(b => b.text)
+            .join('\n')
+          break
+        }
+      }
+
+      // Add to session history if provided
+      if (sessionId && finalOutput) {
+        addSessionMessage(sessionId, { role: 'assistant', content: finalOutput })
+        
+        // Update current goal if exists
+        const currentGoal = getCurrentGoal(sessionId)
+        if (currentGoal && stoppedReason === 'no_more_tools') {
+          updateGoal(sessionId, currentGoal.id, 'completed')
+        }
+      }
+
+      logger.completeExecution(finalOutput)
+      logger.log('info', 'Autonomous execution completed', {
+        iterationCount,
+        toolsExecuted: toolChain.length,
+        stoppedReason,
+      })
+
+      return {
+        output_text: finalOutput || 'Autonomous execution completed',
+        executionId: logger.getExecutionId(),
+        toolChain,
+        iterationCount,
+        goalCompleted: stoppedReason === 'no_more_tools' || stoppedReason === 'completed',
+        sessionId,
+        stoppedReason,
+      }
+    } catch (error) {
+      stoppedReason = 'error'
+      logger.failExecution(error instanceof Error ? error : String(error))
+      
       throw error
     }
   },

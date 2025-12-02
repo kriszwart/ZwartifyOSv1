@@ -39,3 +39,13 @@ export function getCurrentUserPrompt(): string | undefined {
   return currentUserPrompt
 }
 
+/**
+ * Get full tool context object
+ */
+export function getToolContext(): { agentId?: string; userPrompt?: string } | undefined {
+  if (!currentAgentId && !currentUserPrompt) return undefined
+  return {
+    agentId: currentAgentId,
+    userPrompt: currentUserPrompt,
+  }
+}

@@ -1,12 +1,19 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface NodePaletteProps {
   onAddNode: (type: string) => void
   availableTools: Array<{ name: string; description: string }>
   availableSkills: Array<{ id: string; name: string; description: string }>
   availableRAGFolders: Array<{ id: string; name: string }>
+}
+
+interface SearchedTool {
+  name: string
+  description: string
+  category?: string
+  relevanceScore?: number
 }
 
 export default function NodePalette({
@@ -16,6 +23,40 @@ export default function NodePalette({
   availableRAGFolders,
 }: NodePaletteProps) {
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [toolSearch, setToolSearch] = useState('')
+  const [searchedTools, setSearchedTools] = useState<SearchedTool[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+
+  // Search tools using the API
+  const searchTools = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchedTools([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const response = await fetch(`/api/tools/search?q=${encodeURIComponent(query)}&limit=10`)
+      if (response.ok) {
+        const data = await response.json()
+        setSearchedTools(data.tools || [])
+      }
+    } catch (error) {
+      console.error('Error searching tools:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }, [])
+
+  // Debounce tool search
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      if (expanded === 'tool' && toolSearch) {
+        searchTools(toolSearch)
+      }
+    }, 300)
+    return () => clearTimeout(debounce)
+  }, [toolSearch, expanded, searchTools])
 
   const nodeTypes = [
     { type: 'agentConfig', label: 'Agent Config', icon: '⚙️', color: 'green' },
@@ -82,22 +123,45 @@ export default function NodePalette({
             {expanded === nodeType.type && (
               <div className="mt-2 ml-4 space-y-1 max-h-48 overflow-y-auto">
                 {nodeType.type === 'tool' && (
-                  availableTools.length === 0 ? (
-                    <div className="text-yellow-400/40 text-[10px] font-mono px-2 py-1">
-                      No tools available
+                  <>
+                    {/* Tool Search Input */}
+                    <div className="relative mb-2">
+                      <input
+                        type="text"
+                        value={toolSearch}
+                        onChange={(e) => setToolSearch(e.target.value)}
+                        placeholder="🔍 Search tools..."
+                        className="w-full px-2 py-1 text-[10px] bg-black/50 border border-yellow-400/30 text-yellow-300 placeholder-yellow-400/40 rounded font-mono focus:outline-none focus:border-yellow-400"
+                      />
+                      {isSearching && (
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-yellow-400/50 text-[8px]">...</span>
+                      )}
                     </div>
-                  ) : (
-                    availableTools.map((tool) => (
-                      <button
-                        key={tool.name}
-                        onClick={() => handleAddTool(tool.name, tool.description)}
-                        className="w-full px-2 py-1 text-left text-[10px] border border-yellow-400/30 text-yellow-300/80 hover:bg-yellow-400/10 hover:text-yellow-300 rounded font-mono transition-colors"
-                        title={tool.description}
-                      >
-                        {tool.name}
-                      </button>
-                    ))
-                  )
+                    <div className="text-yellow-400/40 text-[8px] font-mono px-1 mb-1">
+                      {toolSearch ? `${searchedTools.length} found` : `${availableTools.length} tools`}
+                    </div>
+                    {(toolSearch ? searchedTools : availableTools).length === 0 ? (
+                      <div className="text-yellow-400/40 text-[10px] font-mono px-2 py-1">
+                        {toolSearch ? 'No matches' : 'No tools available'}
+                      </div>
+                    ) : (
+                      (toolSearch ? searchedTools : availableTools).map((tool) => (
+                        <button
+                          key={tool.name}
+                          onClick={() => handleAddTool(tool.name, tool.description)}
+                          className="w-full px-2 py-1 text-left text-[10px] border border-yellow-400/30 text-yellow-300/80 hover:bg-yellow-400/10 hover:text-yellow-300 rounded font-mono transition-colors"
+                          title={tool.description}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span>{tool.name}</span>
+                            {'relevanceScore' in tool && tool.relevanceScore && tool.relevanceScore > 0 && (
+                              <span className="text-[8px] text-yellow-400/40">{tool.relevanceScore}</span>
+                            )}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </>
                 )}
                 {nodeType.type === 'skill' && (
                   availableSkills.length === 0 ? (

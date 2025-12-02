@@ -1,7 +1,7 @@
 "use client"
 
 import { BaseEdge, EdgeProps, getBezierPath, useReactFlow } from '@xyflow/react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 export default function CustomEdge({
   id,
@@ -18,6 +18,7 @@ export default function CustomEdge({
   selected,
 }: EdgeProps) {
   const { getNode } = useReactFlow()
+  const [isHovered, setIsHovered] = useState(false)
   const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
@@ -29,22 +30,22 @@ export default function CustomEdge({
 
   // Determine edge color based on source node type
   const edgeColor = useMemo(() => {
-    if (!source) return '#00ff00' // Default green
+    if (!source) return '#22c55e' // Default green
     
     const sourceNode = getNode(source)
-    if (!sourceNode) return '#00ff00'
+    if (!sourceNode) return '#22c55e'
     
     const nodeType = sourceNode.type
     const colorMap: Record<string, string> = {
-      agentConfig: '#00ff00', // Green
+      agentConfig: '#22c55e', // Green
       tool: '#eab308',         // Yellow
       skill: '#a855f7',       // Purple
       rag: '#06b6d4',         // Cyan
       mcp: '#60a5fa',         // Blue
-      output: '#00ff00',      // Green
+      output: '#22c55e',      // Green
     }
     
-    return colorMap[nodeType || ''] || '#00ff00'
+    return colorMap[nodeType || ''] || '#22c55e'
   }, [source, getNode])
 
   // Convert hex to rgba for glow effect
@@ -56,15 +57,33 @@ export default function CustomEdge({
   }
 
   const glowColor = hexToRgba(edgeColor, 0.8)
+  const isActive = selected || isHovered
 
   return (
     <g
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onDoubleClick={(e) => {
         e.stopPropagation()
         // Edge deletion will be handled by parent via onEdgesChange
       }}
       style={{ cursor: 'pointer' }}
     >
+      {/* Glow layer for depth */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke={edgeColor}
+        strokeWidth={isActive ? 8 : 6}
+        strokeLinecap="round"
+        style={{
+          filter: `blur(6px)`,
+          opacity: isActive ? 0.4 : 0.2,
+          transition: 'all 0.3s ease',
+        }}
+      />
+      
+      {/* Main edge */}
       <BaseEdge
         id={id}
         path={edgePath}
@@ -72,18 +91,55 @@ export default function CustomEdge({
         style={{
           ...style,
           stroke: edgeColor,
-          strokeWidth: selected ? 3.5 : 2.5,
-          filter: selected 
-            ? `drop-shadow(0 0 10px ${glowColor})`
+          strokeWidth: isActive ? 4 : 2.5,
+          filter: isActive
+            ? `drop-shadow(0 0 12px ${glowColor}) drop-shadow(0 0 24px ${glowColor}60)`
             : `drop-shadow(0 0 6px ${glowColor})`,
           transition: 'all 0.3s ease',
-          opacity: selected ? 1 : 0.9,
-          ...(animated ? { 
-            strokeDasharray: '5 5',
-            animation: 'edgeFlow 1s linear infinite',
-          } : {}),
+          opacity: isActive ? 1 : 0.85,
         }}
       />
+      
+      {/* Animated flow particles */}
+      {(isActive || animated) && (
+        <>
+          <circle r="4" fill={edgeColor} opacity="0.9">
+            <animateMotion
+              dur="2s"
+              repeatCount="indefinite"
+              path={edgePath}
+            />
+          </circle>
+          <circle r="3" fill={edgeColor} opacity="0.6">
+            <animateMotion
+              dur="2s"
+              repeatCount="indefinite"
+              path={edgePath}
+              begin="0.5s"
+            />
+          </circle>
+          <circle r="2" fill={edgeColor} opacity="0.4">
+            <animateMotion
+              dur="2s"
+              repeatCount="indefinite"
+              path={edgePath}
+              begin="1s"
+            />
+          </circle>
+        </>
+      )}
+      
+      {/* CSS for edge flow animation */}
+      <style jsx>{`
+        @keyframes edgeFlow {
+          from {
+            stroke-dashoffset: 0;
+          }
+          to {
+            stroke-dashoffset: 20;
+          }
+        }
+      `}</style>
     </g>
   )
 }

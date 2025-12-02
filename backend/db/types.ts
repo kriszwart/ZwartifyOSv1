@@ -69,5 +69,12 @@ export interface AgentDefinition {
   skillIds?: string[] // Skills assigned to this agent
   createdByAgentId?: string | null // ID of the agent that created this agent
   creationPrompt?: string | null // Original prompt used to create this agent
+  // Export and marketplace fields
+  isPublic?: boolean // Show in marketplace
+  isExportable?: boolean // Allow export
+  exportFormats?: string[] // Allowed export formats (wordpress, widget, api, npm)
+  installCount?: number // Track installations
+  category?: string // For marketplace categorization
+  tags?: string[] // Keywords for search and filtering
 }
 

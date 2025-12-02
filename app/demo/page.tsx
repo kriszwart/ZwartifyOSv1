@@ -1,191 +1,154 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { enhancedDemoSteps, EnhancedDemoStep } from "./data/demoSteps"
+import TokenDisplay from "./components/TokenDisplay"
+import { DemoProvider, useDemo } from "./context/DemoContext"
+import { useDemoOrchestrator } from "./components/DemoOrchestrator"
+import { useVoiceNarration } from "./hooks/useVoiceNarration"
 
-interface DemoStep {
-  id: number
-  title: string
-  description: string
-  icon: string
-  content: string
-  tokenUsage?: {
-    inputTokens: number
-    outputTokens: number
-    totalTokens: number
-    estimatedCost: number
-  }
-}
-
-const demoSteps: DemoStep[] = [
-  {
-    id: 1,
-    title: "Introduction",
-    description: "What is ZwartifyOS and G-SAC",
-    icon: "🚀",
-    content: `ZwartifyOS is an operating system for building intelligent products. 
-
-At its core is G-SAC (Growth Strategy Agent Creator) - a meta-agent that creates other agents from a single natural language prompt.
-
-This demo shows how G-SAC transforms your request into a fully functional agent.`,
-  },
-  {
-    id: 2,
-    title: "User Prompt",
-    description: "You provide a simple request",
-    icon: "💬",
-    content: `User Request:
-
-"Create an agent that qualifies sales leads and schedules demos"
-
-This is all you need to provide. G-SAC handles the rest.`,
-  },
-  {
-    id: 3,
-    title: "Business Goal Translation",
-    description: "G-SAC analyzes your requirements",
-    icon: "🎯",
-    content: `G-SAC uses its BusinessGoalTranslator skill to understand:
-
-• Primary objective: Qualify sales leads
-• Secondary objective: Schedule demos
-• Key capabilities needed: Lead assessment, calendar integration
-• Success criteria: Qualified leads → scheduled demos
-
-Token Usage: 1,245 input / 892 output tokens`,
-    tokenUsage: {
-      inputTokens: 1245,
-      outputTokens: 892,
-      totalTokens: 2137,
-      estimatedCost: 0.0167,
-    },
-  },
-  {
-    id: 4,
-    title: "Tool Selection",
-    description: "G-SAC selects appropriate tools",
-    icon: "🔧",
-    content: `G-SAC uses ToolIntegrator to select tools:
-
-• callMCP - For platform integration (Slack, email, calendar)
-• No createAgent needed (this agent won't create others)
-• Custom logic for lead qualification scoring
-
-Token Usage: 892 input / 567 output tokens`,
-    tokenUsage: {
-      inputTokens: 892,
-      outputTokens: 567,
-      totalTokens: 1459,
-      estimatedCost: 0.0102,
-    },
-  },
-  {
-    id: 5,
-    title: "Platform Integration",
-    description: "G-SAC configures multi-platform support",
-    icon: "🌐",
-    content: `G-SAC uses PlatformIntegrator to enable:
-
-• Slack integration for notifications
-• Email integration for outreach
-• Calendar API for scheduling
-• CRM integration for lead tracking
-
-All via Model Context Protocol (MCP) for platform-agnostic design.
-
-Token Usage: 567 input / 423 output tokens`,
-    tokenUsage: {
-      inputTokens: 567,
-      outputTokens: 423,
-      totalTokens: 990,
-      estimatedCost: 0.0071,
-    },
-  },
-  {
-    id: 6,
-    title: "Agent Prompt Generation",
-    description: "G-SAC creates comprehensive system prompt",
-    icon: "📝",
-    content: `G-SAC generates a detailed system prompt including:
-
-• Agent's role and purpose
-• Lead qualification criteria
-• Demo scheduling workflow
-• Platform interaction guidelines
-• Best practices and constraints
-
-Token Usage: 423 input / 1,234 output tokens`,
-    tokenUsage: {
-      inputTokens: 423,
-      outputTokens: 1234,
-      totalTokens: 1657,
-      estimatedCost: 0.0194,
-    },
-  },
-  {
-    id: 7,
-    title: "Agent Creation",
-    description: "G-SAC calls createAgent tool",
-    icon: "✨",
-    content: `G-SAC executes the createAgent tool with:
-
-• Name: "sales-lead-qualifier"
-• Description: "Qualifies sales leads and schedules demos"
-• Prompt: [Generated comprehensive prompt]
-• Tools: ["callMCP"]
-• Skills: ["sales-qualification", "calendar-management"]
-• MCP Servers: ["slack", "email", "calendar"]
-
-Agent created successfully!
-
-Token Usage: 1,234 input / 456 output tokens`,
-    tokenUsage: {
-      inputTokens: 1234,
-      outputTokens: 456,
-      totalTokens: 1690,
-      estimatedCost: 0.0103,
-    },
-  },
-  {
-    id: 8,
-    title: "Result",
-    description: "Your agent is ready to use",
-    icon: "✅",
-    content: `Agent Created Successfully!
-
-Name: sales-lead-qualifier
-ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890
-Status: Enabled
-Platforms: Slack, Email, Calendar
-Tools: callMCP
-Skills: sales-qualification, calendar-management
-
-Your agent is now live and ready to qualify leads and schedule demos!`,
-  },
-]
-
-export default function DemoPage() {
+function DemoPageContent() {
   const [currentStep, setCurrentStep] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const [displayedText, setDisplayedText] = useState("")
   const [cumulativeTokens, setCumulativeTokens] = useState({ input: 0, output: 0, total: 0, cost: 0 })
+  const [executingAction, setExecutingAction] = useState(false)
+  const [actionResult, setActionResult] = useState<any>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [voiceEnabled, setVoiceEnabled] = useState(false)
+  const typeIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const stepTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const demo = useDemo()
+  const { executeAction } = useDemoOrchestrator()
+  const { speak, stop, isLoading: voiceLoading, error: voiceError } = useVoiceNarration({ enabled: voiceEnabled })
 
   useEffect(() => {
-    if (isPlaying && currentStep < demoSteps.length) {
-      const step = demoSteps[currentStep]
+    if (isPlaying && !isPaused && currentStep < enhancedDemoSteps.length) {
+      const step = enhancedDemoSteps[currentStep]
       setDisplayedText("")
+      setActionError(null)
+      setActionResult(null)
       
-      // Typewriter effect
-      let charIndex = 0
-      const typeInterval = setInterval(() => {
-        if (charIndex < step.content.length) {
-          setDisplayedText(step.content.substring(0, charIndex + 1))
-          charIndex++
-        } else {
-          clearInterval(typeInterval)
+      // Start voice narration if enabled and content is string
+      // Only start after user interaction (when demo is playing)
+      let voicePromise: Promise<void> | null = null
+      if (voiceEnabled && typeof step.content === "string" && step.content && isPlaying) {
+        console.log("Starting voice narration for step:", step.id, step.title)
+        voicePromise = speak(step.content).catch((err) => {
+          console.error("Voice narration failed for step:", step.id, err)
+          // Continue even if voice fails
+        })
+      }
+      
+      // Auto-execute action if step has one
+      let actionPromise: Promise<any> | null = null
+      if (step.action && step.action.type !== "none") {
+        setExecutingAction(true)
+        actionPromise = executeAction(step.action)
+          .then((result) => {
+            setActionResult(result)
+            if (result?.tokenUsage) {
+              setCumulativeTokens(prev => ({
+                input: prev.input + (result.tokenUsage.inputTokens || 0),
+                output: prev.output + (result.tokenUsage.outputTokens || 0),
+                total: prev.total + (result.tokenUsage.totalTokens || 0),
+                cost: prev.cost + (result.tokenUsage.estimatedCost || 0),
+              }))
+            }
+            return result
+          })
+          .catch((error) => {
+            console.error("Action execution error:", error)
+            setActionError(error instanceof Error ? error.message : "Failed to execute action")
+            return null
+          })
+          .finally(() => {
+            setExecutingAction(false)
+          })
+      }
+      
+      // Handle React components differently
+      if (typeof step.content === "string" && step.content) {
+        // Typewriter effect for string content
+        const contentString = step.content
+        let charIndex = 0
+        const stepStartTime = Date.now()
+        const stepDuration = step.duration * 1000 // Convert to milliseconds
+        
+        typeIntervalRef.current = setInterval(() => {
+          if (charIndex < contentString.length && !isPaused) {
+            setDisplayedText(contentString.substring(0, charIndex + 1))
+            charIndex++
+          } else if (charIndex >= contentString.length) {
+            if (typeIntervalRef.current) {
+              clearInterval(typeIntervalRef.current)
+              typeIntervalRef.current = null
+            }
+            
+            // Wait for voice and action to complete, then ensure minimum duration
+            Promise.all([
+              voicePromise || Promise.resolve(),
+              actionPromise || Promise.resolve(),
+            ]).then((results) => {
+              const actionResult = results[1] // Get action result
+              
+              // Update cumulative tokens from step (if action didn't provide real ones)
+              if (step.tokenUsage && !actionResult?.tokenUsage) {
+                setCumulativeTokens(prev => ({
+                  input: prev.input + step.tokenUsage!.inputTokens,
+                  output: prev.output + step.tokenUsage!.outputTokens,
+                  total: prev.total + step.tokenUsage!.totalTokens,
+                  cost: prev.cost + step.tokenUsage!.estimatedCost,
+                }))
+              }
+              
+              // Calculate remaining time to meet minimum duration
+              const elapsed = Date.now() - stepStartTime
+              const remaining = Math.max(0, stepDuration - elapsed)
+              
+              // Wait for remaining time (or minimum 1 second) before advancing
+              if (!isPaused) {
+                stepTimeoutRef.current = setTimeout(() => {
+                  if (!isPaused && currentStep < enhancedDemoSteps.length - 1) {
+                    setCurrentStep(prev => prev + 1)
+                  } else if (currentStep >= enhancedDemoSteps.length - 1) {
+                    setIsPlaying(false)
+                    stop() // Stop any remaining voice
+                  }
+                }, Math.max(remaining, 1000)) // At least 1 second buffer
+              }
+            })
+          }
+        }, 30)
+
+        return () => {
+          if (typeIntervalRef.current) {
+            clearInterval(typeIntervalRef.current)
+            typeIntervalRef.current = null
+          }
+          if (stepTimeoutRef.current) {
+            clearTimeout(stepTimeoutRef.current)
+            stepTimeoutRef.current = null
+          }
+          stop() // Stop voice if component unmounts
+        }
+      } else {
+        // For React components, show immediately
+        setDisplayedText("")
+        const stepStartTime = Date.now()
+        const stepDuration = step.duration * 1000 // Convert to milliseconds
+        
+        // Wait for action to complete, then ensure minimum duration
+        Promise.all([
+          voicePromise || Promise.resolve(),
+          actionPromise || Promise.resolve(),
+        ]).then((results) => {
+          const actionResult = results[1] // Get action result
           
-          // Update cumulative tokens
-          if (step.tokenUsage) {
+          // Update cumulative tokens from step (if action didn't provide real ones)
+          if (step.tokenUsage && !actionResult?.tokenUsage) {
             setCumulativeTokens(prev => ({
               input: prev.input + step.tokenUsage!.inputTokens,
               output: prev.output + step.tokenUsage!.outputTokens,
@@ -194,36 +157,114 @@ export default function DemoPage() {
             }))
           }
           
-          // Auto-advance after 3 seconds
-          setTimeout(() => {
-            if (currentStep < demoSteps.length - 1) {
-              setCurrentStep(prev => prev + 1)
-            } else {
-              setIsPlaying(false)
-            }
-          }, 3000)
-        }
-      }, 30) // 30ms per character for smooth typing
+          // Calculate remaining time to meet minimum duration
+          const elapsed = Date.now() - stepStartTime
+          const remaining = Math.max(0, stepDuration - elapsed)
+          
+          if (!isPaused) {
+            stepTimeoutRef.current = setTimeout(() => {
+              if (!isPaused && currentStep < enhancedDemoSteps.length - 1) {
+                setCurrentStep(prev => prev + 1)
+              } else if (currentStep >= enhancedDemoSteps.length - 1) {
+                setIsPlaying(false)
+                stop() // Stop any remaining voice
+              }
+            }, Math.max(remaining, 1000)) // At least 1 second buffer
+          }
+        })
 
-      return () => clearInterval(typeInterval)
+        return () => {
+          if (stepTimeoutRef.current) {
+            clearTimeout(stepTimeoutRef.current)
+            stepTimeoutRef.current = null
+          }
+          stop() // Stop voice if component unmounts
+        }
+      }
     }
-  }, [currentStep, isPlaying])
+  }, [currentStep, isPlaying, isPaused, voiceEnabled])
 
   const startDemo = () => {
     setCurrentStep(0)
     setDisplayedText("")
     setCumulativeTokens({ input: 0, output: 0, total: 0, cost: 0 })
     setIsPlaying(true)
+    setIsPaused(false)
+  }
+
+  const pauseDemo = () => {
+    setIsPaused(true)
+    if (typeIntervalRef.current) {
+      clearInterval(typeIntervalRef.current)
+      typeIntervalRef.current = null
+    }
+    if (stepTimeoutRef.current) {
+      clearTimeout(stepTimeoutRef.current)
+      stepTimeoutRef.current = null
+    }
+    stop() // Pause voice narration
+  }
+
+  const resumeDemo = () => {
+    setIsPaused(false)
+    // Resume will happen automatically via useEffect when isPaused becomes false
   }
 
   const resetDemo = () => {
     setIsPlaying(false)
+    setIsPaused(false)
     setCurrentStep(0)
     setDisplayedText("")
     setCumulativeTokens({ input: 0, output: 0, total: 0, cost: 0 })
+    setExecutingAction(false)
+    setActionResult(null)
+    setActionError(null)
+    if (typeIntervalRef.current) {
+      clearInterval(typeIntervalRef.current)
+      typeIntervalRef.current = null
+    }
+    if (stepTimeoutRef.current) {
+      clearTimeout(stepTimeoutRef.current)
+      stepTimeoutRef.current = null
+    }
+    stop() // Stop any playing voice
+    demo.reset()
   }
 
-  const currentStepData = demoSteps[currentStep]
+  const handleExecuteAction = async () => {
+    const step = enhancedDemoSteps[currentStep]
+    if (!step.action || step.action.type === "none") {
+      return
+    }
+
+    setExecutingAction(true)
+    setActionError(null)
+    setActionResult(null)
+
+    try {
+      const result = await executeAction(step.action)
+      setActionResult(result)
+      
+      // Update token usage if available from result
+      if (result.tokenUsage) {
+        setCumulativeTokens(prev => ({
+          input: prev.input + (result.tokenUsage.inputTokens || 0),
+          output: prev.output + (result.tokenUsage.outputTokens || 0),
+          total: prev.total + (result.tokenUsage.totalTokens || 0),
+          cost: prev.cost + (result.tokenUsage.estimatedCost || 0),
+        }))
+      }
+    } catch (error) {
+      console.error("Action execution error:", error)
+      setActionError(error instanceof Error ? error.message : "Failed to execute action")
+    } finally {
+      setExecutingAction(false)
+    }
+  }
+
+  const currentStepData = enhancedDemoSteps[currentStep]
+  const isStringContent = typeof currentStepData.content === "string"
+  const VisualComponent = currentStepData.visualComponent
 
   return (
     <div className="min-h-screen bg-black text-green-400 relative overflow-hidden">
@@ -242,13 +283,36 @@ export default function DemoPage() {
           >
             ← HOME
           </Link>
-          <h1 className="text-2xl font-bold font-mono">System Demo</h1>
-          <div className="flex gap-4">
+          <h1 className="text-2xl font-bold font-mono">ZwartifyOS Demo</h1>
+          <div className="flex gap-4 items-center">
+            <label className="flex items-center gap-2 text-sm font-mono cursor-pointer">
+              <input
+                type="checkbox"
+                checked={voiceEnabled}
+                onChange={(e) => {
+                  setVoiceEnabled(e.target.checked)
+                  if (!e.target.checked) stop()
+                }}
+                className="w-4 h-4 border-green-400/50 bg-black text-green-400 focus:ring-green-400 rounded"
+              />
+              <span className="text-green-400/80">🔊 Voice</span>
+            </label>
+            {voiceLoading && (
+              <span className="text-green-400/60 text-xs font-mono animate-pulse">Speaking...</span>
+            )}
+            {voiceError && (
+              <div className="flex flex-col gap-1">
+                <span className="text-red-400/80 text-xs font-mono">Voice Error</span>
+                <span className="text-red-400/60 text-xs font-mono max-w-xs truncate" title={voiceError}>
+                  {voiceError.length > 40 ? voiceError.substring(0, 40) + "..." : voiceError}
+                </span>
+              </div>
+            )}
             <Link
-              href="/create-agent"
+              href="/create-agent-visual"
               className="text-green-400 hover:text-green-300 transition-colors font-mono text-sm"
             >
-              Try It Live
+              Visual Builder
             </Link>
           </div>
         </header>
@@ -258,10 +322,10 @@ export default function DemoPage() {
           {/* Introduction */}
           <div className="text-center mb-8">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-green-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              How G-SAC Creates Agents
+              The Promethean Moment
             </h2>
             <p className="text-green-300/80 mb-6 max-w-2xl mx-auto">
-              Watch how a single natural language prompt becomes a fully functional agent with platform integration, tools, and skills.
+              Agents with skills. Real tools. Real reasoning. Real execution.
             </p>
             {!isPlaying && currentStep === 0 && (
               <button
@@ -271,13 +335,37 @@ export default function DemoPage() {
                 ▶ Start Demo
               </button>
             )}
-            {isPlaying && (
-              <button
-                onClick={resetDemo}
-                className="px-8 py-4 border-2 border-red-400 bg-red-400/20 text-red-300 hover:bg-red-400/30 transition-all font-mono font-bold text-lg"
-              >
-                ⏹ Stop Demo
-              </button>
+            {isPlaying && !isPaused && (
+              <div className="flex gap-4">
+                <button
+                  onClick={pauseDemo}
+                  className="px-8 py-4 border-2 border-yellow-400 bg-yellow-400/20 text-yellow-300 hover:bg-yellow-400/30 transition-all font-mono font-bold text-lg"
+                >
+                  ⏸ Pause
+                </button>
+                <button
+                  onClick={resetDemo}
+                  className="px-8 py-4 border-2 border-red-400 bg-red-400/20 text-red-300 hover:bg-red-400/30 transition-all font-mono font-bold text-lg"
+                >
+                  ⏹ Stop
+                </button>
+              </div>
+            )}
+            {isPlaying && isPaused && (
+              <div className="flex gap-4">
+                <button
+                  onClick={resumeDemo}
+                  className="px-8 py-4 border-2 border-green-400 bg-green-400/20 text-green-300 hover:bg-green-400/30 transition-all font-mono font-bold text-lg"
+                >
+                  ▶ Resume
+                </button>
+                <button
+                  onClick={resetDemo}
+                  className="px-8 py-4 border-2 border-red-400 bg-red-400/20 text-red-300 hover:bg-red-400/30 transition-all font-mono font-bold text-lg"
+                >
+                  ⏹ Stop
+                </button>
+              </div>
             )}
           </div>
 
@@ -285,16 +373,16 @@ export default function DemoPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-green-400/60 font-mono">
-                Step {currentStep + 1} of {demoSteps.length}
+                Step {currentStep + 1} of {enhancedDemoSteps.length} • {currentStepData.scriptTimestamp}
               </span>
               <span className="text-sm text-green-400/60 font-mono">
-                {Math.round(((currentStep + 1) / demoSteps.length) * 100)}%
+                {Math.round(((currentStep + 1) / enhancedDemoSteps.length) * 100)}%
               </span>
             </div>
             <div className="w-full bg-black/50 border border-green-400/30 rounded-full h-2">
               <div
                 className="bg-gradient-to-r from-green-400 to-cyan-400 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${((currentStep + 1) / demoSteps.length) * 100}%` }}
+                style={{ width: `${((currentStep + 1) / enhancedDemoSteps.length) * 100}%` }}
               />
             </div>
           </div>
@@ -309,67 +397,110 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Content with typewriter effect */}
-            <div className="bg-black/50 border border-green-400/20 p-6 rounded font-mono text-sm text-green-300 whitespace-pre-wrap min-h-[200px]">
-              {displayedText}
-              {isPlaying && displayedText.length < currentStepData.content.length && (
-                <span className="animate-pulse text-green-400">▊</span>
-              )}
-            </div>
+            {/* Content */}
+            {isStringContent ? (
+              <div className="bg-black/50 border border-green-400/20 p-6 rounded font-mono text-sm text-green-300 whitespace-pre-wrap min-h-[200px]">
+                {displayedText}
+                {isPlaying && typeof currentStepData.content === "string" && displayedText.length < currentStepData.content.length && (
+                  <span className="animate-pulse text-green-400">▊</span>
+                )}
+              </div>
+            ) : (
+              <div className="bg-black/50 border border-green-400/20 p-6 rounded min-h-[200px]">
+                {currentStepData.content}
+              </div>
+            )}
+
+            {/* Visual Component */}
+            {VisualComponent && (
+              <div className="mt-6">
+                <VisualComponent />
+              </div>
+            )}
 
             {/* Step Token Usage */}
             {currentStepData.tokenUsage && (
-              <div className="mt-4 p-4 bg-cyan-400/10 border border-cyan-400/30 rounded">
-                <div className="text-xs text-cyan-400/60 mb-2 font-mono font-bold">Step Token Usage:</div>
-                <div className="grid grid-cols-4 gap-4 text-xs font-mono">
-                  <div>
-                    <span className="text-cyan-400/60">Input:</span>
-                    <span className="text-cyan-400 ml-2">{currentStepData.tokenUsage.inputTokens.toLocaleString()}</span>
+              <div className="mt-6">
+                <TokenDisplay tokenUsage={currentStepData.tokenUsage} label="Step Token Usage" />
+              </div>
+            )}
+
+            {/* Action Execution */}
+            {currentStepData.action && currentStepData.action.type !== "none" && (
+              <div className="mt-6 space-y-4">
+                <button
+                  onClick={handleExecuteAction}
+                  disabled={executingAction}
+                  className="w-full px-6 py-3 border-2 border-purple-400 bg-purple-400/20 text-purple-300 hover:bg-purple-400/30 transition-all font-mono font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {executingAction ? (
+                    <>
+                      <span className="animate-spin">⏳</span>
+                      <span>Executing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⚡</span>
+                      <span>Execute This Step</span>
+                    </>
+                  )}
+                </button>
+
+                {actionError && (
+                  <div className="bg-red-400/10 border-2 border-red-400/50 p-4 rounded-lg">
+                    <div className="text-red-400 font-mono text-sm font-bold mb-2">Error:</div>
+                    <div className="text-red-300/80 text-sm font-mono">{actionError}</div>
                   </div>
-                  <div>
-                    <span className="text-cyan-400/60">Output:</span>
-                    <span className="text-cyan-400 ml-2">{currentStepData.tokenUsage.outputTokens.toLocaleString()}</span>
+                )}
+
+                {actionResult && (
+                  <div className="bg-green-400/10 border-2 border-green-400/50 p-4 rounded-lg">
+                    <div className="text-green-400 font-mono text-sm font-bold mb-2">✓ Success:</div>
+                    {actionResult.agent && (
+                      <div className="text-green-300/80 text-sm font-mono mb-2">
+                        Agent created: <span className="text-green-400">{actionResult.agent.name}</span> (ID: {actionResult.agent.id})
+                      </div>
+                    )}
+                    {actionResult.result && (
+                      <div className="text-green-300/80 text-sm font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
+                        {actionResult.result.substring(0, 500)}
+                        {actionResult.result.length > 500 && "..."}
+                      </div>
+                    )}
+                    {actionResult.path && (
+                      <div className="text-green-300/80 text-sm font-mono mt-2">
+                        Navigated to: <span className="text-green-400">{actionResult.path}</span>
+                      </div>
+                    )}
+                    {actionResult.tokenUsage && (
+                      <div className="mt-3">
+                        <TokenDisplay tokenUsage={actionResult.tokenUsage} label="Real Token Usage" />
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <span className="text-cyan-400/60">Total:</span>
-                    <span className="text-cyan-400 ml-2">{currentStepData.tokenUsage.totalTokens.toLocaleString()}</span>
-                  </div>
-                  <div>
-                    <span className="text-purple-400/60">Cost:</span>
-                    <span className="text-purple-400 ml-2">${currentStepData.tokenUsage.estimatedCost.toFixed(4)}</span>
-                  </div>
-                </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Cumulative Token Usage */}
           {cumulativeTokens.total > 0 && (
-            <div className="bg-gradient-to-r from-purple-400/10 via-cyan-400/10 to-green-400/10 border-2 border-purple-400/50 p-6 rounded-lg mb-8">
-              <h3 className="text-xl font-bold mb-4 text-purple-400">Cumulative Token Usage</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-sm text-cyan-400/60 font-mono mb-1">Total Input Tokens</div>
-                  <div className="text-3xl font-bold text-cyan-400">{cumulativeTokens.input.toLocaleString()}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-sm text-cyan-400/60 font-mono mb-1">Total Output Tokens</div>
-                  <div className="text-3xl font-bold text-cyan-400">{cumulativeTokens.output.toLocaleString()}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-sm text-purple-400/60 font-mono mb-1">Total Tokens</div>
-                  <div className="text-3xl font-bold text-purple-400">{cumulativeTokens.total.toLocaleString()}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-sm text-purple-400/60 font-mono mb-1">Total Cost</div>
-                  <div className="text-3xl font-bold text-purple-400">${cumulativeTokens.cost.toFixed(4)}</div>
-                </div>
-              </div>
+            <div className="mb-8">
+              <TokenDisplay 
+                tokenUsage={{
+                  inputTokens: cumulativeTokens.input,
+                  outputTokens: cumulativeTokens.output,
+                  totalTokens: cumulativeTokens.total,
+                  estimatedCost: cumulativeTokens.cost,
+                }} 
+                label="Cumulative Token Usage" 
+                size="large" 
+              />
             </div>
           )}
 
           {/* Step Navigation */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mb-8">
             <button
               onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
@@ -378,7 +509,7 @@ export default function DemoPage() {
               ← Previous
             </button>
             <div className="flex gap-2">
-              {demoSteps.map((_, idx) => (
+              {enhancedDemoSteps.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentStep(idx)}
@@ -393,8 +524,8 @@ export default function DemoPage() {
               ))}
             </div>
             <button
-              onClick={() => setCurrentStep(Math.min(demoSteps.length - 1, currentStep + 1))}
-              disabled={currentStep === demoSteps.length - 1}
+              onClick={() => setCurrentStep(Math.min(enhancedDemoSteps.length - 1, currentStep + 1))}
+              disabled={currentStep === enhancedDemoSteps.length - 1}
               className="px-6 py-3 border-2 border-green-400/50 text-green-400/70 hover:bg-green-400/10 hover:text-green-400 transition-all font-mono disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Next →
@@ -402,25 +533,31 @@ export default function DemoPage() {
           </div>
 
           {/* Call to Action */}
-          {currentStep === demoSteps.length - 1 && !isPlaying && (
+          {currentStep === enhancedDemoSteps.length - 1 && !isPlaying && (
             <div className="mt-12 text-center">
               <div className="bg-gradient-to-r from-green-400/10 to-purple-400/10 border-2 border-green-400/50 p-8 rounded-lg">
-                <h3 className="text-2xl font-bold mb-4 text-green-400">Ready to Create Your Own Agent?</h3>
+                <h3 className="text-2xl font-bold mb-4 text-green-400">Ready to Build?</h3>
                 <p className="text-green-300/80 mb-6 max-w-2xl mx-auto">
-                  This demo showed how G-SAC works. Now try it yourself with your own API key!
+                  ZwartifyOS is production-ready. Code-first. Open-source. Token-transparent.
                 </p>
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <Link
+                    href="/create-agent-visual"
+                    className="px-8 py-4 border-2 border-cyan-400 bg-cyan-400/20 text-cyan-300 hover:bg-cyan-400/30 transition-all font-mono font-bold"
+                  >
+                    🎨 Visual Builder
+                  </Link>
                   <Link
                     href="/create-agent"
                     className="px-8 py-4 border-2 border-purple-400 bg-purple-400/20 text-purple-300 hover:bg-purple-400/30 transition-all font-mono font-bold"
                   >
-                    Create Agent Now
+                    Create Agent
                   </Link>
                   <Link
                     href="/docs"
                     className="px-8 py-4 border-2 border-green-400 text-green-400 hover:bg-green-400/10 transition-all font-mono"
                   >
-                    Read Documentation
+                    Documentation
                   </Link>
                 </div>
               </div>
@@ -432,3 +569,10 @@ export default function DemoPage() {
   )
 }
 
+export default function DemoPage() {
+  return (
+    <DemoProvider>
+      <DemoPageContent />
+    </DemoProvider>
+  )
+}

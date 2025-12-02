@@ -2,15 +2,14 @@
  * Agent Registry
  * 
  * Manages agent definitions, metadata, and configurations
+ * Now uses backend adapter for storage (in-memory or remote)
  */
 
 import { AgentDefinition } from '../db/types'
 import { randomUUID } from 'crypto'
 import { getSkillByName } from '../skills/store'
 import { getGrowthPlaybooksFolderId } from '../rag/initializeGrowthPlaybooks'
-
-// In-memory store for now (will be replaced with database)
-const agents = new Map<string, AgentDefinition>()
+import { getBackendAdapter } from '../adapters'
 
 export interface AgentConfig {
   name: string
@@ -24,109 +23,76 @@ export interface AgentConfig {
   skillIds?: string[]
   createdByAgentId?: string | null
   creationPrompt?: string | null
+  // Export and marketplace settings
+  isPublic?: boolean
+  isExportable?: boolean
+  exportFormats?: string[]
+  category?: string
+  tags?: string[]
 }
 
 /**
  * Create a new agent
  */
-export function createAgent(config: AgentConfig, id?: string): AgentDefinition {
-  const now = new Date()
-  const agent: AgentDefinition = {
-    id: id || randomUUID(), // Allow custom ID for deterministic agents
-    name: config.name,
-    description: config.description,
-    prompt: config.prompt,
-    version: config.version || '1.0.0',
-    createdAt: now,
-    updatedAt: now,
-    enabled: config.enabled !== false, // Default to true
-    metadata: config.metadata,
-    ragFolderId: config.ragFolderId,
-    useMemory: config.useMemory !== false, // Default to true
-    skillIds: config.skillIds || [],
-    createdByAgentId: config.createdByAgentId ?? null,
-    creationPrompt: config.creationPrompt ?? null,
-  }
-
-  agents.set(agent.id, agent)
-  return agent
+export async function createAgent(config: AgentConfig, id?: string): Promise<AgentDefinition> {
+  const adapter = getBackendAdapter()
+  return adapter.createAgent(config, id)
 }
 
 /**
  * Get agent by ID
  */
-export function getAgent(id: string): AgentDefinition | undefined {
-  return agents.get(id)
+export async function getAgent(id: string): Promise<AgentDefinition | undefined> {
+  const adapter = getBackendAdapter()
+  return adapter.getAgent(id) ?? undefined
 }
 
 /**
  * Get agent by name
  */
-export function getAgentByName(name: string): AgentDefinition | undefined {
-  return Array.from(agents.values()).find(agent => agent.name === name)
+export async function getAgentByName(name: string): Promise<AgentDefinition | undefined> {
+  const adapter = getBackendAdapter()
+  return adapter.getAgentByName(name) ?? undefined
 }
 
 /**
  * List all agents
  */
-export function listAgents(enabledOnly = false): AgentDefinition[] {
-  const allAgents = Array.from(agents.values())
-  
-  if (enabledOnly) {
-    return allAgents.filter(agent => agent.enabled)
-  }
-  
-  return allAgents.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+export async function listAgents(enabledOnly = false): Promise<AgentDefinition[]> {
+  const adapter = getBackendAdapter()
+  return adapter.listAgents(enabledOnly)
 }
 
 /**
  * Update agent
  */
-export function updateAgent(id: string, updates: Partial<AgentConfig>): AgentDefinition | null {
-  const agent = agents.get(id)
-  if (!agent) return null
-
-  const updated: AgentDefinition = {
-    ...agent,
-    ...updates,
-    updatedAt: new Date(),
-    // Preserve ID and createdAt
-    id: agent.id,
-    createdAt: agent.createdAt,
-    // Preserve lineage fields unless explicitly updated
-    createdByAgentId: updates.createdByAgentId !== undefined ? updates.createdByAgentId : agent.createdByAgentId,
-    creationPrompt: updates.creationPrompt !== undefined ? updates.creationPrompt : agent.creationPrompt,
-  }
-
-  agents.set(id, updated)
-  return updated
+export async function updateAgent(id: string, updates: Partial<AgentConfig>): Promise<AgentDefinition | null> {
+  const adapter = getBackendAdapter()
+  return adapter.updateAgent(id, updates)
 }
 
 /**
  * Delete agent
  */
-export function deleteAgent(id: string): boolean {
-  return agents.delete(id)
+export async function deleteAgent(id: string): Promise<boolean> {
+  const adapter = getBackendAdapter()
+  return adapter.deleteAgent(id)
 }
 
 /**
  * Enable/disable agent
  */
-export function setAgentEnabled(id: string, enabled: boolean): boolean {
-  const agent = agents.get(id)
-  if (!agent) return false
-
-  agent.enabled = enabled
-  agent.updatedAt = new Date()
-  agents.set(id, agent)
-  return true
+export async function setAgentEnabled(id: string, enabled: boolean): Promise<boolean> {
+  const adapter = getBackendAdapter()
+  const result = await adapter.updateAgent(id, { enabled })
+  return result !== null
 }
 
 /**
  * Initialize default agents
  * This should be called after skills are initialized
  */
-export function initializeDefaultAgents(): void {
+export async function initializeDefaultAgents(): Promise<void> {
   try {
     // Helper to generate deterministic ID from name
     const generateIdFromName = (name: string): string => {
@@ -146,9 +112,9 @@ export function initializeDefaultAgents(): void {
     }
     
     // Create PDF Processing Agent
-    if (!getAgentByName('pdf-processor')) {
+    if (!(await getAgentByName('pdf-processor'))) {
       const pdfSkill = getSkillByName('pdf-processing')
-      createAgent({
+      await createAgent({
         name: 'pdf-processor',
         description: 'Extract text, tables, and data from PDF documents. Perfect for document digitization, invoice processing, and form automation.',
         prompt: `You are a PDF processing specialist. When a user uploads a PDF, you can:
@@ -173,9 +139,9 @@ If the PDF contains forms, invoices, or structured data, extract and organise it
     }
 
     // Create Data Analysis Agent
-    if (!getAgentByName('data-analyst')) {
+    if (!(await getAgentByName('data-analyst'))) {
       const dataSkill = getSkillByName('data-analysis')
-      createAgent({
+      await createAgent({
         name: 'data-analyst',
         description: 'Analyse datasets, generate insights, create visualisations, and perform statistical analysis. Ideal for business intelligence and reporting.',
         prompt: `You are a data analysis expert. Help users understand their data by:
@@ -199,9 +165,9 @@ Your approach:
     }
 
     // Create Code Review Agent
-    if (!getAgentByName('code-reviewer')) {
+    if (!(await getAgentByName('code-reviewer'))) {
       const codeSkill = getSkillByName('code-review')
-      createAgent({
+      await createAgent({
         name: 'code-reviewer',
         description: 'Review code for bugs, security vulnerabilities, performance issues, and best practices. Essential for development teams.',
         prompt: `You are a senior code reviewer. Analyse code systematically:
@@ -225,9 +191,9 @@ Provide:
     }
 
     // Create Content Writer Agent
-    if (!getAgentByName('content-writer')) {
+    if (!(await getAgentByName('content-writer'))) {
       const contentSkill = getSkillByName('content-writing')
-      createAgent({
+      await createAgent({
         name: 'content-writer',
         description: 'Create engaging blog posts, marketing copy, social media content, and documentation. Perfect for marketing teams and content creators.',
         prompt: `You are a professional content writer. Create engaging, well-structured content:
@@ -251,9 +217,9 @@ Your writing style:
     }
 
     // Create Email Assistant Agent
-    if (!getAgentByName('email-assistant')) {
+    if (!(await getAgentByName('email-assistant'))) {
       const emailSkill = getSkillByName('email-management')
-      createAgent({
+      await createAgent({
         name: 'email-assistant',
         description: 'Draft professional emails, create templates, and improve email communication. Ideal for sales, support, and business teams.',
         prompt: `You are an email communication specialist. Help users:
@@ -277,9 +243,9 @@ Guidelines:
     }
 
     // Create Research Assistant Agent
-    if (!getAgentByName('research-assistant')) {
+    if (!(await getAgentByName('research-assistant'))) {
       const researchSkill = getSkillByName('research')
-      createAgent({
+      await createAgent({
         name: 'research-assistant',
         description: 'Conduct thorough research, analyse information, and synthesise findings. Perfect for analysts, researchers, and decision-makers.',
         prompt: `You are a research specialist. Help users:
@@ -303,11 +269,11 @@ Your approach:
     }
 
     // Create Customer Support Agent
-    if (!getAgentByName('customer-support')) {
+    if (!(await getAgentByName('customer-support'))) {
       const pdfSkill = getSkillByName('pdf-processing')
       const emailSkill = getSkillByName('email-management')
       const skillIds = [pdfSkill, emailSkill].filter(Boolean).map((s: any) => s?.id).filter(Boolean)
-      createAgent({
+      await createAgent({
         name: 'customer-support',
         description: 'Friendly customer support agent that can analyse documents, draft emails, and help customers effectively. Ideal for support teams.',
         prompt: `You are a friendly and professional customer support agent. Help customers by:
@@ -331,8 +297,8 @@ Your approach:
     }
 
     // Create main agent if it doesn't exist
-    if (!getAgentByName('main')) {
-      createAgent({
+    if (!(await getAgentByName('main'))) {
+      await createAgent({
         name: 'main',
         description: 'Main agent for general-purpose tasks',
         prompt: 'You are a helpful AI assistant. Provide clear, accurate, and helpful responses.',
@@ -342,8 +308,8 @@ Your approach:
     }
 
     // Create expert agent if it doesn't exist
-    if (!getAgentByName('expert')) {
-      createAgent({
+    if (!(await getAgentByName('expert'))) {
+      await createAgent({
         name: 'expert',
         description: 'Expert consultant agent with domain-specific knowledge',
         prompt: 'You are an expert consultant. Provide detailed, professional guidance with reasoning.',
@@ -353,7 +319,7 @@ Your approach:
     }
 
     // Create G-SAC (Growth Strategy Agent Creator) if it doesn't exist
-    if (!getAgentByName('g-sac')) {
+    if (!(await getAgentByName('g-sac'))) {
       const businessGoalSkill = getSkillByName('business-goal-translator')
       const toolIntegratorSkill = getSkillByName('tool-integrator')
       const platformIntegratorSkill = getSkillByName('platform-integrator')
@@ -365,7 +331,7 @@ Your approach:
         platformIntegratorSkill?.id,
       ].filter((id): id is string => !!id)
 
-      createAgent({
+      await createAgent({
         name: 'g-sac',
         description: 'Growth Strategy Agent Creator - Creates specialised agents from single natural language prompts',
         prompt: `You are the ZwartifyOS Growth Strategy Agent Creator (G-SAC), a specialised AI agent with the unique capability to autonomously create and deploy new agents from a single natural language prompt.
@@ -409,7 +375,9 @@ When a user provides a request to create an agent, follow these steps autonomous
 
 4. **Configure Platform Support**
    - Use PlatformIntegrator to determine platform requirements
-   - Enable callMCP tool and configure MCP servers
+   - Enable callMCP tool - MCP servers are automatically configured based on detected platforms
+   - The system auto-discovers MCP servers from environment variables (MCP_SLACK_URL, MCP_DISCORD_URL, etc.)
+   - You don't need to manually specify MCP server URLs - just identify which platforms are needed
    - Inject platform-agnostic instructions into the agent prompt
    - Ensure the agent works across all configured platforms
 
@@ -425,7 +393,7 @@ When a user provides a request to create an agent, follow these steps autonomous
        - Best practices and constraints
      - tools: Array of tool names to enable (include "callMCP" if platform integration needed)
      - skillIds: Relevant skill IDs for domain expertise
-     - metadata: Additional configuration including mcpServers if needed
+     - metadata: Additional configuration (mcpServers are auto-configured, but can be explicitly provided if needed)
 
 6. **Verify and Confirm**
    - Review the created agent configuration
@@ -481,17 +449,17 @@ if (typeof window === 'undefined') {
     require('../skills/store')
     // Initialize RAG folder for Growth Playbooks
     require('../rag/initializeGrowthPlaybooks')
-    // Initialize agents immediately after skills are loaded
-    initializeDefaultAgents()
+    // Initialize agents immediately after skills are loaded (async)
+    initializeDefaultAgents().catch((error) => {
+      console.error('Error initializing agents:', error)
+    })
   } catch (error) {
     console.error('Error initializing agents:', error)
     // Fallback: Try again after a short delay if skills aren't ready
     setTimeout(() => {
-      try {
-        initializeDefaultAgents()
-      } catch (retryError) {
+      initializeDefaultAgents().catch((retryError) => {
         console.error('Error retrying agent initialization:', retryError)
-      }
+      })
     }, 100)
   }
 }

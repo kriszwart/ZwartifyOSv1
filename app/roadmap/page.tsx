@@ -96,6 +96,18 @@ export default function RoadmapPage() {
 
   const features = [
     {
+      name: "Tool Search",
+      icon: "🔍",
+      description: "Dynamic tool discovery (85% token savings)",
+      link: "/docs"
+    },
+    {
+      name: "Tool Examples",
+      icon: "📝",
+      description: "Pattern examples for 90% accuracy",
+      link: "/docs"
+    },
+    {
       name: "Skills System",
       icon: "🧠",
       description: "Modular capabilities that add domain expertise",
@@ -135,13 +147,55 @@ export default function RoadmapPage() {
       name: "MCP Integration",
       icon: "🌐",
       description: "Universal platform support",
-      link: "/docs"
+      link: "/mcp"
     },
     {
       name: "Agent Lineage",
       icon: "🔗",
       description: "Track agent creation history",
       link: "/agents"
+    },
+    {
+      name: "Agent Sessions",
+      icon: "🔄",
+      description: "Persistent multi-turn sessions",
+      link: "/docs"
+    },
+    {
+      name: "Autonomous Mode",
+      icon: "🤖",
+      description: "Multi-turn tool loops",
+      link: "/docs"
+    },
+    {
+      name: "Background Jobs",
+      icon: "⚡",
+      description: "Async job queue processing",
+      link: "/dashboard"
+    },
+    {
+      name: "Event Triggers",
+      icon: "🎯",
+      description: "Webhooks and agent chains",
+      link: "/docs"
+    },
+    {
+      name: "Self-Improve",
+      icon: "📈",
+      description: "Performance self-analysis",
+      link: "/docs"
+    },
+    {
+      name: "Error Analysis",
+      icon: "🔍",
+      description: "Learn from failures",
+      link: "/docs"
+    },
+    {
+      name: "Prompt Refiner",
+      icon: "✨",
+      description: "Auto-improve prompts",
+      link: "/docs"
     }
   ]
 
@@ -185,6 +239,12 @@ export default function RoadmapPage() {
           </div>
           <h1 className="text-2xl font-bold font-mono">The Roadmap</h1>
           <div className="flex items-center gap-4">
+            <Link
+              href="/changelog"
+              className="text-green-400 hover:text-green-300 transition-colors font-mono text-sm"
+            >
+              Changelog
+            </Link>
             <Link
               href="/agents"
               className="text-green-400 hover:text-green-300 transition-colors font-mono text-sm"
@@ -303,6 +363,12 @@ export default function RoadmapPage() {
               Start creating your first agent with G-SAC. It takes just a single prompt.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
+              <Link
+                href="/create-agent-visual"
+                className="px-8 py-4 border-2 border-cyan-400 bg-cyan-400/20 text-cyan-300 hover:bg-cyan-400/30 transition-colors font-mono font-bold"
+              >
+                🎨 Visual Builder
+              </Link>
               <Link
                 href="/playground"
                 className="px-8 py-4 border-2 border-green-400 bg-green-400/20 text-green-300 hover:bg-green-400/30 transition-colors font-mono font-bold"

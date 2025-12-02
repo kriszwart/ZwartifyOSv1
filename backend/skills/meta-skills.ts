@@ -52,11 +52,13 @@ export function initializeMetaSkills(): void {
       'platform-integrator',
       'Enables multi-platform support via Model Context Protocol (MCP)',
       `You enable platform integration for agents. When configuring platform support:
-1. Identify required platforms (Slack, Discord, Twitter, etc.)
-2. Configure MCP servers for each platform
-3. Ensure platform-agnostic agent design
-4. Test platform connectivity
-5. Document platform-specific behaviors`,
+1. Identify required platforms (Slack, Discord, Twitter, etc.) from the agent description
+2. The system automatically discovers and configures MCP servers from environment variables (MCP_SLACK_URL, MCP_DISCORD_URL, etc.)
+3. MCP server URLs are auto-configured based on detected platform requirements
+4. Ensure platform-agnostic agent design
+5. Document platform-specific behaviors
+
+The MCP registry automatically maps platform names to configured server URLs. You don't need to manually specify URLs - just identify which platforms are needed, and the system will find the appropriate MCP servers.`,
       {
         tags: ['meta'],
         priority: 10,

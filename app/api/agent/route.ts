@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   // Check for user-provided API key in header (client-side)
   const userApiKey = request.headers.get('x-user-api-key')
   
-  let body: { input?: string; agentId?: string; metadata?: Record<string, unknown>; image?: string }
+  let body: { input?: string; agentId?: string; metadata?: Record<string, unknown>; image?: string; imageUrl?: string }
   
   try {
     body = await request.json()
@@ -42,7 +42,32 @@ export async function POST(request: NextRequest) {
     )
   }
   
-  let { input, agentId, metadata, image } = body
+  let { input, agentId, metadata, image, imageUrl } = body
+  
+  // If imageUrl is provided, fetch and convert to base64
+  if (imageUrl && !image) {
+    try {
+      const response = await fetch(imageUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; ZwartifyOS/1.0)',
+        },
+      })
+      
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || 'image/png'
+        
+        if (contentType.startsWith('image/')) {
+          const arrayBuffer = await response.arrayBuffer()
+          const buffer = Buffer.from(arrayBuffer)
+          const base64 = buffer.toString('base64')
+          image = `data:${contentType};base64,${base64}`
+        }
+      }
+    } catch (urlError) {
+      console.error('Error fetching image from URL:', urlError)
+      // Continue without image if URL fetch fails
+    }
+  }
 
   if (!input || typeof input !== "string") {
     const errorResult = handleApiError(

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAgentConfig } from '../hooks/useAgentConfig'
 import type { CustomNode } from '../types'
 import WorkflowPreview from './WorkflowPreview'
+import FullscreenTest from './FullscreenTest'
 
 interface AgentPreviewProps {
   nodes: CustomNode[]
@@ -12,6 +13,7 @@ interface AgentPreviewProps {
 export default function AgentPreview({ nodes }: AgentPreviewProps) {
   const agentConfig = useAgentConfig(nodes)
   const [activeTab, setActiveTab] = useState<'preview' | 'test'>('preview')
+  const [showFullscreen, setShowFullscreen] = useState(false)
 
   if (!agentConfig) {
     return (
@@ -40,14 +42,12 @@ export default function AgentPreview({ nodes }: AgentPreviewProps) {
           Preview
         </button>
         <button
-          onClick={() => setActiveTab('test')}
-          className={`flex-1 px-3 py-2 text-xs font-mono transition-all ${
-            activeTab === 'test'
-              ? 'text-green-400 border-b-2 border-green-400 bg-green-400/10'
-              : 'text-green-400/60 hover:text-green-400/80'
-          }`}
+          onClick={() => {
+            setShowFullscreen(true)
+          }}
+          className="flex-1 px-3 py-2 text-xs font-mono transition-all text-green-400/60 hover:text-green-400/80 hover:bg-green-400/5"
         >
-          Test
+          🚀 Test (Fullscreen)
         </button>
       </div>
       
@@ -116,6 +116,25 @@ export default function AgentPreview({ nodes }: AgentPreviewProps) {
             No components configured
           </div>
         )}
+        {(agentConfig as any).isPublic || (agentConfig as any).isExportable !== false ? (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {(agentConfig as any).isPublic && (
+              <span className="px-1.5 py-0.5 text-[10px] border border-blue-400/50 bg-blue-400/10 text-blue-400 font-mono">
+                Public
+              </span>
+            )}
+            {(agentConfig as any).isExportable !== false && (
+              <span className="px-1.5 py-0.5 text-[10px] border border-green-400/50 bg-green-400/10 text-green-400 font-mono">
+                Exportable
+              </span>
+            )}
+            {(agentConfig as any).category && (
+              <span className="px-1.5 py-0.5 text-[10px] border border-purple-400/50 bg-purple-400/10 text-purple-400 font-mono">
+                {(agentConfig as any).category}
+              </span>
+            )}
+          </div>
+        ) : null}
         <div className="mt-3 pt-3 border-t border-green-400/20">
           <div className="text-green-400/60 mb-1 text-[10px]">Prompt Preview:</div>
           <div className="text-green-300/60 text-[10px] line-clamp-4 break-words">
@@ -125,9 +144,20 @@ export default function AgentPreview({ nodes }: AgentPreviewProps) {
             </div>
           </div>
         ) : (
-          <WorkflowPreview nodes={nodes} />
+          <div className="p-4 flex items-center justify-center h-full">
+            <button
+              onClick={() => setShowFullscreen(true)}
+              className="px-6 py-3 border-2 border-green-400 text-green-400 hover:bg-green-400 hover:text-black transition-all font-mono text-sm font-bold"
+            >
+              🚀 Open Fullscreen Test Console
+            </button>
+          </div>
         )}
       </div>
+      
+      {showFullscreen && (
+        <FullscreenTest nodes={nodes} onClose={() => setShowFullscreen(false)} />
+      )}
     </div>
   )
 }

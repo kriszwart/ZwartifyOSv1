@@ -264,6 +264,15 @@ export function storeChunks(chunkList: RAGChunk[]): void {
 }
 
 /**
+ * Get chunks for a file
+ */
+export function getRAGChunks(fileId: string): RAGChunk[] {
+  return Array.from(chunks.values())
+    .filter(chunk => chunk.fileId === fileId)
+    .sort((a, b) => a.chunkIndex - b.chunkIndex)
+}
+
+/**
  * Get file size limit (10 MB)
  */
 export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB

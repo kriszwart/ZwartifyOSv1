@@ -89,7 +89,7 @@ export default function NodePanel({
               placeholder="Agent system prompt..."
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -109,6 +109,26 @@ export default function NodePanel({
               <span className="text-xs font-mono text-green-300/80">Use Memory</span>
             </label>
           </div>
+          {/* Advanced Tool Use Options */}
+          <div className="mt-4 pt-4 border-t border-green-400/20">
+            <div className="text-[10px] font-mono text-green-400/50 uppercase tracking-wider mb-3">
+              Advanced Tool Use
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={(nodeData as any).useDeferredLoading === true}
+                onChange={(e) => handleUpdate({ useDeferredLoading: e.target.checked } as any)}
+                className="w-4 h-4 border-green-400/30 bg-black text-green-400"
+              />
+              <span className="text-xs font-mono text-green-300/80 group-hover:text-green-300">
+                ⚡ Deferred Loading
+              </span>
+            </label>
+            <p className="text-[10px] font-mono text-green-400/40 mt-1 ml-6">
+              Only load searchTools initially. Saves 85% tokens.
+            </p>
+          </div>
           <div>
             <label className="block text-xs font-mono text-green-300/80 mb-1">Version</label>
             <input
@@ -117,6 +137,55 @@ export default function NodePanel({
               onChange={(e) => handleUpdate({ version: e.target.value } as Partial<AgentConfigNodeData>)}
               className="w-full px-3 py-2 bg-black border border-green-400/30 text-green-400 font-mono text-sm focus:outline-none focus:border-green-400"
             />
+          </div>
+          {/* Export Settings */}
+          <div className="mt-4 pt-4 border-t border-green-400/20">
+            <div className="text-[10px] font-mono text-green-400/50 uppercase tracking-wider mb-3">
+              Export & Marketplace
+            </div>
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(nodeData as AgentConfigNodeData).isPublic || false}
+                  onChange={(e) => handleUpdate({ isPublic: e.target.checked } as Partial<AgentConfigNodeData>)}
+                  className="w-4 h-4 border-green-400/30 bg-black text-green-400"
+                />
+                <span className="text-xs font-mono text-green-300/80">Make Public (show in marketplace)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(nodeData as AgentConfigNodeData).isExportable !== false}
+                  onChange={(e) => handleUpdate({ isExportable: e.target.checked } as Partial<AgentConfigNodeData>)}
+                  className="w-4 h-4 border-green-400/30 bg-black text-green-400"
+                />
+                <span className="text-xs font-mono text-green-300/80">Allow Export</span>
+              </label>
+              <div>
+                <label className="block text-xs font-mono text-green-300/80 mb-1">Category</label>
+                <input
+                  type="text"
+                  value={(nodeData as AgentConfigNodeData).category || ''}
+                  onChange={(e) => handleUpdate({ category: e.target.value } as Partial<AgentConfigNodeData>)}
+                  className="w-full px-3 py-2 bg-black border border-green-400/30 text-green-400 font-mono text-sm focus:outline-none focus:border-green-400"
+                  placeholder="e.g., Support, Sales, Content"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono text-green-300/80 mb-1">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={(nodeData as AgentConfigNodeData).tags?.join(', ') || ''}
+                  onChange={(e) => {
+                    const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                    handleUpdate({ tags } as Partial<AgentConfigNodeData>)
+                  }}
+                  className="w-full px-3 py-2 bg-black border border-green-400/30 text-green-400 font-mono text-sm focus:outline-none focus:border-green-400"
+                  placeholder="tag1, tag2, tag3"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

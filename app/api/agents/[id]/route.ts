@@ -9,18 +9,19 @@ export async function GET(
   try {
     const { id } = await params
     // Ensure agents are initialized (in case they weren't on module load)
-    initializeDefaultAgents()
+    await initializeDefaultAgents()
     
-    const agent = getAgent(id)
+    const agent = await getAgent(id)
     
     if (!agent) {
       // Try initializing again and retry
-      initializeDefaultAgents()
-      const retryAgent = getAgent(id)
+      await initializeDefaultAgents()
+      const retryAgent = await getAgent(id)
       
       if (!retryAgent) {
         console.error(`Agent not found: ${id}`)
-        console.error('Available agents:', listAgents().map(a => ({ id: a.id, name: a.name })))
+        const allAgents = await listAgents()
+        console.error('Available agents:', allAgents.map(a => ({ id: a.id, name: a.name })))
         return NextResponse.json(
           { error: "Agent not found" },
           { status: 404 }
@@ -67,7 +68,10 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { name, description, prompt, version, enabled, metadata } = body
+    const { 
+      name, description, prompt, version, enabled, metadata, ragFolderId, useMemory, skillIds,
+      isPublic, isExportable, exportFormats, category, tags
+    } = body
 
     const updates: Partial<AgentConfig> = {}
     if (name !== undefined) updates.name = name
@@ -76,8 +80,16 @@ export async function PUT(
     if (version !== undefined) updates.version = version
     if (enabled !== undefined) updates.enabled = enabled
     if (metadata !== undefined) updates.metadata = metadata
+    if (ragFolderId !== undefined) updates.ragFolderId = ragFolderId
+    if (useMemory !== undefined) updates.useMemory = useMemory
+    if (skillIds !== undefined) updates.skillIds = skillIds
+    if (isPublic !== undefined) updates.isPublic = isPublic
+    if (isExportable !== undefined) updates.isExportable = isExportable
+    if (exportFormats !== undefined) updates.exportFormats = exportFormats
+    if (category !== undefined) updates.category = category
+    if (tags !== undefined) updates.tags = tags
 
-    const agent = updateAgent(id, updates)
+    const agent = await updateAgent(id, updates)
     
     if (!agent) {
       return NextResponse.json(
@@ -102,7 +114,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const deleted = deleteAgent(id)
+    const deleted = await deleteAgent(id)
     
     if (!deleted) {
       return NextResponse.json(
