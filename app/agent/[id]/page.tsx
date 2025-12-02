@@ -490,227 +490,231 @@ export default function AgentDetailPage() {
             </div>
           </div>
 
-          {/* Chat Interface */}
-          <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-4 text-green-400">Test Agent</h3>
-            
-            {/* Messages Thread */}
-            <div className="mb-6 max-h-[600px] overflow-y-auto space-y-4">
-              {messages.length === 0 && !isLoading && (
-                <div className="text-center py-8 text-green-400/60 font-mono text-sm">
-                  Start a conversation with {agent.name}
-                </div>
-              )}
+          {activeTab === 'chat' && (
+            <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-4 text-green-400">Test Agent</h3>
               
-              {messages.map((message, index) => (
-                <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] ${message.role === "user" ? "order-2" : "order-1"}`}>
-                    {/* Header */}
-                    <div className={`flex items-center gap-2 mb-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                      <span className={`text-xs font-mono uppercase tracking-wider ${message.role === "user" ? "text-cyan-400" : "text-green-300"}`}>
-                        {message.role === "user" ? "You" : agent.name}
-                      </span>
-                      <span className="text-xs text-green-400/40 font-mono">
-                        {message.timestamp.toLocaleTimeString()}
-                      </span>
-                    </div>
-
-                    {/* Message Bubble */}
-                    <div
-                      className={`relative px-4 py-3 rounded-lg border-2 ${
-                        message.role === "user"
-                          ? "bg-cyan-400/5 border-cyan-400/30 text-cyan-300"
-                          : "bg-green-400/5 border-green-400/30 text-green-300"
-                      }`}
-                      style={{
-                        boxShadow: message.role === "user"
-                          ? "0 0 20px rgba(0, 255, 255, 0.1)"
-                          : "0 0 20px rgba(0, 255, 0, 0.1)",
-                      }}
-                    >
-                      {message.role === "user" ? (
-                        <div className="space-y-2">
-                          {message.imageUrl && (
-                            message.imageUrl.includes('data:application/pdf') ? (
-                              <div className="border-2 border-cyan-400/50 rounded p-4 bg-black/50">
-                                <div className="text-cyan-400 font-mono text-sm mb-2">📄 PDF Document</div>
-                                <div className="text-cyan-400/60 font-mono text-xs">Ready to analyse</div>
-                              </div>
-                            ) : (
-                              <img 
-                                src={message.imageUrl} 
-                                alt="Uploaded file" 
-                                className="max-w-full rounded border border-cyan-400/30"
-                              />
-                            )
-                          )}
-                          {message.content && (
-                            <p className="font-mono text-sm whitespace-pre-wrap">{message.content}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="relative group">
-                          {/* Download Buttons */}
-                          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                            <button
-                              onClick={() => {
-                                downloadMarkdown(message.content, agent.name, message.timestamp)
-                              }}
-                              className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1"
-                              title="Download as Markdown"
-                            >
-                              📄 MD
-                            </button>
-                            <button
-                              onClick={async () => {
-                                const elementId = `message-${index}`
-                                setDownloadingPDF(elementId)
-                                try {
-                                  // Use the existing rendered markdown element
-                                  const existingElement = document.getElementById(elementId)
-                                  if (!existingElement) {
-                                    throw new Error('Message element not found. Please ensure the message is visible.')
-                                  }
-                                  
-                                  await downloadPDF(elementId, agent.name, message.timestamp, message.content)
-                                } catch (error) {
-                                  console.error('Error downloading PDF:', error)
-                                  const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-                                  alert(`Failed to generate PDF: ${errorMessage}`)
-                                } finally {
-                                  setDownloadingPDF(null)
-                                }
-                              }}
-                              disabled={downloadingPDF === `message-${index}`}
-                              className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Download as PDF"
-                            >
-                              {downloadingPDF === `message-${index}` ? '⏳' : '📋'} PDF
-                            </button>
-                          </div>
-                          
-                          {/* Markdown Content */}
-                          <div 
-                            id={`message-${index}`}
-                            className="prose prose-invert prose-sm max-w-none"
-                          >
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              rehypePlugins={[rehypeHighlight]}
-                              components={enhancedMarkdownComponents}
-                            >
-                              {message.content}
-                            </ReactMarkdown>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+              {/* Messages Thread */}
+              <div className="mb-6 max-h-[600px] overflow-y-auto space-y-4">
+                {messages.length === 0 && !isLoading && (
+                  <div className="text-center py-8 text-green-400/60 font-mono text-sm">
+                    Start a conversation with {agent.name}
                   </div>
-                </div>
-              ))}
-
-              {/* Loading indicator */}
-              {isLoading && (
-                <div className="flex justify-start mb-6">
-                  <div className="max-w-[85%]">
-                    <div className="px-6 py-5 rounded-lg border-2 bg-green-400/5 border-green-400/30"
-                         style={{ boxShadow: "0 0 30px rgba(0, 255, 0, 0.2)" }}>
-                      <AgentThinkingQuote variant="compact" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Image/PDF Preview - Only show when no messages */}
-            {selectedImage && messages.length === 0 && (
-              <div className="relative inline-block max-w-md mb-4">
-                {selectedImage.includes('data:application/pdf') ? (
-                  <div className="border-2 border-cyan-400/50 rounded p-4 bg-black/50">
-                    <div className="text-green-400 font-mono text-sm mb-2">📄 PDF Document</div>
-                    <div className="text-green-400/60 font-mono text-xs">Ready to analyse</div>
-                  </div>
-                ) : (
-                  <img 
-                    src={selectedImage} 
-                    alt="Selected file" 
-                    className="max-w-full rounded border-2 border-cyan-400/50"
-                  />
                 )}
-                <button
-                  onClick={() => {
-                    setSelectedImage(null)
-                    if (fileInputRef.current) fileInputRef.current.value = ''
-                  }}
-                  className="absolute top-2 right-2 px-2 py-1 bg-red-500/80 text-white text-xs rounded hover:bg-red-500"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
+                
+                {messages.map((message, index) => (
+                  <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[85%] ${message.role === "user" ? "order-2" : "order-1"}`}>
+                      {/* Header */}
+                      <div className={`flex items-center gap-2 mb-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                        <span className={`text-xs font-mono uppercase tracking-wider ${message.role === "user" ? "text-cyan-400" : "text-green-300"}`}>
+                          {message.role === "user" ? "You" : agent.name}
+                        </span>
+                        <span className="text-xs text-green-400/40 font-mono">
+                          {message.timestamp.toLocaleTimeString()}
+                        </span>
+                      </div>
 
-            {/* Input - Always at bottom */}
-            <div className="space-y-4">
-              {/* Image URL Input */}
-              <div>
-                <input
-                  type="text"
-                  value={imageUrl}
-                  onChange={(e) => handleImageUrlChange(e.target.value)}
-                  placeholder="Or enter image URL (e.g., https://example.com/image.png)"
-                  className="w-full px-4 py-2 bg-black/50 border border-cyan-400/30 rounded text-green-400 placeholder-green-400/40 font-mono text-sm focus:outline-none focus:border-cyan-400/60"
-                />
-              </div>
-              
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                    e.preventDefault()
-                    handleSend()
-                  }
-                }}
-                placeholder={selectedImage ? (selectedImage.includes('data:application/pdf') ? "Describe what you want analysed from the PDF... (Cmd/Ctrl + Enter to send)" : "Describe what you want analysed... (Cmd/Ctrl + Enter to send)") : "Type your message... (Cmd/Ctrl + Enter to send)"}
-                className="w-full h-32 bg-black border-2 border-green-400/50 text-green-400 font-mono p-4 focus:outline-none focus:border-green-400 resize-none rounded-lg"
-                disabled={isLoading || !agent.enabled}
-              />
+                      {/* Message Bubble */}
+                      <div
+                        className={`relative px-4 py-3 rounded-lg border-2 ${
+                          message.role === "user"
+                            ? "bg-cyan-400/5 border-cyan-400/30 text-cyan-300"
+                            : "bg-green-400/5 border-green-400/30 text-green-300"
+                        }`}
+                        style={{
+                          boxShadow: message.role === "user"
+                            ? "0 0 20px rgba(0, 255, 255, 0.1)"
+                            : "0 0 20px rgba(0, 255, 0, 0.1)",
+                        }}
+                      >
+                        {message.role === "user" ? (
+                          <div className="space-y-2">
+                            {message.imageUrl && (
+                              message.imageUrl.includes('data:application/pdf') ? (
+                                <div className="border-2 border-cyan-400/50 rounded p-4 bg-black/50">
+                                  <div className="text-cyan-400 font-mono text-sm mb-2">📄 PDF Document</div>
+                                  <div className="text-cyan-400/60 font-mono text-xs">Ready to analyse</div>
+                                </div>
+                              ) : (
+                                <img 
+                                  src={message.imageUrl} 
+                                  alt="Uploaded file" 
+                                  className="max-w-full rounded border border-cyan-400/30"
+                                />
+                              )
+                            )}
+                            {message.content && (
+                              <p className="font-mono text-sm whitespace-pre-wrap">{message.content}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="relative group">
+                            {/* Download Buttons */}
+                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              <button
+                                onClick={() => {
+                                  downloadMarkdown(message.content, agent.name, message.timestamp)
+                                }}
+                                className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1"
+                                title="Download as Markdown"
+                              >
+                                📄 MD
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  const elementId = `message-${index}`
+                                  setDownloadingPDF(elementId)
+                                  try {
+                                    // Use the existing rendered markdown element
+                                    const existingElement = document.getElementById(elementId)
+                                    if (!existingElement) {
+                                      throw new Error('Message element not found. Please ensure the message is visible.')
+                                    }
+                                    
+                                    await downloadPDF(elementId, agent.name, message.timestamp, message.content)
+                                  } catch (error) {
+                                    console.error('Error downloading PDF:', error)
+                                    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+                                    alert(`Failed to generate PDF: ${errorMessage}`)
+                                  } finally {
+                                    setDownloadingPDF(null)
+                                  }
+                                }}
+                                disabled={downloadingPDF === `message-${index}`}
+                                className="px-2 py-1 bg-black/90 border border-green-400/50 text-green-400 hover:bg-green-400/10 transition-all rounded text-xs font-mono flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Download as PDF"
+                              >
+                                {downloadingPDF === `message-${index}` ? '⏳' : '📋'} PDF
+                              </button>
+                            </div>
+                            
+                            {/* Markdown Content */}
+                            <div 
+                              id={`message-${index}`}
+                              className="prose prose-invert prose-sm max-w-none"
+                            >
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeHighlight]}
+                                components={enhancedMarkdownComponents}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*,application/pdf"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className="px-4 py-2 border border-green-400/50 text-green-400 font-mono text-sm hover:bg-green-400/10 transition-colors cursor-pointer rounded"
+                {/* Loading indicator */}
+                {isLoading && (
+                  <div className="flex justify-start mb-6">
+                    <div className="max-w-[85%]">
+                      <div className="px-6 py-5 rounded-lg border-2 bg-green-400/5 border-green-400/30"
+                           style={{ boxShadow: "0 0 30px rgba(0, 255, 0, 0.2)" }}>
+                        <AgentThinkingQuote variant="compact" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Image/PDF Preview - Only show when no messages */}
+              {selectedImage && messages.length === 0 && (
+                <div className="relative inline-block max-w-md mb-4">
+                  {selectedImage.includes('data:application/pdf') ? (
+                    <div className="border-2 border-cyan-400/50 rounded p-4 bg-black/50">
+                      <div className="text-green-400 font-mono text-sm mb-2">📄 PDF Document</div>
+                      <div className="text-green-400/60 font-mono text-xs">Ready to analyse</div>
+                    </div>
+                  ) : (
+                    <img 
+                      src={selectedImage} 
+                      alt="Selected file" 
+                      className="max-w-full rounded border-2 border-cyan-400/50"
+                    />
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedImage(null)
+                      if (fileInputRef.current) fileInputRef.current.value = ''
+                    }}
+                    className="absolute top-2 right-2 px-2 py-1 bg-red-500/80 text-white text-xs rounded hover:bg-red-500"
                   >
-                    📄 Upload PDF/Image
-                  </label>
+                    ✕
+                  </button>
                 </div>
-                <button
-                  onClick={handleSend}
-                  disabled={isLoading || (!input.trim() && !selectedImage && !imageUrl.trim()) || !agent.enabled}
-                  className="px-6 py-2 bg-black border-2 border-green-400 text-green-400 font-mono uppercase text-sm hover:bg-green-400 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
-                >
-                  {isLoading ? "Sending..." : "Send →"}
-                </button>
+              )}
+
+              {/* Input - Always at bottom */}
+              <div className="space-y-4">
+                {/* Image URL Input */}
+                <div>
+                  <input
+                    type="text"
+                    value={imageUrl}
+                    onChange={(e) => handleImageUrlChange(e.target.value)}
+                    placeholder="Or enter image URL (e.g., https://example.com/image.png)"
+                    className="w-full px-4 py-2 bg-black/50 border border-cyan-400/30 rounded text-green-400 placeholder-green-400/40 font-mono text-sm focus:outline-none focus:border-cyan-400/60"
+                  />
+                </div>
+                
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault()
+                      handleSend()
+                    }
+                  }}
+                  placeholder={selectedImage ? (selectedImage.includes('data:application/pdf') ? "Describe what you want analysed from the PDF... (Cmd/Ctrl + Enter to send)" : "Describe what you want analysed... (Cmd/Ctrl + Enter to send)") : "Type your message... (Cmd/Ctrl + Enter to send)"}
+                  className="w-full h-32 bg-black border-2 border-green-400/50 text-green-400 font-mono p-4 focus:outline-none focus:border-green-400 resize-none rounded-lg"
+                  disabled={isLoading || !agent.enabled}
+                />
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*,application/pdf"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <label
+                      htmlFor="file-upload"
+                      className="px-4 py-2 border border-green-400/50 text-green-400 font-mono text-sm hover:bg-green-400/10 transition-colors cursor-pointer rounded"
+                    >
+                      📄 Upload PDF/Image
+                    </label>
+                  </div>
+                  <button
+                    onClick={handleSend}
+                    disabled={isLoading || (!input.trim() && !selectedImage && !imageUrl.trim()) || !agent.enabled}
+                    className="px-6 py-2 bg-black border-2 border-green-400 text-green-400 font-mono uppercase text-sm hover:bg-green-400 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+                  >
+                    {isLoading ? "Sending..." : "Send →"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           )}
 
           {activeTab === 'export' && agent && (
             <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg">
-              <AgentExportTab agent={agent} />
+              <AgentExportTab agent={{
+                ...agent,
+                createdAt: new Date(agent.createdAt),
+                updatedAt: new Date(agent.updatedAt),
+              }} />
             </div>
           )}
         </main>

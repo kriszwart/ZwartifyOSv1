@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get agent configuration
-    const agent = getAgent(body.agentId)
+    const agent = await getAgent(body.agentId)
     if (!agent) {
       return NextResponse.json(
         { error: `Agent not found: ${body.agentId}` },
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }

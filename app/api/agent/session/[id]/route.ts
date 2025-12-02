@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
 
   try {
     const { id } = await context.params
-    const session = getSession(id)
+    const session = await getSession(id)
 
     if (!session) {
       return NextResponse.json(
