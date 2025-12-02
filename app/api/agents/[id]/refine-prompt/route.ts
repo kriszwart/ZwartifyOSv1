@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     const { id } = await context.params
     
     // Verify agent exists
-    const agent = getAgent(id)
+    const agent = await getAgent(id)
     if (!agent) {
       return NextResponse.json(
         { error: "Agent not found" },
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
       )
     }
 
-    const analysis = analyzePrompt(id)
+    const analysis = await analyzePrompt(id)
 
     return NextResponse.json({
       success: true,
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest, context: RouteParams) {
     const body = await request.json()
 
     // Verify agent exists
-    const agent = getAgent(id)
+    const agent = await getAgent(id)
     if (!agent) {
       return NextResponse.json(
         { error: "Agent not found" },

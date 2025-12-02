@@ -25,11 +25,11 @@ export async function GET(request: NextRequest, context: RouteParams) {
     const { id } = await context.params
     
     // Get agent info
-    const agent = getAgent(id)
+    const agent = await getAgent(id)
     const agentName = agent?.name
 
     // Get metrics
-    const metrics = getAgentMetrics(id, agentName)
+    const metrics = await getAgentMetrics(id, agentName)
 
     return NextResponse.json({
       success: true,

@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         let skillIds: string[] | undefined
 
         if (agentId) {
-          const agent = getAgent(agentId)
+          const agent = await getAgent(agentId)
           if (agent) {
             agentPrompt = agent.prompt
             agentName = agent.name

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     const { id } = await context.params
     
     // Verify agent exists
-    const agent = getAgent(id)
+    const agent = await getAgent(id)
     if (!agent) {
       return NextResponse.json(
         { error: "Agent not found" },
@@ -34,9 +34,9 @@ export async function GET(request: NextRequest, context: RouteParams) {
     }
 
     // Gather all analyses
-    const skillAnalysis = getSkillAnalysis(id)
-    const toolOptimization = getToolOptimization(id)
-    const promptAnalysis = analyzePrompt(id)
+    const skillAnalysis = await getSkillAnalysis(id)
+    const toolOptimization = await getToolOptimization(id)
+    const promptAnalysis = await analyzePrompt(id)
     const errorAnalysis = analyzeAgentErrors(id)
 
     // Combine all recommendations into a unified list
