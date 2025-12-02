@@ -38,7 +38,7 @@ export async function resolveServerUrl(
 
   // If agent ID is provided, check agent's configured MCP servers
   if (agentId) {
-    const agent = getAgent(agentId)
+    const agent = await getAgent(agentId)
     if (agent?.metadata?.mcpServers) {
       const mcpServers = agent.metadata.mcpServers as string[]
       

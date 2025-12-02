@@ -40,11 +40,11 @@ export function startScheduler(intervalMs: number = 60000): void {
           })
           
           // Mark as run
-          markScheduleRun(schedule.id)
+          markScheduleRun(schedule.id, 'success')
         } catch (error) {
           console.error(`❌ Error running scheduled agent ${schedule.agentId}:`, error)
           // Still mark as run to prevent retry loops
-          markScheduleRun(schedule.id)
+          markScheduleRun(schedule.id, 'failed')
         }
       }
     }

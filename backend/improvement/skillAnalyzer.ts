@@ -217,8 +217,8 @@ export function analyzeSkillGaps(agentId: string): SkillGap[] {
 /**
  * Analyze current skill coverage for an agent
  */
-export function analyzeSkillCoverage(agentId: string): SkillCoverage[] {
-  const agent = getAgent(agentId)
+export async function analyzeSkillCoverage(agentId: string): Promise<SkillCoverage[]> {
+  const agent = await getAgent(agentId)
   if (!agent || !agent.skillIds) return []
 
   const agentStats = skillUsageStats.get(agentId) || new Map()
@@ -246,11 +246,11 @@ export function analyzeSkillCoverage(agentId: string): SkillCoverage[] {
 /**
  * Generate skill recommendations
  */
-export function generateSkillRecommendations(agentId: string): SkillRecommendation[] {
+export async function generateSkillRecommendations(agentId: string): Promise<SkillRecommendation[]> {
   const gaps = analyzeSkillGaps(agentId)
-  const coverage = analyzeSkillCoverage(agentId)
+  const coverage = await analyzeSkillCoverage(agentId)
   const allSkills = listSkills()
-  const agent = getAgent(agentId)
+  const agent = await getAgent(agentId)
 
   const recommendations: SkillRecommendation[] = []
   const currentSkillIds = new Set(agent?.skillIds || [])
@@ -308,9 +308,11 @@ export function generateSkillRecommendations(agentId: string): SkillRecommendati
   const poorSkills = coverage.filter(s => s.usageCount >= 5 && s.successRate < 50)
   for (const skill of poorSkills) {
     // Find a better alternative
+    const currentSkill = getSkill(skill.skillId)
+    const currentTags = currentSkill?.tags || []
     const alternatives = allSkills.filter(s => 
       !currentSkillIds.has(s.id) && 
-      s.category === getSkill(skill.skillId)?.category
+      s.tags && s.tags.some(tag => currentTags.includes(tag))
     )
 
     if (alternatives.length > 0) {
@@ -351,9 +353,9 @@ export function generateSkillRecommendations(agentId: string): SkillRecommendati
 /**
  * Calculate coverage score
  */
-export function calculateCoverageScore(agentId: string): number {
+export async function calculateCoverageScore(agentId: string): Promise<number> {
   const gaps = analyzeSkillGaps(agentId)
-  const coverage = analyzeSkillCoverage(agentId)
+  const coverage = await analyzeSkillCoverage(agentId)
 
   if (coverage.length === 0) return 50 // No skills assigned
 
@@ -388,9 +390,9 @@ export function calculateCoverageScore(agentId: string): number {
 /**
  * Calculate improvement potential
  */
-export function calculateImprovementPotential(agentId: string): number {
+export async function calculateImprovementPotential(agentId: string): Promise<number> {
   const gaps = analyzeSkillGaps(agentId)
-  const recommendations = generateSkillRecommendations(agentId)
+  const recommendations = await generateSkillRecommendations(agentId)
 
   // Base potential on:
   // - Number of high-priority recommendations
@@ -399,7 +401,7 @@ export function calculateImprovementPotential(agentId: string): number {
 
   const highPriorityRecs = recommendations.filter(r => r.priority >= 7).length
   const criticalGaps = gaps.filter(g => g.severity === 'critical').length
-  const coverage = analyzeSkillCoverage(agentId)
+  const coverage = await analyzeSkillCoverage(agentId)
   const unusedRatio = coverage.length > 0
     ? coverage.filter(s => s.usageCount === 0).length / coverage.length
     : 0
@@ -414,14 +416,14 @@ export function calculateImprovementPotential(agentId: string): number {
 /**
  * Get full skill analysis result
  */
-export function getSkillAnalysis(agentId: string): SkillAnalysisResult {
+export async function getSkillAnalysis(agentId: string): Promise<SkillAnalysisResult> {
   return {
     agentId,
-    currentSkills: analyzeSkillCoverage(agentId),
+    currentSkills: await analyzeSkillCoverage(agentId),
     skillGaps: analyzeSkillGaps(agentId),
-    recommendations: generateSkillRecommendations(agentId),
-    coverageScore: calculateCoverageScore(agentId),
-    improvementPotential: calculateImprovementPotential(agentId),
+    recommendations: await generateSkillRecommendations(agentId),
+    coverageScore: await calculateCoverageScore(agentId),
+    improvementPotential: await calculateImprovementPotential(agentId),
   }
 }
 

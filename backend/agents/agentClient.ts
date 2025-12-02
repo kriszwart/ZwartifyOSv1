@@ -171,17 +171,19 @@ export const agentClient = {
       let conversationId = options.conversationId
       if (options.useMemory !== false && options.agentId) {
         if (!conversationId) {
-          const latestConv = getLatestConversation(options.agentId)
+          const latestConv = await getLatestConversation(options.agentId)
           if (latestConv) {
             conversationId = latestConv.id
           } else {
-            const newConv = createConversation(options.agentId)
+            const newConv = await createConversation(options.agentId)
             conversationId = newConv.id
           }
         }
 
         // Add user message to conversation
-        addMessage(conversationId, 'user', input, options.metadata)
+        if (conversationId) {
+          await addMessage(conversationId, 'user', input, options.metadata)
+        }
       }
 
       // Build enhanced input with RAG and memory context
@@ -610,17 +612,19 @@ export const agentClient = {
       let conversationId = options.conversationId
       if (options.useMemory !== false && options.agentId) {
         if (!conversationId) {
-          const latestConv = getLatestConversation(options.agentId)
+          const latestConv = await getLatestConversation(options.agentId)
           if (latestConv) {
             conversationId = latestConv.id
           } else {
-            const newConv = createConversation(options.agentId)
+            const newConv = await createConversation(options.agentId)
             conversationId = newConv.id
           }
         }
 
         // Add user message to conversation
-        addMessage(conversationId, 'user', input, options.metadata)
+        if (conversationId) {
+          await addMessage(conversationId, 'user', input, options.metadata)
+        }
       }
 
       // Build enhanced input with RAG and memory context (same as run method)
@@ -1184,7 +1188,7 @@ export const agentClient = {
         addSessionMessage(sessionId, { role: 'assistant', content: finalOutput })
         
         // Update current goal if exists
-        const currentGoal = getCurrentGoal(sessionId)
+        const currentGoal = await getCurrentGoal(sessionId)
         if (currentGoal && stoppedReason === 'no_more_tools') {
           updateGoal(sessionId, currentGoal.id, 'completed')
         }

@@ -166,7 +166,7 @@ export function calculateToolEffectiveness(agentId: string): ToolEffectiveness[]
     const stats = toolStats.get(record.toolName) || {
       total: 0,
       success: 0,
-      durations: [],
+      durations: [] as number[],
       taskTypes: new Map(),
       recentSuccess: 0,
       recentTotal: 0,

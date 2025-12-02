@@ -45,7 +45,8 @@ export async function createAgent(config: AgentConfig, id?: string): Promise<Age
  */
 export async function getAgent(id: string): Promise<AgentDefinition | undefined> {
   const adapter = getBackendAdapter()
-  return adapter.getAgent(id) ?? undefined
+  const agent = await adapter.getAgent(id)
+  return agent ?? undefined
 }
 
 /**
@@ -53,7 +54,8 @@ export async function getAgent(id: string): Promise<AgentDefinition | undefined>
  */
 export async function getAgentByName(name: string): Promise<AgentDefinition | undefined> {
   const adapter = getBackendAdapter()
-  return adapter.getAgentByName(name) ?? undefined
+  const agent = await adapter.getAgentByName(name)
+  return agent ?? undefined
 }
 
 /**

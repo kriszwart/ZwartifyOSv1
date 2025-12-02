@@ -136,7 +136,7 @@ For the Ouroboros pattern (agents creating agents), include skillIds: ["business
       }
 
       // Create the agent
-      const agent = createAgent({
+      const agent = await createAgent({
         ...config,
         metadata,
         createdByAgentId,

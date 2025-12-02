@@ -86,9 +86,20 @@ export async function GET(
       })
     } else {
       // For other formats, return the content directly
-      const content = typeof exportResult.content === 'string' 
-        ? exportResult.content 
-        : Buffer.from(exportResult.content)
+      // Convert Buffer to a format compatible with NextResponse
+      let content: BodyInit
+      if (typeof exportResult.content === 'string') {
+        content = exportResult.content
+      } else {
+        // Buffer is compatible with BodyInit, but TypeScript needs explicit handling
+        // Convert Buffer to Uint8Array by copying the buffer
+        const buffer = Buffer.isBuffer(exportResult.content) 
+          ? exportResult.content 
+          : Buffer.from(exportResult.content as ArrayBuffer)
+        // Create a new Uint8Array without generic type parameter
+        const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+        content = uint8Array as BodyInit
+      }
       return new NextResponse(content, {
         headers: {
           'Content-Type': exportResult.mimeType,

@@ -15,7 +15,7 @@ export async function mainAgent(input: string, options?: { agentId?: string; met
     let useMemory: boolean = true
     
     if (options?.agentId) {
-      const agent = getAgent(options.agentId)
+      const agent = await getAgent(options.agentId)
       if (agent) {
         if (agent.skillIds && agent.skillIds.length > 0) {
           skillIds = agent.skillIds

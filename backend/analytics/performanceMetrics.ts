@@ -87,7 +87,7 @@ export interface AgentPerformanceMetrics {
 }
 
 // Execution record for tracking
-interface ExecutionRecord {
+export interface ExecutionRecord {
   id: string
   agentId: string
   agentName?: string

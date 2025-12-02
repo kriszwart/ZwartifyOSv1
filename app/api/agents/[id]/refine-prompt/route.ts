@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
       )
     }
 
-    const analysis = analyzePrompt(id)
+    const analysis = await analyzePrompt(id)
 
     return NextResponse.json({
       success: true,

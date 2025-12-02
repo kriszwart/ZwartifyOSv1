@@ -62,8 +62,8 @@ async function analyzePerformance(args: { detailed?: boolean }): Promise<SelfAna
   const metrics = getAgentMetrics(agentId)
   const errors = analyzeAgentErrors(agentId)
   const tools = getToolOptimization(agentId)
-  const skills = getSkillAnalysis(agentId)
-  const prompt = analyzePrompt(agentId)
+  const skills = await getSkillAnalysis(agentId)
+  const prompt = await analyzePrompt(agentId)
 
   // Calculate overall health score
   let healthScore = 100
@@ -268,7 +268,7 @@ async function identifyWeaknesses(args: { area?: 'all' | 'errors' | 'tools' | 's
   }
 
   if (area === 'all' || area === 'skills') {
-    const skills = getSkillAnalysis(agentId)
+    const skills = await getSkillAnalysis(agentId)
     for (const gap of skills.skillGaps) {
       weaknesses.push({
         category: 'Skill Gap',
@@ -283,7 +283,7 @@ async function identifyWeaknesses(args: { area?: 'all' | 'errors' | 'tools' | 's
   }
 
   if (area === 'all' || area === 'prompt') {
-    const prompt = analyzePrompt(agentId)
+    const prompt = await analyzePrompt(agentId)
     for (const weak of prompt.weaknesses) {
       weaknesses.push({
         category: `Prompt: ${weak.category}`,
@@ -332,7 +332,7 @@ async function suggestImprovements(args: { limit?: number }): Promise<{
   }> = []
 
   // Prompt improvements
-  const prompt = analyzePrompt(agentId)
+  const prompt = await analyzePrompt(agentId)
   for (const imp of prompt.improvements.slice(0, 3)) {
     improvements.push({
       id: imp.id,
@@ -346,7 +346,7 @@ async function suggestImprovements(args: { limit?: number }): Promise<{
   }
 
   // Skill improvements
-  const skills = getSkillAnalysis(agentId)
+  const skills = await getSkillAnalysis(agentId)
   for (const rec of skills.recommendations.slice(0, 3)) {
     improvements.push({
       id: rec.id,

@@ -337,8 +337,8 @@ export function calculatePromptScore(prompt: string, weaknesses: PromptWeakness[
 /**
  * Get prompt analysis for an agent
  */
-export function analyzePrompt(agentId: string): PromptAnalysisResult {
-  const agent = getAgent(agentId)
+export async function analyzePrompt(agentId: string): Promise<PromptAnalysisResult> {
+  const agent = await getAgent(agentId)
   const prompt = agent?.prompt || ''
   
   const weaknesses = analyzePromptWeaknesses(prompt)

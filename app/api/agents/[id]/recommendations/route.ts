@@ -34,9 +34,9 @@ export async function GET(request: NextRequest, context: RouteParams) {
     }
 
     // Gather all analyses
-    const skillAnalysis = getSkillAnalysis(id)
+    const skillAnalysis = await getSkillAnalysis(id)
     const toolOptimization = getToolOptimization(id)
-    const promptAnalysis = analyzePrompt(id)
+    const promptAnalysis = await analyzePrompt(id)
     const errorAnalysis = analyzeAgentErrors(id)
 
     // Combine all recommendations into a unified list

@@ -148,7 +148,8 @@ export class InMemoryAdapter implements BackendAdapter {
   }
   
   async getConversation(id: string): Promise<Conversation | null> {
-    return memoryStore.getConversation(id) ?? null
+    const conversation = await memoryStore.getConversation(id)
+    return conversation ?? null
   }
   
   async getAgentConversations(agentId: string, limit = 50): Promise<Conversation[]> {
@@ -156,7 +157,8 @@ export class InMemoryAdapter implements BackendAdapter {
   }
   
   async getLatestConversation(agentId: string): Promise<Conversation | null> {
-    return memoryStore.getLatestConversation(agentId) ?? null
+    const conversation = await memoryStore.getLatestConversation(agentId)
+    return conversation ?? null
   }
   
   async addMessage(
@@ -191,7 +193,8 @@ export class InMemoryAdapter implements BackendAdapter {
   }
   
   async getSession(sessionId: string): Promise<AgentSession | null> {
-    return sessionManager.getSession(sessionId) ?? null
+    const session = await sessionManager.getSession(sessionId)
+    return session ?? null
   }
   
   async getAgentSessions(agentId: string): Promise<AgentSession[]> {

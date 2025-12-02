@@ -154,7 +154,7 @@ export default function NodePalette({
                         >
                           <div className="flex justify-between items-center">
                             <span>{tool.name}</span>
-                            {'relevanceScore' in tool && tool.relevanceScore && tool.relevanceScore > 0 && (
+                            {'relevanceScore' in tool && typeof tool.relevanceScore === 'number' && tool.relevanceScore > 0 && (
                               <span className="text-[8px] text-yellow-400/40">{tool.relevanceScore}</span>
                             )}
                           </div>

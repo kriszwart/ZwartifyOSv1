@@ -198,9 +198,6 @@ function AgentConfigNode({ data, selected }: NodeProps<any>) {
           e.currentTarget.style.animation = 'none'
           e.currentTarget.style.transform = 'scale(1)'
         }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.animation = ''
-        }}
         title="Connect to: Tools, Skills, RAG, MCP"
       />
 

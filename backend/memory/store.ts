@@ -43,7 +43,8 @@ export async function createConversation(
  */
 export async function getConversation(id: string): Promise<Conversation | undefined> {
   const adapter = getBackendAdapter()
-  return adapter.getConversation(id) ?? undefined
+  const conversation = await adapter.getConversation(id)
+  return conversation ?? undefined
 }
 
 /**
@@ -59,7 +60,8 @@ export async function getAgentConversations(agentId: string, limit = 50): Promis
  */
 export async function getLatestConversation(agentId: string): Promise<Conversation | undefined> {
   const adapter = getBackendAdapter()
-  return adapter.getLatestConversation(agentId) ?? undefined
+  const conversation = await adapter.getLatestConversation(agentId)
+  return conversation ?? undefined
 }
 
 /**
