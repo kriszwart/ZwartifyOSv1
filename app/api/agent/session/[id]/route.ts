@@ -84,7 +84,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -120,13 +120,13 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
       let result
       switch (body.action) {
         case 'pause':
-          result = pauseSession(id)
+          result = await pauseSession(id)
           break
         case 'resume':
-          result = resumeSession(id)
+          result = await resumeSession(id)
           break
         case 'complete':
-          result = completeSession(id)
+          result = await completeSession(id)
           break
         default:
           return NextResponse.json(
@@ -154,7 +154,7 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
 
     // Handle add goal
     if (body.addGoal && typeof body.addGoal === 'string') {
-      const goal = addGoal(id, body.addGoal)
+      const goal = await addGoal(id, body.addGoal)
       if (!goal) {
         return NextResponse.json(
           { error: "Failed to add goal" },
@@ -182,7 +182,7 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
         )
       }
 
-      const goal = updateGoal(id, goalId, status)
+      const goal = await updateGoal(id, goalId, status)
       if (!goal) {
         return NextResponse.json(
           { error: "Goal not found" },
@@ -232,7 +232,7 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }
@@ -267,7 +267,7 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
     )
     return NextResponse.json(
       { error: errorResult.message },
-      { status: errorResult.statusCode }
+      { status: errorResult.status }
     )
   }
 }

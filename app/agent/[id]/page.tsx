@@ -490,6 +490,30 @@ export default function AgentDetailPage() {
             </div>
           </div>
 
+          {/* Tab Selector */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`px-4 py-2 font-mono text-sm transition-all ${
+                activeTab === 'chat'
+                  ? 'bg-green-400 text-black border-2 border-green-400'
+                  : 'bg-black text-green-400 border-2 border-green-400/50 hover:border-green-400'
+              }`}
+            >
+              Chat
+            </button>
+            <button
+              onClick={() => setActiveTab('export')}
+              className={`px-4 py-2 font-mono text-sm transition-all ${
+                activeTab === 'export'
+                  ? 'bg-green-400 text-black border-2 border-green-400'
+                  : 'bg-black text-green-400 border-2 border-green-400/50 hover:border-green-400'
+              }`}
+            >
+              Export
+            </button>
+          </div>
+
           {activeTab === 'chat' && (
             <div className="bg-black/50 border-2 border-green-400/50 p-6 rounded-lg">
               <h3 className="text-xl font-bold mb-4 text-green-400">Test Agent</h3>
