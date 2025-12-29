@@ -18,7 +18,7 @@
     "@xyflow/react": "^12.9.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
-    "next": "16.0.1",
+    "next": "16.0.10",
     "pdf-parse": "^2.4.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
